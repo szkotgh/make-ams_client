@@ -2,8 +2,8 @@
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 480
 
-CONNECTION_TEST_URL = "https://www.google.com/"
-CONNECTION_TEST_INTERVAL = 0
+SERVER_URL = "https://www.google.com"
+CONNECTION_INTERVAL = 0
 
 # Status
 STATUS_ENABLE = "enable"

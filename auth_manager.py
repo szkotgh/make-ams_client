@@ -21,7 +21,7 @@ class AuthManager:
     def start_connection(self):
         def check_connection():
             try:
-                response = requests.get(config.CONNECTION_TEST_URL, timeout=1)
+                response = requests.get(config.SERVER_URL, timeout=1)
                 ping = int(response.elapsed.total_seconds()*1000)
                 if response.ok:
                     self.connection_success = True
@@ -44,7 +44,7 @@ class AuthManager:
             except Exception:
                 self.connection_success = False
             
-            threading.Timer(config.CONNECTION_TEST_INTERVAL, check_connection).start()
+            threading.Timer(config.CONNECTION_INTERVAL, check_connection).start()
 
         check_connection()
 
