@@ -1,40 +1,47 @@
-# System
-DISPLAY_WIDTH = 800
-DISPLAY_HEIGHT = 480
+import json
 
-SERVER_URL = "https://www.google.com"
-CONNECTION_INTERVAL = 0
+# Load JSON settings
+with open("./setting.json", "r", encoding="utf-8") as f:
+    config = json.load(f)
+
+# System
+DISPLAY_WIDTH = config["ui"]["display_width"]
+DISPLAY_HEIGHT = config["ui"]["display_height"]
+MAIN_GIF_INTERVAL = config["ui"]["main_gif_interval"]
+SERVER_URL = config["connection"]["server_url"]
+CONNECTION_INTERVAL = config["connection"]["connection_interval"]
 
 # Status
-STATUS_ENABLE = "enable"
-STATUS_DISABLE = "disable"
-STATUS_OPEN = "open"
-STATUS_RESTRIC = "restriction"
-STATUS_CLOSE = "close"
+STATUS_ENABLE = config["status"]["enable"]
+STATUS_DISABLE = config["status"]["disable"]
+STATUS_OPEN = config["status"]["open"]
+STATUS_RESTRIC = config["status"]["restrict"]
+STATUS_CLOSE = config["status"]["close"]
+
 def get_status_korean(status):
     status_map = {
         STATUS_ENABLE: "활성화",
         STATUS_DISABLE: "비활성화",
         STATUS_OPEN: "열림",
-        STATUS_RESTRIC: "외부인제한",
+        STATUS_RESTRIC: "내부인",
         STATUS_CLOSE: "제한"
     }
     return status_map.get(status, "알 수 없음")
 
 # UI
-TITLE = "메이크 출입 관리 시스템"
-UNKNOWN_COLOR = "#979797"
-DISABLE_COLOR = "#e60013"
-ENABLE_COLOR = "#079a3e"
-WARNING_COLOR = "#ffcc00"
+TITLE = config["ui"]["title"]
+DEFAULT_FONT = config["ui"]["default_font"]
+UNKNOWN_COLOR = config["ui"]["unknown_color"]
+DISABLE_COLOR = config["ui"]["disable_color"]
+ENABLE_COLOR = config["ui"]["enable_color"]
+WARNING_COLOR = config["ui"]["warning_color"]
 
 # File
-FILE_PATH = "./src/"
-MAIN_IMAGE_PATH = "./src/main.gif"
-BUTTON_ENABLE_IMG_PAGH = "./src/button_enable.png"
-BUTTON_DISABLE_IMG_PAGH = "./src/button_disable.png"
-QR_ENABLE_IMG_PAGH = "./src/qr_enable.png"
-QR_DISABLE_IMG_PAGH = "./src/qr_disable.png"
-NFC_ENABLE_IMG_PAGH = "./src/nfc_enable.png"
-NFC_DISABLE_IMG_PAGH = "./src/nfc_disable.png"
-
+FILE_PATH = config["file"]["file_path"]
+MAIN_IMAGE_PATH = config["file"]["main_image_path"]
+BUTTON_ENABLE_IMG_PATH = config["file"]["button_enable_img_path"]
+BUTTON_DISABLE_IMG_PATH = config["file"]["button_disable_img_path"]
+QR_ENABLE_IMG_PATH = config["file"]["qr_enable_img_path"]
+QR_DISABLE_IMG_PATH = config["file"]["qr_disable_img_path"]
+NFC_ENABLE_IMG_PATH = config["file"]["nfc_enable_img_path"]
+NFC_DISABLE_IMG_PATH = config["file"]["nfc_disable_img_path"]

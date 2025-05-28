@@ -1,0 +1,34 @@
+{
+  "connection": {
+    "server_url": "https://www.google.com",
+    "connection_interval": 0
+},
+"status": {
+    "enable": "enable",
+    "disable": "disable",
+    "open": "open",
+    "restrict": "restriction",
+    "close": "close"
+},
+"ui": {
+    "display_width": 800,
+    "display_height": 480,
+    "main_gif_interval": 5000,
+    "default_font": "NanumGothic",
+    "title": "메이크 출입 관리 시스템",
+    "unknown_color": "#979797",
+    "disable_color": "#e60013",
+    "enable_color": "#079a3e",
+    "warning_color": "#ffcc00"
+  },
+  "file": {
+    "file_path": "./src/",
+    "main_image_path": "./src/main.gif",
+    "button_enable_img_path": "./src/button_enable.png",
+    "button_disable_img_path": "./src/button_disable.png",
+    "qr_enable_img_path": "./src/qr_enable.png",
+    "qr_disable_img_path": "./src/qr_disable.png",
+    "nfc_enable_img_path": "./src/nfc_enable.png",
+    "nfc_disable_img_path": "./src/nfc_disable.png"
+  }
+}

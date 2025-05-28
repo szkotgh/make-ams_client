@@ -14,14 +14,14 @@ class AuthManager:
 
         self.connection_success = False
         self.connection_status = config.STATUS_CLOSE
-        self.connection_ping = 0
+        self.connection_ping = -1
 
         self.start_connection()
     
     def start_connection(self):
         def check_connection():
             try:
-                response = requests.get(config.SERVER_URL, timeout=1)
+                response = requests.get(config.SERVER_URL+"/", timeout=1)
                 ping = int(response.elapsed.total_seconds()*1000)
                 if response.ok:
                     self.connection_success = True
@@ -32,17 +32,23 @@ class AuthManager:
                     self.button_status = config.STATUS_DISABLE
                     self.qr_status = config.STATUS_ENABLE
                     self.nfc_status = config.STATUS_DISABLE
-
-                    if self.door_status == config.STATUS_RESTRIC:
-                        self.button_status = config.STATUS_DISABLE
-                    elif self.door_status == config.STATUS_CLOSE:
-                        self.button_status = config.STATUS_DISABLE
-                        self.qr_status = config.STATUS_DISABLE
-                        self.nfc_status = config.STATUS_DISABLE
                 else:
                     self.connection_success = False
             except Exception:
                 self.connection_success = False
+            
+            ## 인터넷 연결 불량: 전체 기능 제한
+            if not self.connection_success:
+                self.door_status = config.STATUS_CLOSE
+
+            ## 내부인 상태: 버튼 기능 제한
+            if self.door_status == config.STATUS_RESTRIC:
+                self.button_status = config.STATUS_DISABLE
+            ## 제한 상태: 모든 기능 제한(관리자 예외)
+            elif self.door_status == config.STATUS_CLOSE:
+                self.button_status = config.STATUS_DISABLE
+                self.qr_status = config.STATUS_DISABLE
+                self.nfc_status = config.STATUS_DISABLE
             
             threading.Timer(config.CONNECTION_INTERVAL, check_connection).start()
 

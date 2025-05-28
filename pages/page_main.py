@@ -58,7 +58,7 @@ class MainPage(tk.Frame):
             frame = self.img_label.frames[ind]
             self.img_label.config(image=frame)
             ind = (ind + 1) % len(self.img_label.frames)
-            self.img_label.after(5000, update_gif, ind)
+            self.img_label.after(config.MAIN_GIF_INTERVAL, update_gif, ind)
         update_gif()
 
         # right buttons (size fits contents)
@@ -89,7 +89,7 @@ class MainPage(tk.Frame):
                 else:
                     self.conn_status_label.config(text=f"연결됨 ({connection_status['ping']}ms)", fg=config.DISABLE_COLOR)
             else:
-                self.conn_status_label.config(text="연결 실패", fg=config.DISABLE_COLOR)
+                self.conn_status_label.config(text="통신 불량", fg=config.DISABLE_COLOR)
             self.conn_status_label.update_idletasks()
 
             # Update door status
@@ -106,7 +106,7 @@ class MainPage(tk.Frame):
                 img_btn1 = Image.open(config.BUTTON_ENABLE_IMG_PAGH)
                 self.button1.config(state=tk.NORMAL)
             else:
-                img_btn1 = Image.open(config.BUTTON_DISABLE_IMG_PAGH)
+                img_btn1 = Image.open(config.BUTTON_DISABLE_IMG_PATH)
                 self.button1.config(state=tk.DISABLED)
             img_btn1 = img_btn1.resize((140, 140))
             img_btn1 = ImageTk.PhotoImage(img_btn1)
@@ -115,10 +115,10 @@ class MainPage(tk.Frame):
 
             # Update button2
             if auth_manager.service.get_qr_status() == config.STATUS_ENABLE:
-                img_btn2 = Image.open(config.QR_ENABLE_IMG_PAGH)
+                img_btn2 = Image.open(config.QR_ENABLE_IMG_PATH)
                 self.button2.config(state=tk.NORMAL)
             else:
-                img_btn2 = Image.open(config.QR_DISABLE_IMG_PAGH)
+                img_btn2 = Image.open(config.QR_DISABLE_IMG_PATH)
                 self.button2.config(state=tk.DISABLED)
             img_btn2 = img_btn2.resize((140, 140))
             img_btn2 = ImageTk.PhotoImage(img_btn2)
@@ -130,7 +130,7 @@ class MainPage(tk.Frame):
                 img_btn3 = Image.open(config.NFC_ENABLE_IMG_PAGH)
                 self.button3.config(state=tk.NORMAL)
             else:
-                img_btn3 = Image.open(config.NFC_DISABLE_IMG_PAGH)
+                img_btn3 = Image.open(config.NFC_DISABLE_IMG_PATH)
                 self.button3.config(state=tk.DISABLED)
             img_btn3 = img_btn3.resize((140, 140))
             img_btn3 = ImageTk.PhotoImage(img_btn3)
