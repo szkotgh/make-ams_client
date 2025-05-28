@@ -30,7 +30,7 @@ class MainPage(tk.Frame):
         top_frame.columnconfigure(1, weight=1)
         
         ## title label
-        tk.Label(top_frame, text=config.TITLE, font=("Arial", 24), bg="#000000", fg="#ffffff").grid(row=0, column=1, sticky="nsew")
+        tk.Label(top_frame, text=config.TITLE, font=("NanumGothic", 14), bg="#000000", fg="#ffffff").grid(row=0, column=1, sticky="nsew")
         
         ## connection status label
         self.conn_status_label = tk.Label(top_frame, font=("Arial", 14), bg="#000000", fg=config.UNKNOWN_COLOR, text="con_status")
