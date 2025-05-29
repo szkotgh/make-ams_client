@@ -1,14 +1,20 @@
 import json
+import dotenv
+import os
 
-# Load JSON settings
+# init
+dotenv.load_dotenv()
 with open("./setting.json", "r", encoding="utf-8") as f:
     config = json.load(f)
 
 # System
+SERVER_URL = config["connection"]["server_url"]
+TIME_OUT = config["connection"]["time_out"]
+AUTH_TOKEN = os.environ["AUTH_TOKEN"]
+ADMIN_PW = os.environ["ADMIN_PASSWORD"]
 DISPLAY_WIDTH = config["ui"]["display_width"]
 DISPLAY_HEIGHT = config["ui"]["display_height"]
 MAIN_GIF_INTERVAL = config["ui"]["main_gif_interval"]
-SERVER_URL = config["connection"]["server_url"]
 CONNECTION_INTERVAL = config["connection"]["connection_interval"]
 
 # Status

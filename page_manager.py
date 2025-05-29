@@ -1,6 +1,7 @@
 import tkinter as tk
 from pages.page_start import PageStart
 from pages.page_main import MainPage
+from pages.page_admin import PageAdmin
 from pages.page_auth_button import PageAuthButton
 from pages.page_auth_qr import PageAuthQR
 from pages.page_auth_nfc import PageAuthNFC
@@ -22,7 +23,7 @@ class App(tk.Tk):
         self.pages = {}
 
         # page initialization
-        for PageClass in (PageStart, MainPage, PageAuthButton, PageAuthQR, PageAuthNFC):
+        for PageClass in (PageStart, MainPage, PageAdmin, PageAuthButton, PageAuthQR, PageAuthNFC):
             page_name = PageClass.__name__
             page = PageClass(parent=self.container, controller=self)
             self.pages[page_name] = page

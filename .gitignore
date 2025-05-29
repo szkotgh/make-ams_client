@@ -1,6 +1,7 @@
 __pycache__/
 .venv/
 
+test.json
 .DS_Store
 .env
 

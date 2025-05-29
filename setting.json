@@ -1,16 +1,17 @@
 {
   "connection": {
     "server_url": "https://www.google.com",
-    "connection_interval": 0
-},
-"status": {
-    "enable": "enable",
-    "disable": "disable",
-    "open": "open",
-    "restrict": "restriction",
-    "close": "close"
-},
-"ui": {
+    "connection_interval": 0,
+    "time_out": 3
+  },
+  "status": {
+      "enable": "enable",
+      "disable": "disable",
+      "open": "open",
+      "restrict": "restrict",
+      "close": "close"
+  },
+  "ui": {
     "display_width": 800,
     "display_height": 480,
     "main_gif_interval": 5000,

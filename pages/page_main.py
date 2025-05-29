@@ -10,42 +10,47 @@ class MainPage(tk.Frame):
         super().__init__(parent)
         self.controller = controller
 
+        # main frame
         main_frame = tk.Frame(self)
         main_frame.pack(fill="both", expand=True)
 
+        # top frame
         top_frame = tk.Frame(main_frame, bg="#000000")
         top_frame.pack(side="top", fill="x")
         top_frame.columnconfigure(0, weight=1)
         top_frame.rowconfigure(0, weight=1)
 
         ## time label
-        self.time_label = tk.Label(top_frame, font=("Arial", 18), bg="#000000", fg="#ffffff")
+        self.time_label = tk.Label(top_frame, font=(config.DEFAULT_FONT, 18), bg="#000000", fg="#ffffff")
         self.time_label.grid(row=0, column=0, sticky="w", padx=10)
+        self.time_label.bind("<Button-1>", lambda e: controller.show_page("PageAdmin")) # 누르면 관리자 페이지로
         def update_time():
             now = time.strftime("%H:%M:%S")
             self.time_label.config(text=now)
             self.time_label.after(1000, update_time)
         update_time()
-        top_frame.columnconfigure(0, weight=0)
-        top_frame.columnconfigure(1, weight=1)
+        top_frame.columnconfigure(0, weight=20)
+        top_frame.columnconfigure(1, weight=70)
+        top_frame.columnconfigure(2, weight=5)
+        top_frame.columnconfigure(3, weight=5)
         
         ## title label
-        tk.Label(top_frame, text=config.TITLE, font=("NanumGothic", 14), bg="#000000", fg="#ffffff").grid(row=0, column=1, sticky="nsew")
+        tk.Label(top_frame, text=config.TITLE, font=(config.DEFAULT_FONT, 14), bg="#000000", fg="#ffffff").grid(row=0, column=1, sticky="nsew")
         
         ## connection status label
-        self.conn_status_label = tk.Label(top_frame, font=("Arial", 14), bg="#000000", fg=config.UNKNOWN_COLOR, text="con_status")
+        self.conn_status_label = tk.Label(top_frame, font=(config.DEFAULT_FONT, 14), bg="#000000", fg=config.UNKNOWN_COLOR, text="con_status")
         self.conn_status_label.grid(row=0, column=2, sticky="e")
 
         ## door status label
-        self.door_status_label = tk.Label(top_frame, font=("Arial", 14), bg="#000000", fg=config.UNKNOWN_COLOR, text="door_status")
+        self.door_status_label = tk.Label(top_frame, font=(config.DEFAULT_FONT, 14), bg="#000000", fg=config.UNKNOWN_COLOR, text="door_status")
         self.door_status_label.grid(row=0, column=3, sticky="e", padx=10)
 
-        # left image (fills remaining space)
+        # left frame
         left_frame = tk.Frame(main_frame)
         left_frame.pack(side="left", fill="both", expand=True)
 
+        ## GIF Update
         img = Image.open(config.MAIN_IMAGE_PATH)
-        # Always handle as animated GIF
         frames = []
         for frame in range(getattr(img, "n_frames", 1)):
             img.seek(frame)
@@ -61,7 +66,7 @@ class MainPage(tk.Frame):
             self.img_label.after(config.MAIN_GIF_INTERVAL, update_gif, ind)
         update_gif()
 
-        # right buttons (size fits contents)
+        # right frame
         right_frame = tk.Frame(main_frame)
         right_frame.pack(side="right", fill="y", anchor="e")
         right_frame.rowconfigure((0, 1, 2), weight=1)
@@ -77,9 +82,8 @@ class MainPage(tk.Frame):
         self.button3 = tk.Button(right_frame, command=lambda: controller.show_page("PageAuthNFC"))
         self.button3.grid(row=2, column=0, sticky="nsew")
 
-
         def update_status():
-            # Update connection status
+            # Update connection status label
             connection_status = auth_manager.service.get_connection_status()
             if connection_status["success"]:
                 if connection_status['ping'] < 500:
@@ -92,7 +96,7 @@ class MainPage(tk.Frame):
                 self.conn_status_label.config(text="통신 불량", fg=config.DISABLE_COLOR)
             self.conn_status_label.update_idletasks()
 
-            # Update door status
+            # Update door status label
             door_status = auth_manager.service.get_door_status()
             if door_status == config.STATUS_OPEN:
                 self.door_status_label.config(text=f"{config.get_status_korean(door_status)} 상태", fg=config.ENABLE_COLOR)
@@ -100,10 +104,12 @@ class MainPage(tk.Frame):
                 self.door_status_label.config(text=f"{config.get_status_korean(door_status)} 상태", fg=config.WARNING_COLOR)
             elif door_status == config.STATUS_CLOSE:
                 self.door_status_label.config(text=f"{config.get_status_korean(door_status)} 상태", fg=config.DISABLE_COLOR)
+            else:
+                self.door_status_label.config(text="알수없음", fg=config.UNKNOWN_COLOR)
 
             # Update button1
             if auth_manager.service.get_button_status() == config.STATUS_ENABLE:
-                img_btn1 = Image.open(config.BUTTON_ENABLE_IMG_PAGH)
+                img_btn1 = Image.open(config.BUTTON_ENABLE_IMG_PATH)
                 self.button1.config(state=tk.NORMAL)
             else:
                 img_btn1 = Image.open(config.BUTTON_DISABLE_IMG_PATH)
@@ -127,7 +133,7 @@ class MainPage(tk.Frame):
             
             # Update button3
             if auth_manager.service.get_nfc_status() == config.STATUS_ENABLE:
-                img_btn3 = Image.open(config.NFC_ENABLE_IMG_PAGH)
+                img_btn3 = Image.open(config.NFC_ENABLE_IMG_PATH)
                 self.button3.config(state=tk.NORMAL)
             else:
                 img_btn3 = Image.open(config.NFC_DISABLE_IMG_PATH)
@@ -137,5 +143,5 @@ class MainPage(tk.Frame):
             self.img_btn3 = img_btn3
             self.button3.config(image=self.img_btn3)
 
-            self.conn_status_label.after(50, update_status)
+            self.conn_status_label.after(10, update_status)
         update_status()
