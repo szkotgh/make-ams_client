@@ -83,7 +83,7 @@ class PasswordDialog(tk.Frame):
             self.on_success()
         else:
             self.sub_title_label.config(text="비밀번호가 일치하지 않습니다.", fg=config.DISABLE_COLOR)
-            threading.Timer(1.3, lambda: self.sub_title_label.config(text="비밀번호를 입력하세요", fg="white")).start()
+            threading.Timer(1.3, lambda: self.sub_title_label.config(text="비밀번호를 입력하십시오")).start()
             self.input_clear()
 
     def _back_to_main(self):
