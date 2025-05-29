@@ -15,9 +15,9 @@ class PasswordDialog(tk.Frame):
         # Title
         title_frame = tk.Frame(self)
         title_frame.pack(pady=10)
-        self.title_label = tk.Label(title_frame, text="AMS 관리자", font=(config.DEFAULT_FONT, 24, "bold"), fg="black")
+        self.title_label = tk.Label(title_frame, text="AMS 관리자", font=(config.DEFAULT_FONT, 20, "bold"), fg="black")
         self.title_label.pack()
-        self.sub_title_label = tk.Label(title_frame, text="비밀번호를 입력하십시오", font=(config.DEFAULT_FONT, 14), fg="black")
+        self.sub_title_label = tk.Label(title_frame, text="비밀번호를 입력하십시오", font=(config.DEFAULT_FONT, 12), fg="black")
         self.sub_title_label.pack()
 
         # Circles
@@ -32,7 +32,7 @@ class PasswordDialog(tk.Frame):
 
         # Keypad
         keypad_frame = tk.Frame(self)
-        keypad_frame.pack(pady=10)
+        keypad_frame.pack(pady=3)
         btn_texts = [
             ['1', '2', '3'],
             ['4', '5', '6'],
@@ -44,18 +44,18 @@ class PasswordDialog(tk.Frame):
             row_frame.pack()
             for char in row:
                 btn = self._create_keypad_button(row_frame, char)
-                btn.pack(side="left", padx=5, pady=5)
+                btn.pack(side="left", padx=3, pady=3)
 
         # Back button
-        tk.Button(self, text="초기화면으로", font=(config.DEFAULT_FONT, 16), width=13, height=2, command=self._back_to_main).pack(pady=10)
+        tk.Button(self, text="초기화면으로", font=(config.DEFAULT_FONT, 14), width=10, height=1, command=self._back_to_main).pack(pady=3)
 
     def _create_keypad_button(self, parent, char):
         if char == 'C':
-            return tk.Button(parent, text="C", font=(config.DEFAULT_FONT, 14), width=5, height=2, command=self.input_clear)
+            return tk.Button(parent, text="C", font=(config.DEFAULT_FONT, 14), width=3, height=2, command=self.input_clear)
         elif char == '<':
-            return tk.Button(parent, text="←", font=(config.DEFAULT_FONT, 14), width=5, height=2, command=self.backspace)
+            return tk.Button(parent, text="←", font=(config.DEFAULT_FONT, 14), width=3, height=2, command=self.backspace)
         else:
-            return tk.Button(parent, text=char, font=(config.DEFAULT_FONT, 14), width=5, height=2, command=lambda ch=char: self.add_digit(ch))
+            return tk.Button(parent, text=char, font=(config.DEFAULT_FONT, 14), width=3, height=2, command=lambda ch=char: self.add_digit(ch))
 
     def add_digit(self, digit):
         if len(self.input_digits) < 6:
@@ -83,7 +83,7 @@ class PasswordDialog(tk.Frame):
             self.on_success()
         else:
             self.sub_title_label.config(text="비밀번호가 일치하지 않습니다.", fg=config.DISABLE_COLOR)
-            threading.Timer(1.5, lambda: self.sub_title_label.config(text="비밀번호를 입력하세요", fg="white")).start()
+            threading.Timer(1.3, lambda: self.sub_title_label.config(text="비밀번호를 입력하세요", fg="white")).start()
             self.input_clear()
 
     def _back_to_main(self):

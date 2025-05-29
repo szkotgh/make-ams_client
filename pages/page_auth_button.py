@@ -40,9 +40,9 @@ class PageAuthButton(tk.Frame):
         content_frame = tk.Frame(right_frame, bg=config.AUTH_COLOR)
         content_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-        self.title = tk.Label(content_frame, text="외부인 출입", font=(config.DEFAULT_FONT, 48, "bold"), bg=config.AUTH_COLOR, anchor="center", justify="center")
+        self.title = tk.Label(content_frame, text="외부인 출입", font=(config.DEFAULT_FONT, 48, "bold"), fg="white", bg=config.AUTH_COLOR, anchor="center", justify="center")
         self.title.pack()
-        self.sub_title = tk.Label(content_frame, text="잠시만 기다려주세요", font=(config.DEFAULT_FONT, 32), bg=config.AUTH_COLOR, anchor="center", justify="center")
+        self.sub_title = tk.Label(content_frame, text="잠시만 기다려주세요", font=(config.DEFAULT_FONT, 32), fg="white", bg=config.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
 
         # bottom frame
@@ -60,23 +60,23 @@ class PageAuthButton(tk.Frame):
         self.main_frame.config(bg=config.AUTH_COLOR)
 
         # NFC init
-        self._set_title("게스트 출입")
+        self._set_title("외부인 출입")
         self._set_sub_title("잠시만 기다려주세요")
         time.sleep(1)
 
         # Auth Request
         ## NFC Enable
         if not auth_manager.service.get_nfc_status() == config.STATUS_ENABLE:
-            self._set_title("게스트 출입 불가")
-            self._set_sub_title("게스트 출입이 비활성화되어 있습니다.")
+            self._set_title("외부인 출입 불가")
+            self._set_sub_title("외부인 출입이 비활성화되어 있습니다.")
         ## NFC 
         else:
             if auth_manager.service.request_nfc_auth():
-                self._set_title("게스트 출입 승인")
+                self._set_title("외부인 출입 승인")
                 self._set_sub_title("메이크에 오신 것을 환영합니다")
             else:
-                self._set_title("게스트 출입 거부")
-                self._set_sub_title(f"게스트 출입이 거부되었습니다")
+                self._set_title("외부인 출입 거부")
+                self._set_sub_title(f"외부인 출입이 거부되었습니다")
 
         time.sleep(5)
         self.controller.after(0, lambda: self.controller.show_page("MainPage"))

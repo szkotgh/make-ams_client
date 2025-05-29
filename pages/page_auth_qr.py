@@ -40,7 +40,7 @@ class PageAuthQR(tk.Frame):
         content_frame = tk.Frame(right_frame, bg=config.AUTH_COLOR)
         content_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-        self.title = tk.Label(content_frame, text="QR 인증", font=(config.DEFAULT_FONT, 48, "bold"), bg=config.AUTH_COLOR, anchor="center", justify="center")
+        self.title = tk.Label(content_frame, text="QR 인증", font=(config.DEFAULT_FONT, 48, "bold"), fg="white", bg=config.AUTH_COLOR, anchor="center", justify="center")
         self.title.pack()
         self.sub_title = tk.Label(content_frame, text="QR을 인식시켜주세요", font=(config.DEFAULT_FONT, 32), bg=config.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
