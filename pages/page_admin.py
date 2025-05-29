@@ -47,15 +47,15 @@ class PasswordDialog(tk.Frame):
                 btn.pack(side="left", padx=3, pady=3)
 
         # Back button
-        tk.Button(self, text="초기화면으로", font=(config.DEFAULT_FONT, 14), width=10, height=1, command=self._back_to_main).pack(pady=3)
+        tk.Button(self, text="초기화면으로", font=(config.DEFAULT_FONT, 14), width=12, height=2, command=self._back_to_main).pack(pady=3)
 
     def _create_keypad_button(self, parent, char):
         if char == 'C':
-            return tk.Button(parent, text="C", font=(config.DEFAULT_FONT, 14), width=3, height=2, command=self.input_clear)
+            return tk.Button(parent, text="C", font=(config.DEFAULT_FONT, 14), width=5, height=2, command=self.input_clear)
         elif char == '<':
-            return tk.Button(parent, text="←", font=(config.DEFAULT_FONT, 14), width=3, height=2, command=self.backspace)
+            return tk.Button(parent, text="←", font=(config.DEFAULT_FONT, 14), width=5, height=2, command=self.backspace)
         else:
-            return tk.Button(parent, text=char, font=(config.DEFAULT_FONT, 14), width=3, height=2, command=lambda ch=char: self.add_digit(ch))
+            return tk.Button(parent, text=char, font=(config.DEFAULT_FONT, 14), width=5, height=2, command=lambda ch=char: self.add_digit(ch))
 
     def add_digit(self, digit):
         if len(self.input_digits) < 6:
