@@ -46,6 +46,7 @@ AUTH_COLOR = config["ui"]["auth_color"]
 # File
 FILE_PATH = "./src/"
 MAIN_IMAGE_PATH = "./src/main.gif"
+DOOR_ICON_IMG_PATH = "./src/door_icon.png"
 BUTTON_ENABLE_IMG_PATH = "./src/button_enable.png"
 BUTTON_DISABLE_IMG_PATH = "./src/button_disable.png"
 QR_ICON_IMG_PATH = "./src/qr_icon.png"

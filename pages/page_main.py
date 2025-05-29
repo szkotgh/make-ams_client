@@ -76,7 +76,7 @@ class MainPage(tk.Frame):
         self.button1 = tk.Button(right_frame, command=lambda: controller.show_page("PageAuthButton"))
         self.button1.grid(row=0, column=0, sticky="nsew")
         ## b2
-        self.button2 = tk.Button(right_frame, command=lambda: controller.show_page("PageAuthNFC"))
+        self.button2 = tk.Button(right_frame, command=lambda: controller.show_page("PageAuthQR"))
         self.button2.grid(row=1, column=0, sticky="nsew")
         ## b3
         self.button3 = tk.Button(right_frame, command=lambda: controller.show_page("PageAuthNFC"))

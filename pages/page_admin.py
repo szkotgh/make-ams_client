@@ -15,7 +15,9 @@ class PasswordDialog(tk.Frame):
         # Title
         title_frame = tk.Frame(self)
         title_frame.pack(pady=10)
-        self.sub_title_label = tk.Label(title_frame, text="비밀번호를 입력하세요", font=(config.DEFAULT_FONT, 14), fg="white")
+        self.title_label = tk.Label(title_frame, text="AMS 관리자", font=(config.DEFAULT_FONT, 24, "bold"), fg="black")
+        self.title_label.pack()
+        self.sub_title_label = tk.Label(title_frame, text="비밀번호를 입력하십시오", font=(config.DEFAULT_FONT, 14), fg="black")
         self.sub_title_label.pack()
 
         # Circles
@@ -45,7 +47,7 @@ class PasswordDialog(tk.Frame):
                 btn.pack(side="left", padx=5, pady=5)
 
         # Back button
-        tk.Button(self, text="초기화면으로", command=self._back_to_main).pack()
+        tk.Button(self, text="초기화면으로", font=(config.DEFAULT_FONT, 16), width=13, height=2, command=self._back_to_main).pack(pady=10)
 
     def _create_keypad_button(self, parent, char):
         if char == 'C':
@@ -92,23 +94,26 @@ class PageAdmin(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
+
+        # 비밀번호 입력 창과 관리자 프레임 생성
         self._create_admin_frame()
         self.password_dialog = PasswordDialog(self, controller, self.show_admin_page)
         self.password_dialog.pack(fill="both", expand=True)
-        self.admin_frame.pack_forget()
 
     def _create_admin_frame(self):
         self.admin_frame = tk.Frame(self)
-        tk.Label(self.admin_frame, text="관리자 메뉴", font=(config.DEFAULT_FONT, 20)).pack(pady=50)
+
+        tk.Label(self.admin_frame, text="관리자 메뉴", font=(config.DEFAULT_FONT, 28, "bold"), fg="black").pack(pady=50)
 
         button_frame = tk.Frame(self.admin_frame)
         button_frame.pack()
-        tk.Button(button_frame, text="시스템 재시작").pack(side="left", padx=10)
-        tk.Button(button_frame, text="프로그램 종료", command=lambda: os._exit(os.EX_OK)).pack(side="left", padx=0)
-        tk.Button(button_frame, text="프로그램 재시작", command=lambda: os._exit(1)).pack(side="left", padx=10)
-        tk.Button(button_frame, text="자동문 작동").pack(side="left", padx=10)
 
-        tk.Button(self.admin_frame, text="Back to Main", command=self.back_to_main).pack(pady=20)
+        tk.Button(button_frame, text="시스템 재시작", font=(config.DEFAULT_FONT, 16), width=9, height=3).pack(side="left", padx=5)
+        tk.Button(button_frame, text="프로그램 종료", font=(config.DEFAULT_FONT, 16), width=9, height=3, command=lambda: os._exit(os.EX_OK)).pack(side="left", padx=5)
+        tk.Button(button_frame, text="프로그램 재시작", font=(config.DEFAULT_FONT, 16), width=9, height=3, command=lambda: os._exit(1)).pack(side="left", padx=5)
+        tk.Button(button_frame, text="자동문 작동", font=(config.DEFAULT_FONT, 16), width=9, height=3).pack(side="left", padx=5)
+
+        tk.Button(self.admin_frame, text="관리자 종료", font=(config.DEFAULT_FONT, 14), width=10, height=2, command=self.back_to_main).pack(pady=20)
 
     def show_admin_page(self):
         self.password_dialog.pack_forget()
@@ -117,8 +122,9 @@ class PageAdmin(tk.Frame):
     def back_to_main(self):
         self.admin_frame.pack_forget()
         self.password_dialog.input_clear()
-        self.password_dialog.pack(fill="both", expand=True)
         self.controller.show_page("MainPage")
 
     def on_show(self):
-        pass
+        self.admin_frame.pack_forget()
+        self.password_dialog.input_clear()
+        self.password_dialog.pack(fill="both", expand=True)
