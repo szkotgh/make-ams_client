@@ -25,9 +25,9 @@ class MainPage(tk.Frame):
         self.time_label.grid(row=0, column=0, sticky="w", padx=10)
         self.time_label.bind("<Button-1>", lambda e: controller.show_page("PageAdmin")) # 누르면 관리자 페이지로
         def update_time():
-            now = time.strftime("%H:%M:%S")
+            now = time.strftime("%H:%M")
             self.time_label.config(text=now)
-            self.time_label.after(1000, update_time)
+            self.time_label.after(100, update_time)
         update_time()
         top_frame.columnconfigure(0, weight=20)
         top_frame.columnconfigure(1, weight=70)
@@ -76,7 +76,7 @@ class MainPage(tk.Frame):
         self.button1 = tk.Button(right_frame, command=lambda: controller.show_page("PageAuthButton"))
         self.button1.grid(row=0, column=0, sticky="nsew")
         ## b2
-        self.button2 = tk.Button(right_frame, command=lambda: controller.show_page("PageAuthQR"))
+        self.button2 = tk.Button(right_frame, command=lambda: controller.show_page("PageAuthNFC"))
         self.button2.grid(row=1, column=0, sticky="nsew")
         ## b3
         self.button3 = tk.Button(right_frame, command=lambda: controller.show_page("PageAuthNFC"))
@@ -93,7 +93,7 @@ class MainPage(tk.Frame):
                 else:
                     self.conn_status_label.config(text=f"연결됨 ({connection_status['ping']}ms)", fg=config.DISABLE_COLOR)
             else:
-                self.conn_status_label.config(text="통신 불량", fg=config.DISABLE_COLOR)
+                self.conn_status_label.config(text="통신불량", fg=config.DISABLE_COLOR)
             self.conn_status_label.update_idletasks()
 
             # Update door status label
@@ -143,5 +143,8 @@ class MainPage(tk.Frame):
             self.img_btn3 = img_btn3
             self.button3.config(image=self.img_btn3)
 
-            self.conn_status_label.after(10, update_status)
+            self.conn_status_label.after(100, update_status)
         update_status()
+
+    def on_show(self):
+        pass

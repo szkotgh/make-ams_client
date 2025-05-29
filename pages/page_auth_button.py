@@ -6,3 +6,6 @@ class PageAuthButton(tk.Frame):
         tk.Label(self, text="Button AUTH").pack(pady=50)
         tk.Button(self, text="Back to Main",
                   command=lambda: controller.show_page("MainPage")).pack()
+
+    def on_show(self):
+        pass

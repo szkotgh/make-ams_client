@@ -8,3 +8,6 @@ class PageStart(tk.Frame):
         self.sub_lb = tk.Label(self, text="장치 클라이언트를 로드 중입니다 . . .").pack(pady=50)
     
         self.after(3, lambda: controller.show_page("MainPage"))
+
+    def on_show(self):
+        pass

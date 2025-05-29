@@ -6,3 +6,6 @@ class PageAuthQR(tk.Frame):
         tk.Label(self, text="QR Auth").pack(pady=50)
         tk.Button(self, text="Back to Main",
                   command=lambda: controller.show_page("MainPage")).pack()
+
+    def on_show(self):
+        pass

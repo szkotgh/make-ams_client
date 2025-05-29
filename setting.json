@@ -1,7 +1,7 @@
 {
   "connection": {
     "server_url": "https://www.google.com",
-    "connection_interval": 0,
+    "connection_interval": 1.0,
     "time_out": 3
   },
   "status": {
@@ -20,16 +20,7 @@
     "unknown_color": "#979797",
     "disable_color": "#e60013",
     "enable_color": "#079a3e",
-    "warning_color": "#ffcc00"
-  },
-  "file": {
-    "file_path": "./src/",
-    "main_image_path": "./src/main.gif",
-    "button_enable_img_path": "./src/button_enable.png",
-    "button_disable_img_path": "./src/button_disable.png",
-    "qr_enable_img_path": "./src/qr_enable.png",
-    "qr_disable_img_path": "./src/qr_disable.png",
-    "nfc_enable_img_path": "./src/nfc_enable.png",
-    "nfc_disable_img_path": "./src/nfc_disable.png"
+    "warning_color": "#ffcc00",
+    "auth_color": "#1c2087"
   }
 }

@@ -41,13 +41,16 @@ UNKNOWN_COLOR = config["ui"]["unknown_color"]
 DISABLE_COLOR = config["ui"]["disable_color"]
 ENABLE_COLOR = config["ui"]["enable_color"]
 WARNING_COLOR = config["ui"]["warning_color"]
+AUTH_COLOR = config["ui"]["auth_color"]
 
 # File
-FILE_PATH = config["file"]["file_path"]
-MAIN_IMAGE_PATH = config["file"]["main_image_path"]
-BUTTON_ENABLE_IMG_PATH = config["file"]["button_enable_img_path"]
-BUTTON_DISABLE_IMG_PATH = config["file"]["button_disable_img_path"]
-QR_ENABLE_IMG_PATH = config["file"]["qr_enable_img_path"]
-QR_DISABLE_IMG_PATH = config["file"]["qr_disable_img_path"]
-NFC_ENABLE_IMG_PATH = config["file"]["nfc_enable_img_path"]
-NFC_DISABLE_IMG_PATH = config["file"]["nfc_disable_img_path"]
+FILE_PATH = "./src/"
+MAIN_IMAGE_PATH = "./src/main.gif"
+BUTTON_ENABLE_IMG_PATH = "./src/button_enable.png"
+BUTTON_DISABLE_IMG_PATH = "./src/button_disable.png"
+QR_ICON_IMG_PATH = "./src/qr_icon.png"
+QR_ENABLE_IMG_PATH = "./src/qr_enable.png"
+QR_DISABLE_IMG_PATH = "./src/qr_disable.png"
+NFC_ICON_IMG_PATH = "./src/nfc_icon.png"
+NFC_ENABLE_IMG_PATH = "./src/nfc_enable.png"
+NFC_DISABLE_IMG_PATH = "./src/nfc_disable.png"

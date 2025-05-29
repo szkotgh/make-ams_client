@@ -34,3 +34,4 @@ class App(tk.Tk):
     def show_page(self, page_name):
         page = self.pages[page_name]
         page.tkraise()
+        page.on_show()

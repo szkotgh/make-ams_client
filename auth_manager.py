@@ -12,7 +12,7 @@ class AuthManager:
 
         self.door_status = config.STATUS_CLOSE
         self.button_status = config.STATUS_DISABLE
-        self.qr_status = config.STATUS_ENABLE
+        self.qr_status = config.STATUS_DISABLE
         self.nfc_status = config.STATUS_DISABLE
 
         self.start_connection()
@@ -34,7 +34,6 @@ class AuthManager:
                 else:
                     self.connection_success = False
             except Exception as e:
-                print(e)
                 self.connection_success = False
             
             ## 인터넷 연결 불량: 전체 기능 제한
@@ -66,7 +65,7 @@ class AuthManager:
     def request_button_auth(self):
         url = config.SERVER_URL + "/auth/button"
         try:
-            response = requests.post(url, timeout=1)
+            response = requests.post(url, timeout=config.TIME_OUT, headers={"Authorization": self.AUTH_TOKEN})
             return True if response.ok else False
         except Exception as e:
             return False
@@ -75,7 +74,7 @@ class AuthManager:
     def request_qr_auth(self):
         url = config.SERVER_URL + "/auth/qr"
         try:
-            response = requests.post(url, timeout=1)
+            response = requests.post(url, timeout=config.TIME_OUT, headers={"Authorization": self.AUTH_TOKEN})
             return True if response.ok else False
         except Exception as e:
             return False
@@ -84,7 +83,7 @@ class AuthManager:
     def request_nfc_auth(self):
         url = config.SERVER_URL + "/auth/nfc"
         try:
-            response = requests.post(url, timeout=1)
+            response = requests.post(url, timeout=config.TIME_OUT, headers={"Authorization": self.AUTH_TOKEN})
             return True if response.ok else False
         except Exception as e:
             return False
