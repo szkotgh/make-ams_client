@@ -1,3 +1,4 @@
+import os
 import threading
 import tkinter as tk
 import config
@@ -109,7 +110,7 @@ class PageAdmin(tk.Frame):
         button_frame = tk.Frame(self.admin_frame)
         button_frame.pack()
         tk.Button(button_frame, text="시스템 재시작").pack(side="left", padx=10)
-        tk.Button(button_frame, text="프로그램 종료").pack(side="left", padx=0)
+        tk.Button(button_frame, text="프로그램 종료", command=lambda: os._exit(0)).pack(side="left", padx=0)
         tk.Button(button_frame, text="프로그램 재시작").pack(side="left", padx=10)
         tk.Button(button_frame, text="자동문 작동").pack(side="left", padx=10)
 
