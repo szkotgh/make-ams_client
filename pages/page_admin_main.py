@@ -8,6 +8,7 @@ class PageAdminMain(tk.Frame):
         self.controller = controller
 
         self.admin_frame = tk.Frame(self)
+        self.admin_frame.pack(expand=True)
 
         tk.Label(self.admin_frame, text="관리자 메뉴", font=(config.DEFAULT_FONT, 28, "bold"), fg="black").pack(pady=50)
 
