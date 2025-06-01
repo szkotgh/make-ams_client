@@ -12,8 +12,8 @@
       "close": "close"
   },
   "ui": {
-    "display_width": 806,
-    "display_height": 484,
+    "display_width": 800,
+    "display_height": 480,
     "main_gif_interval": 5000,
     "default_font": "NanumGothic",
     "title": "메이크 출입 관리 시스템",
