@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 import config
 import time
 import auth_manager
+import utils
 
 class MainPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -23,7 +24,7 @@ class MainPage(tk.Frame):
         ## time label
         self.time_label = tk.Label(top_frame, font=(config.DEFAULT_FONT, 18), bg="#000000", fg="#ffffff")
         self.time_label.grid(row=0, column=0, sticky="w", padx=10)
-        self.time_label.bind("<Button-1>", lambda e: controller.show_page("PageAdmin")) # 누르면 관리자 페이지로
+        self.time_label.bind("<Button-1>", lambda e: controller.show_page("PageAdminLogin"))
         def update_time():
             now = time.strftime("%H:%M")
             self.time_label.config(text=now)
@@ -99,11 +100,11 @@ class MainPage(tk.Frame):
             # Update door status label
             door_status = auth_manager.service.get_door_status()
             if door_status == config.STATUS_OPEN:
-                self.door_status_label.config(text=f"{config.get_status_korean(door_status)} 상태", fg=config.ENABLE_COLOR)
+                self.door_status_label.config(text=f"{utils.get_status_korean(door_status)} 상태", fg=config.ENABLE_COLOR)
             elif door_status == config.STATUS_RESTRIC:
-                self.door_status_label.config(text=f"{config.get_status_korean(door_status)} 상태", fg=config.WARNING_COLOR)
+                self.door_status_label.config(text=f"{utils.get_status_korean(door_status)} 상태", fg=config.WARNING_COLOR)
             elif door_status == config.STATUS_CLOSE:
-                self.door_status_label.config(text=f"{config.get_status_korean(door_status)} 상태", fg=config.DISABLE_COLOR)
+                self.door_status_label.config(text=f"{utils.get_status_korean(door_status)} 상태", fg=config.DISABLE_COLOR)
             else:
                 self.door_status_label.config(text="알수없음", fg=config.UNKNOWN_COLOR)
 

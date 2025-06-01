@@ -24,16 +24,6 @@ STATUS_OPEN = config["status"]["open"]
 STATUS_RESTRIC = config["status"]["restrict"]
 STATUS_CLOSE = config["status"]["close"]
 
-def get_status_korean(status):
-    status_map = {
-        STATUS_ENABLE: "활성화",
-        STATUS_DISABLE: "비활성화",
-        STATUS_OPEN: "열림",
-        STATUS_RESTRIC: "내부인",
-        STATUS_CLOSE: "제한"
-    }
-    return status_map.get(status, "알 수 없음")
-
 # UI
 TITLE = config["ui"]["title"]
 DEFAULT_FONT = config["ui"]["default_font"]
