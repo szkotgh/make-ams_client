@@ -28,9 +28,9 @@ class PageAdminMain(tk.Frame):
         button_frame = tk.Frame(self.admin_frame)
         button_frame.pack()
 
-        tk.Button(button_frame, text="시스템 재시작", font=(config.DEFAULT_FONT, 16), width=12, height=3).pack(side="left", padx=5)
+        tk.Button(button_frame, text="시스템 재시작", font=(config.DEFAULT_FONT, 16), width=12, height=3, command=lambda: os.system("sudo reboot now")).pack(side="left", padx=5)
         tk.Button(button_frame, text="프로그램 종료", font=(config.DEFAULT_FONT, 16), width=12, height=3, command=lambda: os._exit(0)).pack(side="left", padx=5)
-        tk.Button(button_frame, text="프로그램 재시작", font=(config.DEFAULT_FONT, 16), width=12, height=3, command=lambda: os.system("sudo reboot now")).pack(side="left", padx=5)
+        tk.Button(button_frame, text="프로그램 재시작", font=(config.DEFAULT_FONT, 16), width=12, height=3, command=lambda: os._exit(1)).pack(side="left", padx=5)
         tk.Button(button_frame, text="자동문 작동", font=(config.DEFAULT_FONT, 16), width=12, height=3).pack(side="left", padx=5)
 
         tk.Button(self.admin_frame, text="관리자 종료", font=(config.DEFAULT_FONT, 14), width=10, height=2, command=lambda: self.controller.show_page("MainPage")).pack(pady=20)
