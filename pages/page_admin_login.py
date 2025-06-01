@@ -50,7 +50,7 @@ class PageAdminLogin(tk.Frame):
 
     def _create_keypad_button(self, parent, char):
         def on_click(action=None):
-            speaker_manager.service.play(config.CLICK_SOUND_PATH)
+            # speaker_manager.service.play(config.CLICK_SOUND_PATH)
             if action:
                 action()
         if char == 'C':
