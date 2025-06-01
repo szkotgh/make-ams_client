@@ -50,3 +50,5 @@ NFC_ENABLE_IMG_PATH = "./src/nfc_enable.png"
 NFC_DISABLE_IMG_PATH = "./src/nfc_disable.png"
 ## sounds
 CLICK_SOUND_PATH = "./src/sounds/click.mp3"
+WRONG_SOUND_PATH = "./src/sounds/wrong.mp3"
+SUCCESS_SOUND_PATH = "./src/sounds/success.mp3"

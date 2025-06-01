@@ -50,7 +50,7 @@ class PageAdminLogin(tk.Frame):
 
     def _create_keypad_button(self, parent, char):
         def on_click(action=None):
-            # speaker_manager.service.play(config.CLICK_SOUND_PATH)
+            speaker_manager.service.play(config.CLICK_SOUND_PATH)
             if action:
                 action()
         if char == 'C':
@@ -85,11 +85,13 @@ class PageAdminLogin(tk.Frame):
 
     def check_password(self):
         if ''.join(self.input_digits) == config.ADMIN_PW:
+            speaker_manager.service.play(config.SUCCESS_SOUND_PATH)
             self.input_clear()
             self.controller.show_page("PageAdminMain")
         else:
+            speaker_manager.service.play(config.WRONG_SOUND_PATH)
             self.sub_title_label.config(text="비밀번호가 일치하지 않습니다", fg=config.DISABLE_COLOR)
-            threading.Timer(1.3, self._reset_subtitle).start()
+            threading.Timer(1.5, self._reset_subtitle).start()
             self.input_clear()
 
     def _reset_subtitle(self):

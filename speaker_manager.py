@@ -1,42 +1,40 @@
 import os
 import platform
+import subprocess
 import threading
 
 class SpeakerManager:
     def __init__(self):
-        self._current_thread = None
+        self._process = None
 
     def play(self, file_path):
         if not os.path.isfile(file_path):
             raise FileNotFoundError()
 
-        if self._current_thread and self._current_thread.is_alive():
-            self.stop()
+        self.stop()
 
-        self._current_thread = threading.Thread(target=self._play_file, args=(file_path,))
-        self._current_thread.start()
+        threading.Thread(target=self._play_file, args=(file_path,), daemon=True).start()
 
     def _play_file(self, file_path):
         system = platform.system()
-        if system == "Darwin":  # macOS
-            os.system(f"afplay '{file_path}'")
+        cmd = None
+        if system == "Darwin":
+            cmd = ["afplay", file_path]
         elif system == "Windows":
-            os.system(f'start /min wmplayer "{file_path}"')
+            cmd = ["wmplayer", file_path]
         elif system == "Linux":
-            os.system(f"aplay '{file_path}' || paplay '{file_path}' || ffplay -nodisp -autoexit '{file_path}'")
+            cmd = ["ffplay", "-nodisp", "-autoexit", file_path]
+
+        if cmd:
+            self._process = subprocess.Popen(cmd)
+            self._process.wait()
         else:
-            raise NotImplementedError("not support os error: " + system)
+            raise NotImplementedError()
 
     def stop(self):
-        system = platform.system()
-        if system == "Darwin":
-            os.system("killall afplay")
-        elif system == "Windows":
-            os.system("taskkill /im wmplayer.exe /f")
-        elif system == "Linux":
-            os.system("killall aplay paplay ffplay")
-        if self._current_thread:
-            self._current_thread.join(timeout=1)
-            self._current_thread = None
+        if self._process and self._process.poll() is None:
+            self._process.terminate()
+            self._process.wait()
+        self._process = None
 
 service = SpeakerManager()
