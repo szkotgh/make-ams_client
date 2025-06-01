@@ -4,7 +4,7 @@ Documentation=https://github.com/szkotgh/make-ams_client.git
 After=network.target
 
 [Service]
-DISPLAY=":0"
+Environment=DISPLAY=:0
 ExecStart=/bin/bash /home/user/make-ams_client/stater.sh
 User=user
 Restart=always
