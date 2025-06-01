@@ -2,6 +2,7 @@ import os
 import threading
 import tkinter as tk
 import config
+import speaker_manager
 
 class PageAdminLogin(tk.Frame):
     def __init__(self, parent, controller):
@@ -48,13 +49,19 @@ class PageAdminLogin(tk.Frame):
                   command=lambda: self.controller.show_page("MainPage")).pack(pady=3)
 
     def _create_keypad_button(self, parent, char):
+        def on_click(action=None):
+            speaker_manager.service.play(config.CLICK_SOUND_PATH)
+            if action:
+                action()
         if char == 'C':
-            return tk.Button(parent, text="C", font=(config.DEFAULT_FONT, 14, 'bold'), width=5, height=2, command=self.input_clear)
+            return tk.Button(parent, text="C", font=(config.DEFAULT_FONT, 14, 'bold'), width=5, height=2,
+                             command=lambda: on_click(self.input_clear))
         elif char == '<':
-            return tk.Button(parent, text="←", font=(config.DEFAULT_FONT, 14, 'bold'), width=5, height=2, command=self.backspace)
+            return tk.Button(parent, text="←", font=(config.DEFAULT_FONT, 14, 'bold'), width=5, height=2,
+                             command=lambda: on_click(self.backspace))
         else:
             return tk.Button(parent, text=char, font=(config.DEFAULT_FONT, 14, 'bold'), width=5, height=2,
-                             command=lambda ch=char: self.add_digit(ch))
+                             command=lambda ch=char: on_click(lambda: self.add_digit(ch)))
 
     def add_digit(self, digit):
         if len(self.input_digits) < 6:
@@ -91,3 +98,4 @@ class PageAdminLogin(tk.Frame):
     def on_show(self):
         self.input_clear()
         self._reset_subtitle()
+        

@@ -1,6 +1,7 @@
 import json
 import dotenv
 import os
+import utils
 
 # init
 dotenv.load_dotenv()
@@ -16,6 +17,7 @@ DISPLAY_WIDTH = config["ui"]["display_width"]
 DISPLAY_HEIGHT = config["ui"]["display_height"]
 MAIN_GIF_INTERVAL = config["ui"]["main_gif_interval"]
 CONNECTION_INTERVAL = config["connection"]["connection_interval"]
+START_TIME = utils.get_now_datetime()
 
 # Status
 STATUS_ENABLE = config["status"]["enable"]
@@ -34,6 +36,7 @@ WARNING_COLOR = config["ui"]["warning_color"]
 AUTH_COLOR = config["ui"]["auth_color"]
 
 # File
+## images
 FILE_PATH = "./src/"
 MAIN_IMAGE_PATH = "./src/main.gif"
 DOOR_ICON_IMG_PATH = "./src/door_icon.png"
@@ -45,3 +48,5 @@ QR_DISABLE_IMG_PATH = "./src/qr_disable.png"
 NFC_ICON_IMG_PATH = "./src/nfc_icon.png"
 NFC_ENABLE_IMG_PATH = "./src/nfc_enable.png"
 NFC_DISABLE_IMG_PATH = "./src/nfc_disable.png"
+## sounds
+CLICK_SOUND_PATH = "./src/sounds/click.mp3"

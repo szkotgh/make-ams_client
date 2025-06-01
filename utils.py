@@ -1,12 +1,17 @@
 import config
 import tkinter as tk
+from datetime import datetime
+
+def get_now_datetime():
+    return datetime.now()
 
 def get_display_size():
     root = tk.Tk()
+    root.withdraw()
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
+    root.destroy()
     return screen_width, screen_height
-
 
 def get_status_korean(status):
     status_map = {
