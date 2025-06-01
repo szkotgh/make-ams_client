@@ -7,7 +7,7 @@ After=network.target
 Environment=DISPLAY=:0
 ExecStart=/bin/bash /home/user/make-ams_client/stater.sh
 User=user
-Restart=always
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
