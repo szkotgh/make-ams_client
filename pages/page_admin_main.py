@@ -1,6 +1,7 @@
 import os
 import tkinter as tk
 import config
+import utils
 
 class PageAdminMain(tk.Frame):
     def __init__(self, parent, controller):
@@ -10,7 +11,11 @@ class PageAdminMain(tk.Frame):
         self.admin_frame = tk.Frame(self)
         self.admin_frame.pack(expand=True)
 
-        tk.Label(self.admin_frame, text="관리자 메뉴", font=(config.DEFAULT_FONT, 28, "bold"), fg="black").pack(pady=50)
+        title_frame = tk.Frame(self.admin_frame)
+        title_frame.pack(pady=30)
+
+        tk.Label(title_frame, text="관리자 메뉴", font=(config.DEFAULT_FONT, 28, "bold"), fg="black").pack()
+        tk.Label(title_frame, text=f"디스플레이: {utils.get_display_size()}", font=(config.DEFAULT_FONT, 16), fg="black").pack(pady=10)
 
         button_frame = tk.Frame(self.admin_frame)
         button_frame.pack()
