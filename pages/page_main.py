@@ -55,7 +55,7 @@ class MainPage(tk.Frame):
         frames = []
         for frame in range(getattr(img, "n_frames", 1)):
             img.seek(frame)
-            frame_image = img.copy().resize((652, 444))
+            frame_image = img.copy().resize((652, 445))
             frames.append(ImageTk.PhotoImage(frame_image))
         self.img_label = tk.Label(left_frame)
         self.img_label.pack(fill="both", expand=True)
