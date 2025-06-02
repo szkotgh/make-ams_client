@@ -8,7 +8,7 @@ class PageAdminLog(tk.Frame):
 
         tk.Label(self, text="로그열람", font=(config.DEFAULT_FONT, 28, "bold"), fg="black").pack(pady=20)
 
-        self.text_area = tk.Text(self, font=(config.DEFAULT_FONT, 14), width=58, height=10)
+        self.text_area = tk.Text(self, font=(config.DEFAULT_FONT, 14), width=58, height=10, state="disabled")
         self.text_area.pack(expand=True, fill="both", padx=20)
 
         tk.Button(self, text="뒤로가기", font=(config.DEFAULT_FONT, 14), width=10, height=2,
