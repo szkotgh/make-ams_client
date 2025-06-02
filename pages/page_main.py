@@ -25,10 +25,10 @@ class MainPage(tk.Frame):
         self.time_label = tk.Label(top_frame, font=(config.DEFAULT_FONT, 18), bg="#000000", fg="#ffffff")
         self.time_label.grid(row=0, column=0, sticky="w", padx=10)
         self.time_label.bind("<Button-1>", lambda e: controller.show_page("PageAdminLogin"))
-        def update_time():
-            now = time.strftime("%H:%M")
+        def update_time(blink=False):
+            now = time.strftime("%H:%M" if blink else "%H %M")
             self.time_label.config(text=now)
-            self.time_label.after(100, update_time)
+            self.time_label.after(1000, lambda: update_time(not blink))
         update_time()
         top_frame.columnconfigure(0, weight=20)
         top_frame.columnconfigure(1, weight=70)

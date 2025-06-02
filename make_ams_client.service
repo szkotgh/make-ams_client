@@ -1,13 +1,14 @@
 [Unit]
 Description=MAKE; AMS Client
 Documentation=https://github.com/szkotgh/make-ams_client.git
-After=network.target
+After=graphical-session.target
 
 [Service]
 Environment=DISPLAY=:0
 ExecStart=/bin/bash /home/user/make-ams_client/stater.sh
 User=user
 Restart=on-failure
+RestartSec=0
 
 [Install]
 WantedBy=multi-user.target
