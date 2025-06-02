@@ -1,4 +1,4 @@
-import sys
+import os
 from page_manager import App
 import tkinter
 
@@ -8,6 +8,6 @@ if __name__ == "__main__":
         app.mainloop()
     except tkinter.TclError as e:
         print("Tkinter GUI Fail:", e)
-        sys.exit(1)
+        os._exit(1)
     except Exception:
-        sys.exit(1)
+        os._exit(1)
