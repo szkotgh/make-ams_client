@@ -45,7 +45,7 @@ class PageAdminLogin(tk.Frame):
                 btn.pack(side="left", padx=3, pady=3)
 
         # Back button
-        tk.Button(self, text="취소", font=(config.DEFAULT_FONT, 14), width=12, height=2,
+        tk.Button(self, text="홈으로", font=(config.DEFAULT_FONT, 14), width=12, height=2,
                   command=lambda: self.controller.show_page("MainPage")).pack(pady=3)
 
     def _create_keypad_button(self, parent, char):

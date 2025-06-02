@@ -11,7 +11,7 @@ class PageAdminLog(tk.Frame):
         title_frame.pack(pady=20)
         
         tk.Label(title_frame, text="로그열람", font=(config.DEFAULT_FONT, 28, "bold"), fg="black").pack()
-        tk.Label(title_frame, text="관리자 페이지", font=(config.DEFAULT_FONT, 14), fg="black").pack()
+        tk.Label(title_frame, text="내부적인 장치 로그입니다", font=(config.DEFAULT_FONT, 14), fg="black").pack()
         
         self.text_area = tk.Text(self, font=(config.DEFAULT_FONT, 12), width=58, height=10)
         self.text_area.pack(expand=True, fill="both", padx=20)
