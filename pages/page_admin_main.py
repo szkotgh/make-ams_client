@@ -19,8 +19,9 @@ class PageAdminMain(tk.Frame):
         self.uptime = utils.get_now_datetime() - config.START_TIME
         self.uptime_label = tk.Label(title_frame, text=f"작동시간: {self.uptime}", font=(config.DEFAULT_FONT, 16), fg="black")
         def update_uptime():
+            time_label = str(self.uptime)[:-7]
             self.uptime = utils.get_now_datetime() - config.START_TIME
-            self.uptime_label.config(text=f"작동시간: {self.uptime}")
+            self.uptime_label.config(text=f"작동시간: {time_label}")
             self.uptime_label.after(1000, update_uptime)
         update_uptime()
         self.uptime_label.pack()
