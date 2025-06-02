@@ -11,3 +11,5 @@ if __name__ == "__main__":
         os._exit(1)
     except Exception:
         os._exit(1)
+    finally:
+        os._exit(1) # 항상 재시작
