@@ -18,7 +18,7 @@ class App(tk.Tk):
         self.attributes("-topmost", True)
         self.attributes("-fullscreen", True)
         # self.config(cursor="none")
-
+        
         # container frame(change zone)
         self.container = tk.Frame(self)
         self.container.pack(fill="both", expand=True)
