@@ -89,7 +89,7 @@ class PageAdminLogin(tk.Frame):
             self.input_clear()
             self.controller.show_page("PageAdminMain")
         else:
-            speaker_manager.service.play(config.WHY_YOU_LITTLE)
+            speaker_manager.service.play(config.WRONG_SOUND_PATH)
             self.sub_title_label.config(text="비밀번호가 일치하지 않습니다", fg=config.DISABLE_COLOR)
             threading.Timer(1.5, self._reset_subtitle).start()
             self.input_clear()
