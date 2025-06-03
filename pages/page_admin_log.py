@@ -25,7 +25,7 @@ class PageAdminLog(tk.Frame):
         logs = log_manager.service.get_logs(limit=100)
         for log in logs:
             time, method, action, details = log[1], log[2], log[3], log[4]
-            self.text_area.insert(tk.END, f"{time} - {method} - {action} - {details}\n")
+            self.text_area.insert(tk.END, f"{time} | {method} | {action} | {details}\n")
         self.text_area.see(tk.END)
 
     def on_show(self):

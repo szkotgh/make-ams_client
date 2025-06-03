@@ -2,6 +2,7 @@ import os
 import threading
 import tkinter as tk
 import config
+import log_manager
 import speaker_manager
 
 class PageAdminLogin(tk.Frame):
@@ -88,6 +89,7 @@ class PageAdminLogin(tk.Frame):
         if ''.join(self.input_digits) == config.ADMIN_PW:
             speaker_manager.service.play(config.SUCCESS_SOUND_PATH)
             self.input_clear()
+            log_manager.service.insert_log("관리자", "로그인", "관리자페이지에 로그인했습니다.")
             self.controller.show_page("PageAdminMain")
         else:
             self.error_count += 1

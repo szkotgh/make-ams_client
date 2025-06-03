@@ -5,6 +5,7 @@ import hardware_manager
 import tkinter
 
 if __name__ == "__main__":
+    log_manager.service.insert_log("시스템", "시작", "프로그램이 실행되었습니다.")
     try:
         app = App()
         app.mainloop()
@@ -15,4 +16,5 @@ if __name__ == "__main__":
     finally:
         log_manager.service.log_close()
         hardware_manager.service.hardware_close()
+        log_manager.service.insert_log("시스템", "종료", "프로그램을 다시 실행합니다.")
         os._exit(1) # 항상 재시작

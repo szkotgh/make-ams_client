@@ -26,10 +26,12 @@ class SpeakerManager:
             cmd = ["ffplay", "-nodisp", "-autoexit", file_path]
 
         if cmd:
-            self._process = subprocess.Popen(cmd)
-            self._process.wait()
-        else:
-            raise NotImplementedError()
+            try:
+                self._process = subprocess.Popen(cmd)
+                self._process.wait()
+            except Exception as e:
+                print(f"Error playing sound: {e}")
+                self._process = None
 
     def stop(self):
         if self._process and self._process.poll() is None:
