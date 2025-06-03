@@ -36,6 +36,8 @@ WARNING_COLOR = config["ui"]["warning_color"]
 AUTH_COLOR = config["ui"]["auth_color"]
 
 # File
+## logs
+LOG_DB_PATH = "./src/log.db"
 ## images
 FILE_PATH = "./src/"
 MAIN_IMAGE_PATH = "./src/main.gif"

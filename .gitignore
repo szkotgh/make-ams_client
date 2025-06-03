@@ -5,3 +5,4 @@ test.json
 .DS_Store
 .env
 
+src/log.db

@@ -2,6 +2,8 @@ import os
 import tkinter as tk
 import config
 import utils
+import log_manager
+import hardware_manager
 
 class PageAdminMain(tk.Frame):
     def __init__(self, parent, controller):
@@ -32,10 +34,19 @@ class PageAdminMain(tk.Frame):
         tk.Button(button_frame, text="시스템 재시작", font=(config.DEFAULT_FONT, 16, 'bold'), height=3, command=lambda: os.system("sudo reboot now")).pack(side="left", padx=2)
         tk.Button(button_frame, text="프로그램 종료", font=(config.DEFAULT_FONT, 16, 'bold'), height=3, command=lambda: os._exit(0)).pack(side="left", padx=2)
         tk.Button(button_frame, text="프로그램 재시작", font=(config.DEFAULT_FONT, 16, 'bold'), height=3, command=lambda: os._exit(1)).pack(side="left", padx=2)
-        tk.Button(button_frame, text="자동문 작동", font=(config.DEFAULT_FONT, 16, 'bold'), height=3).pack(side="left", padx=2)
+        self.button3 = tk.Button(button_frame, text="자동문 작동", font=(config.DEFAULT_FONT, 16, 'bold'), height=3, command=self.open_door)
+        self.button3.pack(side="left", padx=2)
         tk.Button(button_frame, text="로그 열람", font=(config.DEFAULT_FONT, 16, 'bold'), height=3, command=lambda: self.controller.show_page("PageAdminLog")).pack(side="left", padx=2)
 
         tk.Button(self.admin_frame, text="관리자 종료", font=(config.DEFAULT_FONT, 14), width=10, height=2, command=lambda: self.controller.show_page("MainPage")).pack(pady=20)
+
+    def open_door(self):
+        log_manager.service.insert_log("내부관리자", "문열음", "관리자 페이지에서 수동으로 문을 열었습니다.")
+        hardware_manager.service.open_door()
+        self.button3.config(state="disabled")
+        def reset_button():
+            self.button3.config(state="normal")
+        self.after(3000, reset_button)
 
     def on_show(self):
         pass
