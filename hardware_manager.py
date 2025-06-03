@@ -1,10 +1,8 @@
 import RPi.GPIO as GPIO
 import time
 
-
 class HardwareManager():
     def __init__(self, RELAY_PIN=17):
-        
         self.RELAY_PIN = RELAY_PIN
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(RELAY_PIN, GPIO.OUT)
