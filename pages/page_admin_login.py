@@ -9,6 +9,7 @@ class PageAdminLogin(tk.Frame):
         super().__init__(parent)
         self.controller = controller
         self.input_digits = []
+        self.error_count = 0
 
         # Title
         title_frame = tk.Frame(self)
@@ -45,7 +46,7 @@ class PageAdminLogin(tk.Frame):
                 btn.pack(side="left", padx=3, pady=3)
 
         # Back button
-        tk.Button(self, text="홈으로", font=(config.DEFAULT_FONT, 14), width=12, height=2,
+        tk.Button(self, text="홈으로 ", font=(config.DEFAULT_FONT, 14), width=12, height=2,
                   command=lambda: self.controller.show_page("MainPage")).pack(pady=3)
 
     def _create_keypad_button(self, parent, char):
@@ -89,7 +90,13 @@ class PageAdminLogin(tk.Frame):
             self.input_clear()
             self.controller.show_page("PageAdminMain")
         else:
-            speaker_manager.service.play(config.WRONG_SOUND_PATH)
+            self.error_count += 1
+            if self.error_count == 3:
+                speaker_manager.service.play(config.DTMG)
+            elif self.error_count == 6:
+                speaker_manager.service.play(config.JTMG)
+            else:
+                speaker_manager.service.play(config.WRONG_SOUND_PATH)
             self.sub_title_label.config(text="비밀번호가 일치하지 않습니다", fg=config.DISABLE_COLOR)
             threading.Timer(1.5, self._reset_subtitle).start()
             self.input_clear()
@@ -98,6 +105,7 @@ class PageAdminLogin(tk.Frame):
         self.sub_title_label.config(text="비밀번호를 입력하십시오", fg="black")
 
     def on_show(self):
+        self.error_count = 0
         self.input_clear()
         self._reset_subtitle()
         
