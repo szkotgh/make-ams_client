@@ -6,6 +6,7 @@ class HardwareManager():
         self.RELAY_PIN = RELAY_PIN
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(RELAY_PIN, GPIO.OUT)
+        self.set_door(False)
         
     def set_door(self, state: bool):
         GPIO.output(self.RELAY_PIN, GPIO.HIGH if state else GPIO.LOW)
