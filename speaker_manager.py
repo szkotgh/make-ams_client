@@ -1,46 +1,24 @@
-import os
-import platform
-import subprocess
+import pygame
 import threading
 
 class SpeakerManager:
     def __init__(self):
-        self._process = None
+        pygame.mixer.init()
+        self._lock = threading.Lock()
 
     def play(self, file_path):
-        try:
-            if not os.path.isfile(file_path):
-                raise FileNotFoundError()
+        def _play():
+            with self._lock:
+                try:
+                    pygame.mixer.music.load(file_path)
+                    pygame.mixer.music.play()
+                except Exception as e:
+                    print(f"Error playing sound: {e}")
 
-            self.stop()
-
-            threading.Thread(target=self._play_file, args=(file_path,), daemon=True).start()
-        except Exception as e:
-            print(f"Error playing sound: {e}")
-            self._process = None
-
-    def _play_file(self, file_path):
-        system = platform.system()
-        cmd = None
-        if system == "Darwin":
-            cmd = ["afplay", file_path]
-        elif system == "Windows":
-            cmd = ["wmplayer", file_path]
-        elif system == "Linux":
-            cmd = ["ffplay", "-nodisp", "-autoexit", file_path]
-
-        if cmd:
-            try:
-                self._process = subprocess.Popen(cmd)
-                self._process.wait()
-            except Exception as e:
-                print(f"Error playing sound: {e}")
-                self._process = None
+        threading.Thread(target=_play, daemon=True).start()
 
     def stop(self):
-        if self._process and self._process.poll() is None:
-            self._process.terminate()
-            self._process.wait()
-        self._process = None
+        with self._lock:
+            pygame.mixer.music.stop()
 
 service = SpeakerManager()
