@@ -8,12 +8,16 @@ class SpeakerManager:
         self._process = None
 
     def play(self, file_path):
-        if not os.path.isfile(file_path):
-            raise FileNotFoundError()
+        try:
+            if not os.path.isfile(file_path):
+                raise FileNotFoundError()
 
-        self.stop()
+            self.stop()
 
-        threading.Thread(target=self._play_file, args=(file_path,), daemon=True).start()
+            threading.Thread(target=self._play_file, args=(file_path,), daemon=True).start()
+        except Exception as e:
+            print(f"Error playing sound: {e}")
+            self._process = None
 
     def _play_file(self, file_path):
         system = platform.system()
