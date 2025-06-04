@@ -1,3 +1,4 @@
+import time
 import RPi.GPIO as GPIO
 import threading
 
@@ -20,6 +21,7 @@ class HardwareManager():
         self.set_door(True)
         def close_door():
             speaker_manager.service.play(config.DOOR_CLOSE_SOUND_PATH)
+            time.sleep(3)
             self.set_door(False)
         threading.Timer(duration, close_door).start()
     
