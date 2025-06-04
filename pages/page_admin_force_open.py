@@ -46,11 +46,9 @@ class PageAdminForceOpen(tk.Frame):
 
     def status_release(self):
         log_manager.service.insert_log("관리자", "문열어두기", "관리자가 문 열어두기를 해제했습니다.")
-        speaker_manager.service.play(config.DOOR_CLOSE_SOUND_PATH)
-        hardware_manager.service.set_door(False)
+        hardware_manager.service.close_door()
         self.controller.show_page("MainPage")
 
     def on_show(self):
         log_manager.service.insert_log("관리자", "문열어두기", "관리자가 문 열어두기를 시작했습니다.")
-        speaker_manager.service.play(config.DOOR_OPEN_SOUND_PATH)
-        hardware_manager.service.set_door(True)
+        hardware_manager.service.open_door()
