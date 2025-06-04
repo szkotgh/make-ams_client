@@ -38,7 +38,7 @@ class PageAdminMain(tk.Frame):
         self.button3.pack(side="left", padx=2)
         tk.Button(button_frame, text="로그 열람", font=(config.DEFAULT_FONT, 16, 'bold'), height=3, command=lambda: self.controller.show_page("PageAdminLog")).pack(side="left", padx=2)
 
-        tk.Button(self.admin_frame, text="문 열어놓기", font=(config.DEFAULT_FONT, 16, 'bold'), height=2, width=60, command=lambda: self.controller.show_page("PageAdminForceOpen")).pack()
+        tk.Button(self.admin_frame, text="문 열어놓기", font=(config.DEFAULT_FONT, 16, 'bold'), height=2, width=56, command=lambda: self.controller.show_page("PageAdminForceOpen")).pack()
         
         tk.Button(self.admin_frame, text="관리자 종료", font=(config.DEFAULT_FONT, 14), width=14, height=2, command=lambda: self.controller.show_page("MainPage")).pack(pady=10)
 
