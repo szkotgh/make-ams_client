@@ -20,13 +20,13 @@ class HardwareManager():
         speaker_manager.service.play(config.DOOR_OPEN_SOUND_PATH)
         self.set_door(True)
         
-    def close_door(self, close_duration=3000):
+    def close_door(self, close_duration=3):
         speaker_manager.service.play(config.DOOR_CLOSE_SOUND_PATH)
         def close_door():
             self.set_door(False)
         threading.Timer(close_duration, close_door).start()
     
-    def auto_open_door(self, wait_duration=1000):
+    def auto_open_door(self, wait_duration=3):
         self.open_door()
         threading.Timer(wait_duration, self.close_door).start()
     
