@@ -1,6 +1,9 @@
 import RPi.GPIO as GPIO
 import threading
 
+import config
+import speaker_manager
+
 class HardwareManager():
     def __init__(self, RELAY_PIN=17):
         self.RELAY_PIN = RELAY_PIN
@@ -13,8 +16,10 @@ class HardwareManager():
         pass
     
     def open_door(self, duration=1):
+        speaker_manager.service.play(config.DOOR_OPEN_SOUND_PATH)
         self.set_door(True)
         def close_door():
+            speaker_manager.service.play(config.DOOR_CLOSE_SOUND_PATH)
             self.set_door(False)
         threading.Timer(duration, close_door).start()
     
