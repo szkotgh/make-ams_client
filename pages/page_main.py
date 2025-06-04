@@ -4,6 +4,8 @@ from PIL import Image, ImageTk
 import config
 import time
 import auth_manager
+import log_manager
+import speaker_manager
 import utils
 
 class MainPage(tk.Frame):
@@ -74,13 +76,13 @@ class MainPage(tk.Frame):
         right_frame.columnconfigure(0, weight=1)
 
         ## b1
-        self.button1 = tk.Button(right_frame, command=lambda: controller.show_page("PageAuthButton"))
+        self.button1 = tk.Button(right_frame, command=self.button_auth)
         self.button1.grid(row=0, column=0, sticky="nsew")
         ## b2
-        self.button2 = tk.Button(right_frame, command=lambda: controller.show_page("PageAuthQR"))
+        self.button2 = tk.Button(right_frame, command=self.qr_auth)
         self.button2.grid(row=1, column=0, sticky="nsew")
         ## b3
-        self.button3 = tk.Button(right_frame, command=lambda: controller.show_page("PageAuthNFC"))
+        self.button3 = tk.Button(right_frame, command=self.nfc_auth)
         self.button3.grid(row=2, column=0, sticky="nsew")
 
         def update_status():
@@ -147,5 +149,20 @@ class MainPage(tk.Frame):
             self.conn_status_label.after(100, update_status)
         update_status()
 
+    def button_auth(self):
+        log_manager.service.insert_log("사용자", "인증", "사용자가 버튼 인증을 시도했습니다.")
+        speaker_manager.service.play(config.CLICK_SOUND_PATH)
+        self.controller.show_page("PageAuthButton")
+    
+    def qr_auth(self):
+        log_manager.service.insert_log("사용자", "인증", "사용자가 QR 인증을 시도했습니다.")
+        speaker_manager.service.play(config.CLICK_SOUND_PATH)
+        self.controller.show_page("PageAuthQR")
+        
+    def nfc_auth(self):
+        log_manager.service.insert_log("사용자", "인증", "사용자가 NFC 인증을 시도했습니다.")
+        speaker_manager.service.play(config.CLICK_SOUND_PATH)
+        self.controller.show_page("PageAuthNFC")
+    
     def on_show(self):
         pass

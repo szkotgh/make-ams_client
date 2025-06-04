@@ -3,6 +3,7 @@ from PIL import Image, ImageTk
 import config
 import log_manager
 import hardware_manager
+import speaker_manager
 
 class PageAdminForceOpen(tk.Frame):
     def __init__(self, parent, controller):
@@ -40,14 +41,16 @@ class PageAdminForceOpen(tk.Frame):
 
         self.title = tk.Label(content_frame, text="문 열어두기", font=(config.DEFAULT_FONT, 48, "bold"), fg="white", bg=config.AUTH_COLOR, anchor="center", justify="center")
         self.title.pack()
-        self.sub_button = tk.Button(content_frame, text=" 다시 눌러 해제하십시오", font=(config.DEFAULT_FONT, 32), fg="black", command=self.status_release)
+        self.sub_button = tk.Button(content_frame, text=" 다시 눌러 해제하십시오", font=(config.DEFAULT_FONT, 32), fg="black", height=2, width=20, command=self.status_release)
         self.sub_button.pack(pady=30)
 
     def status_release(self):
         log_manager.service.insert_log("관리자", "문열어두기", "관리자가 문 열어두기를 해제했습니다.")
+        speaker_manager.service.play(config.SUCCESS_SOUND_PATH)
         hardware_manager.service.set_door(False)
         self.controller.show_page("MainPage")
 
     def on_show(self):
         log_manager.service.insert_log("관리자", "문열어두기", "관리자가 문 열어두기를 시작했습니다.")
+        speaker_manager.service.play(config.SUCCESS_SOUND_PATH)
         hardware_manager.service.set_door(True)
