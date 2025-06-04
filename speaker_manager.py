@@ -3,7 +3,7 @@ import threading
 
 class SpeakerManager:
     def __init__(self):
-        pygame.mixer.init()
+        pygame.mixer.init(frequency=48000)
         self._lock = threading.Lock()
 
     def play(self, file_path):
