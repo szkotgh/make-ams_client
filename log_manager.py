@@ -18,15 +18,11 @@ class LogManager:
         self.conn.commit()
     
     def insert_log(self, method, action, details=None):
-        try:
-            self.cursor.execute('''
-                INSERT INTO main (method, action, details)
-                VALUES (?, ?, ?)
-            ''', (method, action, details))
-            self.conn.commit()
-        except:
-            return False
-        return True
+        self.cursor.execute('''
+            INSERT INTO main (method, action, details)
+            VALUES (?, ?, ?)
+        ''', (method, action, details))
+        self.conn.commit()
         
     def get_logs(self, limit=100):
         self.cursor.execute('''
