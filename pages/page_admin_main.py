@@ -62,7 +62,7 @@ class PageAdminMain(tk.Frame):
 
     def open_door(self):
         log_manager.service.insert_log("관리자", "문열림", "관리자가 수동으로 문을 열었습니다.")
-        hardware_manager.service.open_door(duration=3)
+        hardware_manager.service.open_door(duration=2)
         self.button3.config(state="disabled")
         def reset_button():
             self.button3.config(state="normal")
