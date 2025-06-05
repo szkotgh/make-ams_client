@@ -1,9 +1,10 @@
 import time
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 import threading
 
 import config
 import speaker_manager
+import page_manager
 
 class HardwareManager():
     def __init__(self, RELAY_PIN=17):
