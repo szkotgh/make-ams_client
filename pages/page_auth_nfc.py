@@ -5,6 +5,8 @@ import auth_manager
 import config
 from PIL import Image, ImageTk
 
+import hardware_manager
+
 class PageAuthNFC(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
@@ -51,41 +53,65 @@ class PageAuthNFC(tk.Frame):
         bottom_frame.config(height=100)
         self.bottom_label = tk.Label(bottom_frame, text="NFC 인증을 위해 태그를 인식시켜주세요.", font=(config.DEFAULT_FONT, 16), bg=config.AUTH_COLOR, fg="black")
         self.bottom_label.pack(pady=20)
+        
+        # Start NFC detection thread
+        threading.Thread(target=self._detect_nfc, daemon=True).start()
 
     def on_show(self):
-        threading.Thread(target=self._run_auth_flow, daemon=True).start()
+        def nfc_auth_process():
+            if not auth_manager.service.get_nfc_status() == config.STATUS_ENABLE:
+                self.main_frame.after(0, lambda: self.main_frame.config(bg=config.DISABLE_COLOR))
+                self._set_title("NFC 인증 불가")
+                self._set_sub_title("NFC 모듈이 비활성화되어 있습니다.")
+                self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
+                return
 
-    def _run_auth_flow(self):
-        self.main_frame.config(bg=config.AUTH_COLOR)
-        self._set_title("NFC 인증")
+            self.main_frame.after(0, lambda: self.main_frame.config(bg=config.AUTH_COLOR))
+            self._set_title("NFC 인증")
+            for i in range(10, 0, -1):
+                self._set_sub_title(f"카드를 인식시켜주세요 ({i}s)")
+                nfc_uid = hardware_manager.service.read_nfc(timeout=1.0)
+                if nfc_uid is not None:
+                    self._set_sub_title(nfc_uid + "\n태그를 인식했습니다.")
+                    self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
+                    return
+            self._set_sub_title("카드를 인식하지 못했습니다.\n다시 시도해주세요.")
+            self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
 
-        # NFC init
-        self._set_sub_title("NFC 모듈 초기화 중입니다")
-        time.sleep(1)
+        threading.Thread(target=nfc_auth_process, daemon=True).start()
 
-        # NFC Wait
-        self._set_sub_title("NFC 태그를 인식시켜주세요")
-        time.sleep(3)
-
-        # Auth Request
-        ## NFC Enable
-        if not auth_manager.service.get_nfc_status() == config.STATUS_ENABLE:
-            self._set_title("NFC 인증 불가")
-            self._set_sub_title("NFC 모듈이 비활성화되어 있습니다.")
-        ## NFC 
-        else:
-            if auth_manager.service.request_nfc_auth():
-                self._set_title("NFC 인증 성공")
-                self._set_sub_title("이건희님, 출입이 승인되었습니다.")
-            else:
-                self._set_title("NFC 인증 실패")
-                self._set_sub_title(f"인증 실패. 처음부터 다시 시도하세요.")
-
-        time.sleep(5)
-        self.controller.after(0, lambda: self.controller.show_page("MainPage"))
+    def _detect_nfc(self):
+        while True:
+            time.sleep(0.3)
+            
+            # 메인화면이 아닐 경우 대기
+            if self.controller.now_page != "MainPage":
+                continue
+            
+            # NFC를 인식할 때까지 대기
+            nfc_uid = hardware_manager.service.read_nfc()
+            if nfc_uid == None:
+                continue
+            
+            # NFC 인증 화면으로 전환
+            self.controller.show_page("PageAuthNFC")
+            
+            if not auth_manager.service.get_nfc_status() == config.STATUS_ENABLE:
+                self.main_frame.config(bg=config.DISABLE_COLOR)
+                self._set_title("NFC 인증 불가")
+                self._set_sub_title("NFC 모듈이 비활성화되어 있습니다.")
+                time.sleep(1)
+                continue
+            
+            self.main_frame.config(bg=config.AUTH_COLOR)
+            self._set_title("NFC 인증")
+            self._set_sub_title(nfc_uid + "\n태그를 인식했습니다.")
+            
+            time.sleep(3)
+            self.controller.after(0, lambda: self.controller.show_page("MainPage"))
 
     def _set_title(self, text):
-        self.title.after(0, lambda: self.title.config(text=text))
+        self.title.config(text=text)
 
     def _set_sub_title(self, text):
-        self.sub_title.after(0, lambda: self.sub_title.config(text=text))
+        self.sub_title.config(text=text)
