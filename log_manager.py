@@ -1,7 +1,6 @@
 import sqlite3
 import config
 
-## init db
 class LogManager:
     def __init__(self):
         self.conn = sqlite3.connect(config.LOG_DB_PATH)
@@ -9,7 +8,7 @@ class LogManager:
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS main (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                time DATETIME DEFAULT CURRENT_TIMESTAMP,
+                time DATETIME DEFAULT (datetime('now', 'localtime')),
                 method TEXT NOT NULL,
                 action TEXT NOT NULL,
                 details TEXT
