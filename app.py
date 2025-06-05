@@ -14,7 +14,7 @@ if __name__ == "__main__":
     except Exception as e:
         print("Unknown Error:", e)
     finally:
+        log_manager.service.insert_log("시스템", "종료", "프로그램을 다시 실행합니다.")
         log_manager.service.log_close()
         hardware_manager.service.hardware_close()
-        log_manager.service.insert_log("시스템", "종료", "프로그램을 다시 실행합니다.")
         os._exit(1) # 항상 재시작

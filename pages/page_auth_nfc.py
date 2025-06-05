@@ -59,14 +59,14 @@ class PageAuthNFC(tk.Frame):
 
     def on_show(self):
         def nfc_auth_process():
+            self.main_frame.after(0, lambda: self.main_frame.config(bg=config.AUTH_COLOR))
+            
             if not auth_manager.service.get_nfc_status() == config.STATUS_ENABLE:
-                self.main_frame.after(0, lambda: self.main_frame.config(bg=config.DISABLE_COLOR))
                 self._set_title("NFC 인증 불가")
                 self._set_sub_title("NFC 모듈이 비활성화되어 있습니다.")
                 self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
                 return
 
-            self.main_frame.after(0, lambda: self.main_frame.config(bg=config.AUTH_COLOR))
             self._set_title("NFC 인증")
             for i in range(10, 0, -1):
                 self._set_sub_title(f"카드를 인식시켜주세요 ({i}s)")
@@ -95,15 +95,14 @@ class PageAuthNFC(tk.Frame):
             
             # NFC 인증 화면으로 전환
             self.controller.show_page("PageAuthNFC")
+            self.main_frame.config(bg=config.AUTH_COLOR)
             
             if not auth_manager.service.get_nfc_status() == config.STATUS_ENABLE:
-                self.main_frame.config(bg=config.DISABLE_COLOR)
                 self._set_title("NFC 인증 불가")
                 self._set_sub_title("NFC 모듈이 비활성화되어 있습니다.")
                 time.sleep(1)
                 continue
             
-            self.main_frame.config(bg=config.AUTH_COLOR)
             self._set_title("NFC 인증")
             self._set_sub_title(nfc_uid + "\n태그를 인식했습니다.")
             
