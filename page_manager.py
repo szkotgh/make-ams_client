@@ -24,6 +24,7 @@ class App(tk.Tk):
         self.container = tk.Frame(self)
         self.container.pack(fill="both", expand=True)
 
+        self.now_page = None
         self.pages = {}
 
         # page initialization
@@ -36,6 +37,7 @@ class App(tk.Tk):
         self.show_page("PageStart")
 
     def show_page(self, page_name):
+        self.now_page = page_name
         page = self.pages[page_name]
         page.tkraise()
         page.on_show()
