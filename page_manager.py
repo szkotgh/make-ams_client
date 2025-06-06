@@ -17,7 +17,12 @@ class App(tk.Tk):
         self.geometry(f"{config.DISPLAY_WIDTH}x{config.DISPLAY_HEIGHT}")
         self.resizable(False, False)
         self.attributes("-topmost", True)
-        self.after(1000, lambda: self.attributes("-fullscreen", True))
+        self.attributes("-fullscreen", True)
+        def toggle_fullscreen():
+            self.attributes("-fullscreen", False)
+            self.after(100, lambda: self.attributes("-fullscreen", True))
+        self.after(1000, toggle_fullscreen)
+        
         # self.config(cursor="none")
         
         # container frame(change zone)
