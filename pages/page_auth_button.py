@@ -45,41 +45,32 @@ class PageAuthButton(tk.Frame):
         self.sub_title = tk.Label(content_frame, text="잠시만 기다려주세요", font=(config.DEFAULT_FONT, 32), fg="white", bg=config.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
 
-        # bottom frame
-        bottom_frame = tk.Frame(self.main_frame, bg=config.AUTH_COLOR)
-        bottom_frame.pack(side=tk.BOTTOM, fill=tk.X)
-        bottom_frame.pack_propagate(False)
-        bottom_frame.config(height=100)
-        self.bottom_label = tk.Label(bottom_frame, text="잠시만 기다려주세요", font=(config.DEFAULT_FONT, 16), bg=config.AUTH_COLOR, fg="black")
-        self.bottom_label.pack(pady=20)
-
     def on_show(self):
         threading.Thread(target=self._run_auth_flow, daemon=True).start()
 
     def _run_auth_flow(self):
         self.main_frame.config(bg=config.AUTH_COLOR)
 
-        # NFC init
+        # Button init
         self._set_title("외부인 출입")
-        self._set_sub_title("잠시만 기다려주세요")
+        self._set_sub_title("잠시만 기다려주십시오")
         time.sleep(1)
 
         # Auth Request
-        ## NFC Enable
-        if not auth_manager.service.get_nfc_status() == config.STATUS_ENABLE:
+        ## Button Enable
+        if not auth_manager.service.get_button_status() == config.STATUS_ENABLE:
             self._set_title("외부인 출입 불가")
             self._set_sub_title("외부인 출입이 비활성화되어 있습니다.")
-        ## NFC 
+        ## Button 
         else:
-            if auth_manager.service.request_nfc_auth():
+            if auth_manager.service.request_button_auth():
                 self._set_title("외부인 출입 승인")
                 self._set_sub_title("메이크에 오신 것을 환영합니다")
             else:
                 self._set_title("외부인 출입 거부")
                 self._set_sub_title(f"외부인 출입이 거부되었습니다")
 
-        time.sleep(5)
-        self.controller.after(0, lambda: self.controller.show_page("MainPage"))
+        self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
 
     def _set_title(self, text):
         self.title.after(0, lambda: self.title.config(text=text))

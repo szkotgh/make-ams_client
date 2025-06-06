@@ -17,5 +17,6 @@ sudo systemctl disable bluetooth.service
 sudo systemctl disable hciuart.service
 sudo systemctl disable avahi-daemon.service
 sudo systemctl disable cups.service
+sudo apt remove rpi-connect -y
 
 ```

@@ -1,6 +1,6 @@
 {
   "connection": {
-    "server_url": "https://www.google.com",
+    "server_url": "http://www.google.com",
     "connection_interval": 1.0,
     "time_out": 3
   },
