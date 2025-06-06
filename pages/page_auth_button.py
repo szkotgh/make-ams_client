@@ -72,7 +72,7 @@ class PageAuthButton(tk.Frame):
         self.main_frame.config(bg=config.AUTH_COLOR)
 
         # Check button enabled
-        if auth_manager.service.get_button_status() == config.STATUS_ENABLE:
+        if not auth_manager.service.get_button_status() == config.STATUS_ENABLE:
             self._set_title("외부인 출입 불가")
             self._set_sub_title("비활성화되어 있습니다")
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
