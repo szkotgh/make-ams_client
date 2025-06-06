@@ -1,7 +1,7 @@
 [Unit]
 Description=MAKE; AMS Client
 After=graphical.target network-online.target
-Wants=network-online.target
+Wants=graphical.target network-online.target
 
 [Service]
 Type=simple
@@ -10,7 +10,7 @@ Environment=DISPLAY=:0
 Environment=XAUTHORITY=/home/administrator/.Xauthority
 ExecStart=/bin/bash /home/administrator/make-ams_client/stater.sh
 Restart=on-failure
-RestartSec=0
+RestartSec=1
 
 [Install]
 WantedBy=graphical.target

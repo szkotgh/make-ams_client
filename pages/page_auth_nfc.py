@@ -11,7 +11,7 @@ class PageAuthNFC(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-        self.nfc_enable = False
+        self.detect_nfc = False
 
         # main frame
         self.main_frame = tk.Frame(self, width=config.DISPLAY_WIDTH, height=config.DISPLAY_HEIGHT, background=config.AUTH_COLOR)
@@ -58,25 +58,22 @@ class PageAuthNFC(tk.Frame):
         threading.Thread(target=self._detect_nfc, daemon=True).start()
 
     def on_show(self):
+        if self.detect_nfc:
+            self.detect_nfc = False
+            return
+        
         def nfc_auth_process():
             self.main_frame.after(0, lambda: self.main_frame.config(bg=config.AUTH_COLOR))
-            
-            if not auth_manager.service.get_nfc_status() == config.STATUS_ENABLE:
-                self._set_title("NFC 인증 불가")
-                self._set_sub_title("NFC 모듈이 비활성화되어 있습니다.")
-                self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
-                return
 
             self._set_title("NFC 인증")
             for i in range(10, 0, -1):
                 self._set_sub_title(f"카드를 인식시켜주세요 ({i}s)")
                 nfc_uid = hardware_manager.service.read_nfc(timeout=1.0)
                 if nfc_uid is not None:
-                    self._set_sub_title(nfc_uid + "\n태그를 인식했습니다.")
-                    self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
+                    self.auth_nfc(nfc_uid)
                     return
-            self._set_sub_title("카드를 인식하지 못했습니다.\n다시 시도해주세요.")
-            self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
+                
+            self.controller.after(0, lambda: self.controller.show_page("MainPage"))
 
         threading.Thread(target=nfc_auth_process, daemon=True).start()
 
@@ -94,21 +91,33 @@ class PageAuthNFC(tk.Frame):
                 continue
             
             # NFC 인증 화면으로 전환
+            self.detect_nfc = True
             self.controller.show_page("PageAuthNFC")
-            self.main_frame.config(bg=config.AUTH_COLOR)
-            
-            if not auth_manager.service.get_nfc_status() == config.STATUS_ENABLE:
-                self._set_title("NFC 인증 불가")
-                self._set_sub_title("NFC 모듈이 비활성화되어 있습니다.")
-                time.sleep(1)
-                continue
-            
-            self._set_title("NFC 인증")
-            self._set_sub_title(nfc_uid + "\n태그를 인식했습니다.")
-            
-            time.sleep(3)
-            self.controller.after(0, lambda: self.controller.show_page("MainPage"))
+            self.auth_nfc(nfc_uid)
 
+    def auth_nfc(self, nfc_uid):
+        self.main_frame.config(bg=config.AUTH_COLOR)
+        if not auth_manager.service.get_nfc_status() == config.STATUS_ENABLE:
+            self._set_title("NFC 인증 실패")
+            self._set_sub_title("NFC 인증이 비활성화되어 있습니다")
+            return
+        
+        self._set_title("NFC 인증")
+        self._set_sub_title("인증 중입니다...")
+        
+        time.sleep(0.3)
+        
+        result = nfc_uid
+        if result == "0497e436bc2a81":
+            self._set_title("NFC 인증 성공")
+            self._set_sub_title("Admin님, 환영합니다")
+            hardware_manager.service.auto_open_door()
+        else:
+            self._set_title("NFC 인증 실패")
+            self._set_sub_title("올바르지 않은 카드입니다")
+        
+        self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
+    
     def _set_title(self, text):
         self.title.config(text=text)
 
