@@ -236,6 +236,7 @@ class PageAuthNFC(tk.Frame):
         
         self._set_title("NFC 인증")
         self._set_sub_title("정보를 가져오고 있습니다")
+        time.sleep(0.5)
         
         # user info logic
         result = False
