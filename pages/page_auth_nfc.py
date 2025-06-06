@@ -234,7 +234,7 @@ class PageAuthNFC(tk.Frame):
             self.user_name = "관리자"
             self.user_password = "1234"
             
-        if nfc_uid == "0491b736bc2a81" or nfc_uid == "c996123f" or nfc_uid == "0874":
+        if nfc_uid == "0491b736bc2a81" or nfc_uid == "c996123f":
             result = True
             self.user_name = "이건희"
             self.user_password = "5678"
