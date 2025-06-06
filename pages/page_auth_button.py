@@ -47,16 +47,19 @@ class PageAuthButton(tk.Frame):
         self.sub_title.pack(pady=30)
         
         threading.Thread(target=self._detect_button, daemon=True).start()
+        threading.Thread(target=self.thread_set_button_led, daemon=True).start()
 
     def on_show(self):
         threading.Thread(target=self.button_auth, daemon=True).start()
     
+    def thread_set_button_led(self):
+        while True:
+            time.sleep(0.1)
+            hardware_manager.service.set_button_led(auth_manager.service.get_button_status() == config.STATUS_ENABLE)
+    
     def _detect_button(self):
         while True:
-            time.sleep(0.01)
-            
-            # set button led
-            hardware_manager.service.set_button_led(auth_manager.service.get_button_status() == config.STATUS_ENABLE)
+            time.sleep(0.05)
             
             if self.controller.now_page != "MainPage":
                 continue
@@ -68,16 +71,19 @@ class PageAuthButton(tk.Frame):
     def button_auth(self):
         self.main_frame.config(bg=config.AUTH_COLOR)
 
+        # Check button enabled
+        if auth_manager.service.get_button_status() == config.STATUS_ENABLE:
+            self._set_title("외부인 출입 불가")
+            self._set_sub_title("비활성화되어 있습니다")
+            self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
+            return
+
         # Button init
         self._set_title("외부인 출입")
         self._set_sub_title("잠시만 기다려주십시오")
         time.sleep(1)
 
         # Auth Request
-        ## Button Enable
-        if not auth_manager.service.get_button_status() == config.STATUS_ENABLE:
-            self._set_title("외부인 출입 불가")
-            self._set_sub_title("비활성화되어 있습니다.")
         # ## Button 
         # else:
         #     if auth_manager.service.request_button_auth():
