@@ -183,7 +183,6 @@ class PageAuthNFC(tk.Frame):
         if self.password_frame:
             self.password_frame.place_forget()
             self.password_visible = False
-            # 타이틀을 중앙으로 복귀
             self.content_frame.place_configure(rely=0.5)
 
     def on_show(self):
@@ -196,8 +195,14 @@ class PageAuthNFC(tk.Frame):
             self._set_title("NFC 인증")
             for i in range(10, 0, -1):
                 self._set_sub_title(f"카드를 인식시켜주세요 ({i}s)")
-                nfc_uid = hardware_manager.service.read_nfc(timeout=1.0)
-                if nfc_uid is not None:
+                try:
+                    nfc_uid = hardware_manager.service.read_nfc(timeout=1.0)
+                except Exception as e:
+                    self._set_title("NFC 센서 오류")
+                    self._set_sub_title(f"센서를 점검하십시오")
+                    self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
+                    return
+                if not nfc_uid == None:
                     self.auth_nfc(nfc_uid)
                     return
             self.controller.after(0, lambda: self.controller.show_page("MainPage"))
@@ -209,7 +214,12 @@ class PageAuthNFC(tk.Frame):
             time.sleep(0.3)
             if self.controller.now_page != "MainPage":
                 continue
-            nfc_uid = hardware_manager.service.read_nfc()
+            
+            try:
+                nfc_uid = hardware_manager.service.read_nfc()
+            except:
+                continue
+            
             if nfc_uid == None:
                 continue
             self.detect_nfc = True
@@ -246,7 +256,7 @@ class PageAuthNFC(tk.Frame):
             self._on_clear_press()
         else:
             self._set_title("NFC 인증 실패")
-            self._set_sub_title(f"올바르지 않은 카드입니다")
+            self._set_sub_title(f"올바르지 않은 카드입니다\n{nfc_uid}")
             self._hide_password_frame()
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
     
