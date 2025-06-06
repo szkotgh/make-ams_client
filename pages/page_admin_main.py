@@ -66,7 +66,7 @@ class PageAdminMain(tk.Frame):
         self.button3.config(state="disabled")
         def reset_button():
             self.button3.config(state="normal")
-        self.after(6000, reset_button)
+        self.after(3000, reset_button)
 
     def on_show(self):
         pass

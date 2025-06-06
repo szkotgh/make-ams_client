@@ -5,6 +5,7 @@ from PIL import Image, ImageTk
 
 import auth_manager
 import config
+import hardware_manager
 
 class PageAuthButton(tk.Frame):
     def __init__(self, parent, controller):
@@ -44,11 +45,27 @@ class PageAuthButton(tk.Frame):
         self.title.pack()
         self.sub_title = tk.Label(content_frame, text="잠시만 기다려주세요", font=(config.DEFAULT_FONT, 32), fg="white", bg=config.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
+        
+        threading.Thread(target=self._detect_button, daemon=True).start()
 
     def on_show(self):
-        threading.Thread(target=self._run_auth_flow, daemon=True).start()
-
-    def _run_auth_flow(self):
+        threading.Thread(target=self.button_auth, daemon=True).start()
+    
+    def _detect_button(self):
+        while True:
+            time.sleep(0.01)
+            
+            # set button led
+            hardware_manager.service.set_button_led(auth_manager.service.get_button_status() == config.STATUS_ENABLE)
+            
+            if self.controller.now_page != "MainPage":
+                continue
+            
+            if hardware_manager.service.read_button():
+                self.controller.show_page("PageAuthButton")
+                time.sleep(1)
+            
+    def button_auth(self):
         self.main_frame.config(bg=config.AUTH_COLOR)
 
         # Button init
@@ -60,18 +77,22 @@ class PageAuthButton(tk.Frame):
         ## Button Enable
         if not auth_manager.service.get_button_status() == config.STATUS_ENABLE:
             self._set_title("외부인 출입 불가")
-            self._set_sub_title("외부인 출입이 비활성화되어 있습니다.")
-        ## Button 
-        else:
-            if auth_manager.service.request_button_auth():
-                self._set_title("외부인 출입 승인")
-                self._set_sub_title("메이크에 오신 것을 환영합니다")
-            else:
-                self._set_title("외부인 출입 거부")
-                self._set_sub_title(f"외부인 출입이 거부되었습니다")
-
+            self._set_sub_title("비활성화되어 있습니다.")
+        # ## Button 
+        # else:
+        #     if auth_manager.service.request_button_auth():
+        #         self._set_title("환영합니다")
+        #         self._set_sub_title("메이크에 오신 것을 환영합니다")
+        #         hardware_manager.service.auto_open_door()
+        #     else:
+        #         self._set_title("외부인 출입 불가")
+        #         self._set_sub_title(f"출입이 거부되었습니다")
+        self._set_title("환영합니다")
+        self._set_sub_title("메이크에 오신 것을 환영합니다")
+        hardware_manager.service.auto_open_door()
+        
         self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
-
+    
     def _set_title(self, text):
         self.title.after(0, lambda: self.title.config(text=text))
 
