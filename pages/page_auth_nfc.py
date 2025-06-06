@@ -125,7 +125,7 @@ class PageAuthNFC(tk.Frame):
             if self.password_visible == False:
                 return
             elapsed = time.time() - start_time
-            if elapsed >= 15:
+            if elapsed >= 10:
                 self.main_frame.after(0, self._password_timeout)
                 return
             time.sleep(0.01)
@@ -243,11 +243,14 @@ class PageAuthNFC(tk.Frame):
             result = True
             self.user_name = "관리자"
             self.user_password = "1234"
-            
         if nfc_uid == "0491b736bc2a81" or nfc_uid == "c996123f":
             result = True
             self.user_name = "이건희"
             self.user_password = "5678"
+        if nfc_uid == "a503670b":
+            result = True
+            self.user_name = "송명근"
+            self.user_password = "0000"
         
         if result:
             self._set_title("비밀번호 인증")
