@@ -24,16 +24,25 @@ class HardwareManager():
         
         # Initialize GPIO
         self._init_gpio()
+        
+        threading.Thread(target=self._init_nfc, daemon=True).start()
     
     def _init_nfc(self):
-        try:
-            self.i2c = busio.I2C(board.SCL, board.SDA)
-            self.pn532 = PN532_I2C(self.i2c, debug=False)
-            self.pn532.SAM_configuration()
-            self.nfc_initialized = True
-        except Exception as e:
-            print(f"Failed to initialize NFC: {e}")
-            self.nfc_initialized = False
+        while True:
+            try:
+                self.i2c = busio.I2C(board.SCL, board.SDA)
+                self.pn532 = PN532_I2C(self.i2c, debug=False)
+                self.pn532.SAM_configuration()
+                self.nfc_initialized = True
+            except Exception as e:
+                print(f"Failed to initialize NFC: {e}")
+                self.nfc_initialized = False
+            
+            # Wait for a while before retrying
+            if self.nfc_initialized:
+                time.sleep(3600)
+            else:
+                time.sleep(5)
         
     def _init_gpio(self):
         GPIO.setmode(GPIO.BCM)
