@@ -20,12 +20,11 @@ class HardwareManager():
         self._door_close_cancel_flag = False
         
         # Initialize PN532 NFC reader
-        self._init_nfc()
+        threading.Thread(target=self._init_nfc, daemon=True).start()
         
         # Initialize GPIO
         self._init_gpio()
         
-        threading.Thread(target=self._init_nfc, daemon=True).start()
     
     def _init_nfc(self):
         while True:

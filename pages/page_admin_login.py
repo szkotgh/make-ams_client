@@ -1,5 +1,6 @@
 import os
 import threading
+import time
 import tkinter as tk
 import config
 import log_manager
@@ -11,6 +12,8 @@ class PageAdminLogin(tk.Frame):
         self.controller = controller
         self.input_digits = []
         self.error_count = 0
+        self.inactivity_timer_active = False
+        self.inactivity_thread = None
 
         # Title
         title_frame = tk.Frame(self)
@@ -50,6 +53,26 @@ class PageAdminLogin(tk.Frame):
         tk.Button(self, text="홈으로 ", font=(config.DEFAULT_FONT, 14), width=12, height=2,
                   command=lambda: self.controller.show_page("MainPage")).pack(pady=3)
 
+    def start_inactivity_timer(self):
+        self.inactivity_timer_active = True
+        self.last_input_time = time.time()
+        self.inactivity_thread = threading.Thread(target=self._inactivity_watchdog, daemon=True)
+        self.inactivity_thread.start()
+
+    def stop_inactivity_timer(self):
+        self.inactivity_timer_active = False
+
+    def _reset_inactivity_timer(self):
+        self.last_input_time = time.time()
+
+    def _inactivity_watchdog(self):
+        while self.inactivity_timer_active:
+            if time.time() - self.last_input_time > 10:
+                self.stop_inactivity_timer()
+                self.controller.after(0, lambda: self.controller.show_page("MainPage"))
+                return
+            time.sleep(0.2)
+
     def _create_keypad_button(self, parent, char):
         def on_click(action=None):
             speaker_manager.service.play(config.CLICK_SOUND_PATH)
@@ -66,6 +89,8 @@ class PageAdminLogin(tk.Frame):
                              command=lambda ch=char: on_click(lambda: self.add_digit(ch)))
 
     def add_digit(self, digit):
+        self._reset_inactivity_timer()
+
         if len(self.input_digits) < 6:
             self.input_digits.append(digit)
             self.update_circles()
@@ -73,11 +98,15 @@ class PageAdminLogin(tk.Frame):
                 self.check_password()
 
     def backspace(self):
+        self._reset_inactivity_timer()
+
         if self.input_digits:
             self.input_digits.pop()
             self.update_circles()
 
     def input_clear(self):
+        self._reset_inactivity_timer()
+
         self.input_digits = []
         self.update_circles()
 
@@ -110,4 +139,5 @@ class PageAdminLogin(tk.Frame):
         self.error_count = 0
         self.input_clear()
         self._reset_subtitle()
+        self.start_inactivity_timer()
         
