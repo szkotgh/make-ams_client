@@ -50,8 +50,11 @@ class PageAdminLogin(tk.Frame):
                 btn.pack(side="left", padx=3, pady=3)
 
         # Back button
-        tk.Button(self, text="홈으로 ", font=(config.DEFAULT_FONT, 14), width=12, height=2,
-                  command=lambda: self.controller.show_page("MainPage")).pack(pady=3)
+        def cancel_login():
+            self.stop_inactivity_timer()
+            self.controller.show_page("MainPage")
+        tk.Button(self, text="로그인 취소", font=(config.DEFAULT_FONT, 14), width=12, height=2,
+                  command=cancel_login).pack(pady=3)
 
     def start_inactivity_timer(self):
         self.inactivity_timer_active = True
@@ -118,6 +121,7 @@ class PageAdminLogin(tk.Frame):
         if ''.join(self.input_digits) == config.ADMIN_PW:
             speaker_manager.service.play(config.SUCCESS_SOUND_PATH)
             self.input_clear()
+            self.stop_inactivity_timer()
             log_manager.service.insert_log("관리자", "로그인", "관리자페이지에 로그인했습니다.")
             self.controller.show_page("PageAdminMain")
         else:
