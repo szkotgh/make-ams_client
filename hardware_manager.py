@@ -6,6 +6,7 @@ import busio
 from digitalio import DigitalInOut
 from adafruit_pn532.i2c import PN532_I2C
 import binascii
+import auth_manager
 import config
 import speaker_manager
 import page_manager
@@ -38,11 +39,11 @@ class HardwareManager():
                 print(f"Failed to initialize NFC: {e}")
                 self.nfc_initialized = False
             
-            # Wait for a while before retrying
+            # 주기적으로 센서 초기화
             if self.nfc_initialized:
-                time.sleep(3600)
+                time.sleep(600)
             else:
-                time.sleep(5)
+                time.sleep(3)
             
             self.i2c.deinit()
         
@@ -56,7 +57,7 @@ class HardwareManager():
     def thread_set_button_led(self):
         while True:
             time.sleep(0.1)
-            current_status = self.get_button_status() == config.STATUS_ENABLE
+            current_status = auth_manager.service.get_button_status() == config.STATUS_ENABLE
             if current_status != self.last_button_status:
                 self.set_button_led(current_status)
                 self.last_button_status = current_status

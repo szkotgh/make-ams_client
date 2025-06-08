@@ -192,6 +192,13 @@ class PageAuthNFC(tk.Frame):
         
         def nfc_auth_process():
             self.main_frame.after(0, lambda: self.main_frame.config(bg=config.AUTH_COLOR))
+            
+            if hardware_manager.service.nfc_initialized == False:
+                self._set_title("NFC 센서 오류")
+                self._set_sub_title("센서를 점검하십시오")
+                self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
+                return
+            
             self._set_title("NFC 인증")
             for i in range(10, 0, -1):
                 self._set_sub_title(f"카드를 인식시켜주세요 ({i}s)")
