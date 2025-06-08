@@ -24,7 +24,8 @@ class HardwareManager():
         
         # Initialize GPIO
         self._init_gpio()
-        
+        self.last_button_status = False
+        threading.Thread(target=self.thread_set_button_led, daemon=True).start()
     
     def _init_nfc(self):
         while True:
@@ -42,6 +43,8 @@ class HardwareManager():
                 time.sleep(3600)
             else:
                 time.sleep(5)
+            
+            self.i2c.deinit()
         
     def _init_gpio(self):
         GPIO.setmode(GPIO.BCM)
@@ -49,6 +52,14 @@ class HardwareManager():
         GPIO.setup(self.BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.BUTTON_LED_PIN, GPIO.OUT)
         self.set_door(False)
+    
+    def thread_set_button_led(self):
+        while True:
+            time.sleep(0.1)
+            current_status = self.get_button_status() == config.STATUS_ENABLE
+            if current_status != self.last_button_status:
+                self.set_button_led(current_status)
+                self.last_button_status = current_status
     
     def set_door(self, state: bool):
         GPIO.output(self.DOOR_RELAY_PIN, GPIO.HIGH if state else GPIO.LOW)

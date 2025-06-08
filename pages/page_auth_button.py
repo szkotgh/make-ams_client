@@ -47,15 +47,9 @@ class PageAuthButton(tk.Frame):
         self.sub_title.pack(pady=30)
         
         threading.Thread(target=self._detect_button, daemon=True).start()
-        threading.Thread(target=self.thread_set_button_led, daemon=True).start()
 
     def on_show(self):
         threading.Thread(target=self.button_auth, daemon=True).start()
-    
-    def thread_set_button_led(self):
-        while True:
-            time.sleep(0.1)
-            hardware_manager.service.set_button_led(auth_manager.service.get_button_status() == config.STATUS_ENABLE)
     
     def _detect_button(self):
         while True:
