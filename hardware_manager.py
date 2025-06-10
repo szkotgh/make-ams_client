@@ -44,13 +44,12 @@ class HardwareManager():
                     test_uid = self.pn532.read_passive_target(timeout=0.1)
                     # test_uid는 None이어도 괜찮음. 중요한 건 에러 없이 호출되는가
                 except Exception as e:
-                    print(f"NFC 동작 테스트 실패: {e}")
+                    print(f"NFC Test Failed: {e}")
                     self.nfc_initialized = False
                     need_reinit = True
 
-            # 재초기화 수행
             if need_reinit:
-                print("NFC 재초기화 중...")
+                print("NFC Initializing...")
                 try:
                     if hasattr(self, "i2c"):
                         try:
@@ -63,13 +62,11 @@ class HardwareManager():
                     self.nfc_initialized = True
                     last_init_time = now
                 except Exception as e:
-                    print(f"NFC init failed: {e}")
+                    print(f"NFC Initialize failed: {e}")
                     self.nfc_initialized = False
 
             time.sleep(check_interval)
 
-
-        
     def _init_gpio(self):
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.DOOR_RELAY_PIN, GPIO.OUT)
@@ -128,4 +125,4 @@ class HardwareManager():
         GPIO.cleanup()
         pass
 
-service = HardwareManager(DOOR_RELAY_PIN=17, BUTTON_PIN=27, BUTTON_LED_PIN=22)
+service = HardwareManager(DOOR_RELAY_PIN=23, BUTTON_PIN=24, BUTTON_LED_PIN=25)
