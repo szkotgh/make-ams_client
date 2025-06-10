@@ -255,18 +255,28 @@ class PageAuthNFC(tk.Frame):
         
         # user info logic
         result = False
+        enable = True
         if nfc_uid == "0497e436bc2a81":
             result = True
-            self.user_name = "관리자"
+            self.user_name = "이건희"
             self.user_password = "1234"
         if nfc_uid == "0491b736bc2a81" or nfc_uid == "c996123f":
             result = True
             self.user_name = "이건희"
             self.user_password = "5678"
+            enable = False
         if nfc_uid == "a503670b":
             result = True
             self.user_name = "송명근"
             self.user_password = "0000"
+        
+        # if not enable
+        if enable == False:
+            self._set_title("차단된 카드")
+            self._set_sub_title("이 카드는 사용이 불가능합니다")
+            speaker_manager.service.play(config.WRONG_SOUND_PATH)
+            self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
+            return
         
         if result:
             self._set_title("비밀번호 인증")
