@@ -72,6 +72,7 @@ class PageAdminLogin(tk.Frame):
         while self.inactivity_timer_active:
             if time.time() - self.last_input_time > 10:
                 self.stop_inactivity_timer()
+                speaker_manager.service.play(config.WRONG_SOUND_PATH)
                 self.controller.after(0, lambda: self.controller.show_page("MainPage"))
                 return
             time.sleep(0.2)

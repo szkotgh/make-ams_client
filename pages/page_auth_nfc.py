@@ -5,6 +5,7 @@ import auth_manager
 import config
 from PIL import Image, ImageTk
 import hardware_manager
+import speaker_manager
 
 class PageAuthNFC(tk.Frame):
     def __init__(self, parent, controller):
@@ -133,11 +134,13 @@ class PageAuthNFC(tk.Frame):
     def _password_timeout(self):
         self._set_title("NFC 인증 실패")
         self._set_sub_title("입력 시간이 초과되었습니다")
+        speaker_manager.service.play(config.WRONG_SOUND_PATH)
         self._hide_password_frame()
         self._stop_password_timer()
         self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
 
     def _on_key_press(self, key):
+        speaker_manager.service.play(config.CLICK_SOUND_PATH)
         self._start_password_timer()
         if len(self.password_entry) < 4:
             self.password_entry += key
@@ -146,11 +149,13 @@ class PageAuthNFC(tk.Frame):
                 self._verify_password()
 
     def _on_clear_press(self):
+        speaker_manager.service.play(config.CLICK_SOUND_PATH)
         self._start_password_timer()
         self.password_entry = ""
         self.pw_display.config(text="")
 
     def _on_cancel_press(self):
+        speaker_manager.service.play(config.CLICK_SOUND_PATH)
         self._stop_password_timer()
         self.password_entry = ""
         self.pw_display.config(text="")
@@ -171,11 +176,13 @@ class PageAuthNFC(tk.Frame):
                 self.password_fail_count = 0
                 self._set_title("NFC 인증 실패")
                 self._set_sub_title("비밀번호를 확인하십시오")
+                speaker_manager.service.play(config.WRONG_SOUND_PATH)
                 self._hide_password_frame()
                 self._stop_password_timer()
                 self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             else:
                 self._set_sub_title("비밀번호가 틀렸습니다")
+                speaker_manager.service.play(config.WRONG_SOUND_PATH)
                 self.password_entry = ""
                 self.pw_display.config(text="")
 
@@ -238,6 +245,7 @@ class PageAuthNFC(tk.Frame):
         if not auth_manager.service.get_nfc_status() == config.STATUS_ENABLE:
             self._set_title("NFC 인증 실패")
             self._set_sub_title("비활성화 되어있습니다")
+            speaker_manager.service.play(config.WRONG_SOUND_PATH)
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             return
         
@@ -269,6 +277,7 @@ class PageAuthNFC(tk.Frame):
             self._set_title("NFC 인증 실패")
             self._set_sub_title(f"올바르지 않은 카드입니다\n{nfc_uid}")
             self._hide_password_frame()
+            speaker_manager.service.play(config.WRONG_SOUND_PATH)
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
     
     def _set_title(self, text):

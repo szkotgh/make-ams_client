@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 import auth_manager
 import config
 import hardware_manager
+import speaker_manager
 
 class PageAuthButton(tk.Frame):
     def __init__(self, parent, controller):
@@ -69,6 +70,7 @@ class PageAuthButton(tk.Frame):
         if not auth_manager.service.get_button_status() == config.STATUS_ENABLE:
             self._set_title("외부인 출입 불가")
             self._set_sub_title("비활성화되어 있습니다")
+            speaker_manager.service.play(config.WRONG_SOUND_PATH)
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             return
 
