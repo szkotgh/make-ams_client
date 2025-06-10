@@ -29,23 +29,46 @@ class HardwareManager():
         threading.Thread(target=self.thread_set_button_led, daemon=True).start()
     
     def _init_nfc(self):
+        last_init_time = 0
+        check_interval = 10
+        reinit_interval = 3600
+
         while True:
-            try:
-                self.i2c = busio.I2C(board.SCL, board.SDA)
-                self.pn532 = PN532_I2C(self.i2c, debug=False)
-                self.pn532.SAM_configuration()
-                self.nfc_initialized = True
-            except Exception as e:
-                print(f"Failed to initialize NFC: {e}")
-                self.nfc_initialized = False
-            
-            # 주기적으로 센서 초기화
-            if self.nfc_initialized:
-                time.sleep(600)
-            else:
-                time.sleep(3)
-            
-            self.i2c.deinit()
+            now = time.time()
+            need_reinit = False
+
+            if now - last_init_time > reinit_interval or not self.nfc_initialized:
+                need_reinit = True
+            elif self.nfc_initialized:
+                try:
+                    test_uid = self.pn532.read_passive_target(timeout=0.1)
+                    # test_uid는 None이어도 괜찮음. 중요한 건 에러 없이 호출되는가
+                except Exception as e:
+                    print(f"NFC 동작 테스트 실패: {e}")
+                    self.nfc_initialized = False
+                    need_reinit = True
+
+            # 재초기화 수행
+            if need_reinit:
+                print("NFC 재초기화 중...")
+                try:
+                    if hasattr(self, "i2c"):
+                        try:
+                            self.i2c.deinit()
+                        except Exception:
+                            pass
+                    self.i2c = busio.I2C(board.SCL, board.SDA)
+                    self.pn532 = PN532_I2C(self.i2c, debug=False)
+                    self.pn532.SAM_configuration()
+                    self.nfc_initialized = True
+                    last_init_time = now
+                except Exception as e:
+                    print(f"NFC init failed: {e}")
+                    self.nfc_initialized = False
+
+            time.sleep(check_interval)
+
+
         
     def _init_gpio(self):
         GPIO.setmode(GPIO.BCM)
