@@ -256,19 +256,23 @@ class PageAuthNFC(tk.Frame):
         # user info logic
         result = False
         enable = True
-        if nfc_uid == "0497e436bc2a81":
+        if nfc_uid == "0497e436bc2a81" or nfc_uid == "c996123f":
             result = True
-            self.user_name = "이건희"
+            self.user_name = "관리자"
             self.user_password = "1234"
-        if nfc_uid == "0491b736bc2a81" or nfc_uid == "c996123f":
+        if nfc_uid == "0491b736bc2a81":
             result = True
             self.user_name = "이건희"
             self.user_password = "5678"
-            enable = False
+        if nfc_uid == "af6572d7" or nfc_uid == "60ea625c" or nfc_uid == "41bbacad":
+            result = True
+            self.user_name = "박여웅"
+            self.user_password = "2162"
         if nfc_uid == "a503670b":
             result = True
             self.user_name = "송명근"
             self.user_password = "0000"
+            enable = False
         
         # if not enable
         if enable == False:
