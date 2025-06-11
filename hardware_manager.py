@@ -61,6 +61,7 @@ class HardwareManager():
                     self.pn532.SAM_configuration()
                     self.nfc_initialized = True
                     last_init_time = now
+                    print("NFC Initialized Successfully")
                 except Exception as e:
                     print(f"NFC Initialize failed: {e}")
                     self.nfc_initialized = False
