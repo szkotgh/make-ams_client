@@ -6,3 +6,5 @@ test.json
 .env
 
 src/log.db
+src/log.db-shm
+src/log.db-wal
