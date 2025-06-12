@@ -3,7 +3,7 @@ import config
 
 class LogManager:
     def __init__(self):
-        self.conn = sqlite3.connect(config.LOG_DB_PATH, isolation_level=None)
+        self.conn = sqlite3.connect(config.LOG_DB_PATH, isolation_level=None, check_same_thread=False)
         self.cursor = self.conn.cursor()
 
         self.cursor.execute('PRAGMA journal_mode=WAL;')
@@ -44,7 +44,7 @@ class LogManager:
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, _exc_type, _exc_value, _traceback):
         self.log_close()
 
 service = LogManager()

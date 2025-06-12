@@ -43,7 +43,7 @@ class PageAdminMain(tk.Frame):
         tk.Button(self.admin_frame, text="관리자 종료", font=(config.DEFAULT_FONT, 14), width=14, height=2, command=lambda: self.controller.show_page("MainPage")).pack(pady=10)
 
     def reboot_system(self):
-        log_manager.service.insert_log("관리자", "재시작", "관리자가 시스템을 재시작했습니다.")
+        log_manager.service.insert_log("관리자", "종료", "관리자가 시스템을 재시작했습니다.")
         hardware_manager.service.hardware_close()
         log_manager.service.log_close()
         os.system("sudo reboot now")
@@ -61,7 +61,7 @@ class PageAdminMain(tk.Frame):
         os._exit(1)
 
     def open_door(self):
-        log_manager.service.insert_log("관리자", "문열림", "관리자가 수동으로 문을 열었습니다.")
+        log_manager.service.insert_log("관리자", "승인", "수동으로 문을 열었습니다.")
         hardware_manager.service.auto_open_door()
         self.button3.config(state="disabled")
         def reset_button():

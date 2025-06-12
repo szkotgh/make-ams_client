@@ -29,4 +29,5 @@ class PageAdminLog(tk.Frame):
         self.text_area.see(tk.END)
 
     def on_show(self):
+        log_manager.service.insert_log("관리자", "승인", "로그를 열람했습니다.")
         self.refresh_log()

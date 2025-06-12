@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 import auth_manager
 import config
 import hardware_manager
+import log_manager
 import speaker_manager
 
 class PageAuthButton(tk.Frame):
@@ -89,6 +90,8 @@ class PageAuthButton(tk.Frame):
         #     else:
         #         self._set_title("외부인 출입 불가")
         #         self._set_sub_title(f"출입이 거부되었습니다")
+        
+        log_manager.service.insert_log("외부인출입", "문열림", "외부인 출입이 허용된 상태입니다.")
         self._set_title("환영합니다")
         self._set_sub_title("메이크에 오신 것을 환영합니다")
         hardware_manager.service.auto_open_door()
