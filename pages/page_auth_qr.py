@@ -2,9 +2,10 @@ import threading
 import time
 import tkinter as tk
 from PIL import Image, ImageTk
-
+import hardware_manager
 import auth_manager
 import config
+import log_manager
 
 class PageAuthQR(tk.Frame):
     def __init__(self, parent, controller):
@@ -44,46 +45,72 @@ class PageAuthQR(tk.Frame):
         self.title.pack()
         self.sub_title = tk.Label(content_frame, text="QR을 인식시켜주세요", font=(config.DEFAULT_FONT, 32), fg="white", bg=config.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
+        
+        self.qr_listner = hardware_manager.QRListener()
+        self.qr_listner.start()
+        
+        self.qr_value = None
+        threading.Thread(target=self._detect_qr, daemon=True).start()
 
-        # bottom frame
-        bottom_frame = tk.Frame(self.main_frame, bg=config.AUTH_COLOR)
-        bottom_frame.pack(side=tk.BOTTOM, fill=tk.X)
-        bottom_frame.pack_propagate(False)
-        bottom_frame.config(height=100)
-        self.bottom_label = tk.Label(bottom_frame, text="QR 인증을 위해 인식시켜주세요.", font=(config.DEFAULT_FONT, 16), bg=config.AUTH_COLOR, fg="black")
-        self.bottom_label.pack(pady=20)
+    def _detect_qr(self):
+        while True:
+            time.sleep(0.05)
+            if not self.controller.now_page == "MainPage":
+                continue
+            
+            self.qr_value = self.qr_listner.get_qr_detect_result()
+            if self.qr_value == None:
+                continue
+            
+            self.controller.after(0, lambda: self.controller.show_page("PageAuthQR"))
+            threading.Thread(target=self._run_auth_flow, daemon=True).start()
 
     def on_show(self):
+        self.main_frame.config(bg=config.AUTH_COLOR)
+        self._set_title("QR 인증")
+        
+        
         threading.Thread(target=self._run_auth_flow, daemon=True).start()
+        
+        self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
 
     def _run_auth_flow(self):
         self.main_frame.config(bg=config.AUTH_COLOR)
         self._set_title("QR 인증")
-
-        # QR init
-        self._set_sub_title("QR 모듈 초기화 중입니다")
-        time.sleep(1)
-
-        # QR Wait
-        self._set_sub_title("QR 태그를 인식시켜주세요")
-        time.sleep(3)
 
         # Auth Request
         ## QR Enable
         if not auth_manager.service.get_qr_status() == config.STATUS_ENABLE:
             self._set_title("QR 인증 불가")
             self._set_sub_title("QR 모듈이 비활성화되어 있습니다.")
-        ## QR Disable
-        else:
-            if auth_manager.service.request_qr_auth():
-                self._set_title("QR 인증 성공")
-                self._set_sub_title("이건희님, 출입이 승인되었습니다.")
-            else:
-                self._set_title("QR 인증 실패")
-                self._set_sub_title(f"인증 실패. 처음부터 다시 시도하세요.")
+            self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
+            return
 
-        time.sleep(5)
-        self.controller.after(0, lambda: self.controller.show_page("MainPage"))
+        # get info
+        self._set_sub_title("정보를 가져오고 있습니다")
+        time.sleep(0.5)
+        
+        # user auth logic
+        result = False
+        user_name = None
+        
+        if self.qr_value == "G23KA4AGA":
+            result = True
+            user_name = "관리자"
+            
+        # open door
+        if result:
+            self._set_title("QR 인증 성공")
+            self._set_sub_title(f"{user_name}님 환영합니다")
+            log_manager.service.insert_log("QR출입", "승인", f"QR출입이 승인되었습니다: UNAME={user_name} VALUE={self.qr_value}")
+            hardware_manager.service.auto_open_door()
+        else:
+            self._set_title("QR 인증 실패")
+            self._set_sub_title(f"인증에 실패하였습니다\n{self.qr_value}")
+            log_manager.service.insert_log("QR출입", "차단", f"올바르지 않은 QR로 접근을 시도했습니다: VALUE={self.qr_value}")
+        
+
+        self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
 
     def _set_title(self, text):
         self.title.after(0, lambda: self.title.config(text=text))

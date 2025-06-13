@@ -5,3 +5,5 @@ requests==2.32.3
 tk==0.1.0
 pygame==2.6.1
 adafruit-circuitpython-pn532==2.4.4
+pynput==1.8.1
+types-pynput==1.7

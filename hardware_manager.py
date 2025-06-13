@@ -3,13 +3,60 @@ import RPi.GPIO as GPIO
 import threading
 import board
 import busio
-from digitalio import DigitalInOut
 from adafruit_pn532.i2c import PN532_I2C
 import binascii
 import auth_manager
 import config
 import speaker_manager
-import page_manager
+from pynput import keyboard
+
+class QRListener:
+    def __init__(self, on_scan_callback=None):
+        self.buffer = ""
+        self.collecting = False
+        self.lock = threading.Lock()
+        self.on_scan_callback = on_scan_callback
+        self.listener = keyboard.Listener(on_press=self._on_key)
+        self.string_detect = None
+
+    def _on_key(self, key):
+        try:
+            char = key.char if hasattr(key, 'char') else ''
+        except AttributeError:
+            return
+
+        with self.lock:
+            if char == '{':
+                self.collecting = True
+                self.buffer = ""
+            elif self.collecting:
+                if char == '}':
+                    self.collecting = False
+                    scanned_code = self.buffer
+                    self.buffer = ""
+                    self.string_detect = scanned_code
+                else:
+                    self.buffer += char
+    
+    def get_qr_detect_result(self):
+        result = self.string_detect
+        
+        if not result == None:
+            self.string_detect = None
+            return result
+        
+        return None
+    
+    def start(self):
+        def _start_listner():
+            print("QR Listener Initializing...")
+            try:
+                self.listener.start()
+                print("QR Listener Initialized Successfully")
+            except Exception as e:
+                print(f"QR Listener Initializing failed: {e}")
+        
+        threading.Thread(target=_start_listner, daemon=True).start()
 
 class HardwareManager():
     def __init__(self, DOOR_RELAY_PIN, BUTTON_PIN, BUTTON_LED_PIN):
