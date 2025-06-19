@@ -121,7 +121,7 @@ class PageAuthQR(tk.Frame):
         result = False
         user_name = None
 
-        if self.detect_qr_value == "GMLASD12":
+        if self.detect_qr_value == "GMLASD12".lower():
             result = True
             user_name = "관리자"
 

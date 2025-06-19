@@ -6,6 +6,7 @@ sudo apt update; sudo apt upgrade;
 
 # Font
 sudo apt install fonts-nanum
+sudo apt-get install python3-evdev
 
 # NFC
 sudo raspi-config  # -> Interface Options -> I2C -> Enable
