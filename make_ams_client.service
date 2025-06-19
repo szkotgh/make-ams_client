@@ -6,6 +6,7 @@ Requires=graphical.target
 
 [Service]
 Environment=DISPLAY=:0
+ExecStartPre=/bin/bash -c 'while ! lsusb | grep -q "0525:a4ac"; do sleep 1; done'
 ExecStart=/bin/bash /home/administrator/make-ams_client/stater.sh
 User=administrator
 Restart=on-failure
