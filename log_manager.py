@@ -21,11 +21,13 @@ class LogManager:
 
     def insert_log(self, method, action, details=None):
         try:
-            self.cursor.execute('''
-                INSERT INTO main (method, action, details)
-                VALUES (?, ?, ?)
-            ''', (method, action, details))
-            self.conn.commit()
+            with sqlite3.connect(config.LOG_DB_PATH, isolation_level=None) as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    INSERT INTO main (method, action, details)
+                    VALUES (?, ?, ?)
+                ''', (method, action, details))
+                conn.commit()
         except sqlite3.OperationalError as e:
             print("Failed to write log:", e)
 
@@ -37,14 +39,11 @@ class LogManager:
         ''', (limit,))
         return self.cursor.fetchall()
 
-    def log_close(self):
-        self.conn.commit()
-        self.conn.close()
-
     def __enter__(self):
         return self
 
-    def __exit__(self, _exc_type, _exc_value, _traceback):
-        self.log_close()
+    def __exit__(self, *_):
+        self.conn.commit()
+        self.conn.close()
 
 service = LogManager()

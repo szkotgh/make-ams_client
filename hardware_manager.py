@@ -1,3 +1,4 @@
+import os
 import time
 import RPi.GPIO as GPIO
 import threading
@@ -11,20 +12,18 @@ import speaker_manager
 from pynput import keyboard
 
 class QRListener:
-    def __init__(self, on_scan_callback=None):
-        self.buffer = ""
-        self.collecting = False
+    def __init__(self):
         self.lock = threading.Lock()
-        self.on_scan_callback = on_scan_callback
         self.listener = keyboard.Listener(on_press=self._on_key)
+        self.collecting = False
+        self.buffer = ""
         self.string_detect = None
 
     def _on_key(self, key):
         try:
             char = key.char if hasattr(key, 'char') else ''
-        except AttributeError:
+        except:
             return
-
         with self.lock:
             if char == '{':
                 self.collecting = True
@@ -39,13 +38,12 @@ class QRListener:
                     self.buffer += char
     
     def get_qr_detect_result(self):
-        result = self.string_detect
-        
-        if not result == None:
+        if self.string_detect is not None:
+            result = self.string_detect
             self.string_detect = None
             return result
         
-        return None
+        return self.string_detect
     
     def start(self):
         def _start_listner():
@@ -55,6 +53,7 @@ class QRListener:
                 print("QR Listener Initialized Successfully")
             except Exception as e:
                 print(f"QR Listener Initializing failed: {e}")
+                os._exit(1)
         
         threading.Thread(target=_start_listner, daemon=True).start()
 
@@ -88,8 +87,8 @@ class HardwareManager():
                 need_reinit = True
             elif self.nfc_initialized:
                 try:
-                    test_uid = self.pn532.read_passive_target(timeout=0.1)
-                    # test_uid는 None이어도 괜찮음. 중요한 건 에러 없이 호출되는가
+                    # 에러 없이 호출되는가 검사
+                    self.pn532.read_passive_target(timeout=0.1)
                 except Exception as e:
                     print(f"NFC Test Failed: {e}")
                     self.nfc_initialized = False
