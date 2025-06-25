@@ -18,12 +18,11 @@ class App(tk.Tk):
         self.resizable(False, False)
         self.attributes("-topmost", True)
         self.attributes("-fullscreen", True)
+        self.config(cursor="none")
         def toggle_fullscreen():
             self.attributes("-fullscreen", False)
             self.after(100, lambda: self.attributes("-fullscreen", True))
         self.after(1000, toggle_fullscreen)
-        
-        # self.config(cursor="none")
         
         # container frame(change zone)
         self.container = tk.Frame(self)
