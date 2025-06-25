@@ -14,7 +14,7 @@ class MainPage(tk.Frame):
         self.controller = controller
 
         # main frame
-        main_frame = tk.Frame(self)
+        main_frame = tk.Frame(self, padx=0, pady=0)
         main_frame.pack(fill="both", expand=True)
 
         # top frame
@@ -49,7 +49,7 @@ class MainPage(tk.Frame):
         self.door_status_label.grid(row=0, column=3, sticky="e", padx=10)
 
         # left frame
-        left_frame = tk.Frame(main_frame)
+        left_frame = tk.Frame(main_frame, padx=0, pady=0)
         left_frame.pack(side="left", fill="both", expand=True)
 
         ## GIF Update
@@ -59,7 +59,7 @@ class MainPage(tk.Frame):
             img.seek(frame)
             frame_image = img.copy().resize((652, 445))
             frames.append(ImageTk.PhotoImage(frame_image))
-        self.img_label = tk.Label(left_frame)
+        self.img_label = tk.Label(left_frame, padx=0, pady=0)
         self.img_label.pack(fill="both", expand=True)
         self.img_label.frames = frames
         def update_gif(ind=0):
