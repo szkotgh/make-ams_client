@@ -32,7 +32,7 @@ class LogManager:
     def get_logs(self, limit=100):
         self.cursor.execute('''
             SELECT * FROM main
-            ORDER BY time ASC
+            ORDER BY time DESC
             LIMIT ?
         ''', (limit,))
         return self.cursor.fetchall()

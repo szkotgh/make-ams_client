@@ -23,7 +23,7 @@ class PageAdminLog(tk.Frame):
     def refresh_log(self):
         self.text_area.delete("1.0", tk.END)
         logs = log_manager.service.get_logs(limit=500)
-        for log in logs:
+        for log in reversed(logs):
             time, method, action, details = log[1], log[2], log[3], log[4]
             self.text_area.insert(tk.END, f"{time} | {method} | {action} | {details}\n")
         self.text_area.see(tk.END)

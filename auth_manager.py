@@ -12,8 +12,10 @@ class AuthManager:
 
         self.door_status = config.STATUS_CLOSE
         self.button_status = config.STATUS_DISABLE
-        self.qr_status = config.STATUS_DISABLE
-        self.nfc_status = config.STATUS_DISABLE
+        self.qr_status_server = config.STATUS_DISABLE
+        self.nfc_status_server = config.STATUS_DISABLE
+        self.qr_status_hw = config.STATUS_DISABLE
+        self.nfc_status_hw = config.STATUS_DISABLE
 
         self.start_connection()
     
@@ -29,8 +31,8 @@ class AuthManager:
 
                     self.door_status = config.STATUS_OPEN
                     self.button_status = config.STATUS_ENABLE
-                    self.qr_status = config.STATUS_ENABLE
-                    self.nfc_status = config.STATUS_ENABLE
+                    self.qr_status_server = config.STATUS_ENABLE
+                    self.nfc_status_server = config.STATUS_ENABLE
                 else:
                     self.connection_success = False
             except Exception as e:
@@ -49,13 +51,13 @@ class AuthManager:
             ## 제한 상태: 모든 기능 제한(관리자 예외)
             elif self.door_status == config.STATUS_CLOSE:
                 self.button_status = config.STATUS_DISABLE
-                self.qr_status = config.STATUS_DISABLE
-                self.nfc_status = config.STATUS_DISABLE
+                self.qr_status_server = config.STATUS_DISABLE
+                self.nfc_status_server = config.STATUS_DISABLE
             ## 알 수 없는 상태: 모든 기능 제한(관리자 예외)
             else:
                 self.button_status = config.STATUS_DISABLE
-                self.qr_status = config.STATUS_DISABLE
-                self.nfc_status = config.STATUS_DISABLE
+                self.qr_status_server = config.STATUS_DISABLE
+                self.nfc_status_server = config.STATUS_DISABLE
 
             threading.Timer(config.CONNECTION_INTERVAL, check_connection).start()
 
@@ -98,9 +100,15 @@ class AuthManager:
         return self.button_status
     
     def get_qr_status(self):
-        return self.qr_status
+        return config.STATUS_ENABLE if self.is_qr_enabled() else config.STATUS_DISABLE
     
     def get_nfc_status(self):
-        return self.nfc_status
-    
+        return config.STATUS_ENABLE if self.is_nfc_enabled() else config.STATUS_DISABLE
+
+    def is_qr_enabled(self):
+        return self.qr_status_server == config.STATUS_ENABLE and self.qr_status_hw == config.STATUS_ENABLE
+
+    def is_nfc_enabled(self):
+        return self.nfc_status_server == config.STATUS_ENABLE and self.nfc_status_hw == config.STATUS_ENABLE
+
 service = AuthManager()
