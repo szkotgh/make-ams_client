@@ -2,6 +2,14 @@ import json
 import threading
 import requests
 import config
+import log_manager
+
+class AuthResultDTO:
+    def __init__(self, success: bool, detail: str, user_name: str, user_id: str):
+        self.success = success
+        self.detail = detail
+        self.user_name = user_name
+        self.user_id = user_id
 
 class AuthManager:
     def __init__(self):
@@ -22,12 +30,12 @@ class AuthManager:
     def start_connection(self):
         def check_connection():
             try:
-                response = requests.get(config.SERVER_URL+"/", timeout=config.TIME_OUT)
-                ping = int(response.elapsed.total_seconds()*1000)
+                response = requests.get(config.SERVER_URL+"/device/get_status", timeout=config.TIME_OUT, headers={"Authorization": f"Bearer {self.AUTH_TOKEN}", "User-Agent": "MAKE-AMS Device"})
+                ping_ms = int(response.elapsed.total_seconds()*1000)
 
                 if response.ok:
                     self.connection_success = True
-                    self.connection_ping = ping
+                    self.connection_ping = ping_ms
 
                     self.door_status = config.STATUS_OPEN
                     self.button_status = config.STATUS_ENABLE
@@ -64,31 +72,87 @@ class AuthManager:
         check_connection()
 
     # 버튼 눌렀을 때
-    def request_button_auth(self):
+    def request_button_auth(self) -> AuthResultDTO:
         url = config.SERVER_URL + "/auth/button"
+        data = {}
+        
         try:
-            response = requests.post(url, timeout=config.TIME_OUT, headers={"Authorization": self.AUTH_TOKEN})
-            return True if response.ok else False
+            response = requests.post(url, timeout=config.TIME_OUT, headers={"Authorization": f"Bearer {self.AUTH_TOKEN}", "User-Agent": "MAKE-AMS Device"}, json=data)
+
+            result_json = response.json()
+            result_success = result_json["success"]
+            result_detail = result_json["detail"]
+            result_user_name = result_json["user_name"]
+            result_user_id = result_json["user_id"]
+            
+            return AuthResultDTO(result_success, result_detail, result_user_name, result_user_id)
+        
+        except requests.exceptions.ConnectionError as e:
+            log_manager.service.insert_log("auth_manager", "에러", f"서버와 연결에 실패했습니다: {e}")
+            return AuthResultDTO(False, "서버와 연결에 실패했습니다.", "", "")
+        except requests.exceptions.Timeout as e:
+            log_manager.service.insert_log("auth_manager", "에러", f"요청 시간이 초과되었습니다: {e}")
+            return AuthResultDTO(False, "요청 시간이 초과되었습니다.", "", "")
         except Exception as e:
-            return False
+            log_manager.service.insert_log("auth_manager", "에러", f"알 수 없는 오류입니다: {e}")
+            return AuthResultDTO(False, "알 수 없는 오류입니다.", "", "")
 
     # QR 인식했을 때
-    def request_qr_auth(self):
+    def request_qr_auth(self, qr_value: str):
         url = config.SERVER_URL + "/auth/qr"
+        body = {
+            "value": qr_value
+        }
+
         try:
-            response = requests.post(url, timeout=config.TIME_OUT, headers={"Authorization": self.AUTH_TOKEN})
-            return True if response.ok else False
+            response = requests.post(url, timeout=config.TIME_OUT, headers={"Authorization": f"Bearer {self.AUTH_TOKEN}", "User-Agent": "MAKE-AMS Device"}, json=body)
+            
+            result_json = response.json()
+            result_success = result_json["success"]
+            result_detail = result_json["detail"]
+            result_user_name = result_json["user_name"]
+            result_user_id = result_json["user_id"]
+            
+            return AuthResultDTO(result_success, result_detail, result_user_name, result_user_id)
+        
+        except requests.exceptions.ConnectionError as e:
+            log_manager.service.insert_log("auth_manager", "에러", f"서버와 연결에 실패했습니다: {e}")
+            return AuthResultDTO(False, "서버와 연결에 실패했습니다.", "", "")
+        except requests.exceptions.Timeout as e:
+            log_manager.service.insert_log("auth_manager", "에러", f"요청 시간이 초과되었습니다: {e}")
+            return AuthResultDTO(False, "요청 시간이 초과되었습니다.", "", "")
         except Exception as e:
-            return False
+            log_manager.service.insert_log("auth_manager", "에러", f"알 수 없는 오류입니다: {e}")
+            return AuthResultDTO(False, "알 수 없는 오류입니다.", "", "")
     
     # NFC 인식했을 때
-    def request_nfc_auth(self):
+    def request_nfc_auth(self, nfc_value: str) -> AuthResultDTO:
         url = config.SERVER_URL + "/auth/nfc"
+        body = {
+            "value": nfc_value
+        }
+        
         try:
-            response = requests.post(url, timeout=config.TIME_OUT, headers={"Authorization": self.AUTH_TOKEN})
-            return True if response.ok else False
+            response = requests.post(url, timeout=config.TIME_OUT, headers={"Authorization": f"Bearer {self.AUTH_TOKEN}", "User-Agent": "MAKE-AMS Device"}, json=body)
+            response.raise_for_status()
+            
+            result_json = response.json()
+            result_success = result_json["success"]
+            result_detail = result_json["detail"]
+            result_user_name = result_json["user_name"]
+            result_user_id = result_json["user_id"]
+            
+            return AuthResultDTO(result_success, result_detail, result_user_name, result_user_id)
+        
+        except requests.exceptions.ConnectionError as e:
+            log_manager.service.insert_log("auth_manager", "에러", f"서버와 연결에 실패했습니다: {e}")
+            return AuthResultDTO(False, "서버와 연결에 실패했습니다.", "", "")
+        except requests.exceptions.Timeout as e:
+            log_manager.service.insert_log("auth_manager", "에러", f"요청 시간이 초과되었습니다: {e}")
+            return AuthResultDTO(False, "요청 시간이 초과되었습니다.", "", "")
         except Exception as e:
-            return False
+            log_manager.service.insert_log("auth_manager", "에러", f"알 수 없는 오류입니다: {e}")
+            return AuthResultDTO(False, "알 수 없는 오류입니다.", "", "")
 
     def get_connection_status(self):
         return {"success": self.connection_success, "ping": self.connection_ping}

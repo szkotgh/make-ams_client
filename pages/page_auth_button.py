@@ -2,7 +2,6 @@ import threading
 import time
 import tkinter as tk
 from PIL import Image, ImageTk
-
 import auth_manager
 import config
 import hardware_manager
@@ -75,26 +74,21 @@ class PageAuthButton(tk.Frame):
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             return
 
-        # Button init
+        # Auth Request
         self._set_title("외부인 출입")
         self._set_sub_title("잠시만 기다려주십시오")
-        time.sleep(1)
 
-        # Auth Request
-        # ## Button 
-        # else:
-        #     if auth_manager.service.request_button_auth():
-        #         self._set_title("환영합니다")
-        #         self._set_sub_title("메이크에 오신 것을 환영합니다")
-        #         hardware_manager.service.auto_open_door()
-        #     else:
-        #         self._set_title("외부인 출입 불가")
-        #         self._set_sub_title(f"출입이 거부되었습니다")
-        
-        log_manager.service.insert_log("외부인출입", "문열림", "외부인 출입이 허용된 상태입니다.")
-        self._set_title("환영합니다")
-        self._set_sub_title("메이크에 오신 것을 환영합니다")
-        hardware_manager.service.auto_open_door()
+        auth_result = auth_manager.service.request_button_auth()
+        if auth_result.success:
+            self._set_title("환영합니다")
+            self._set_sub_title("메이크에 오신 것을 환영합니다")
+            log_manager.service.insert_log("외부인출입", "승인", f"문이 열렸습니다.")
+            hardware_manager.service.auto_open_door()
+        else:
+            self._set_title("외부인 출입 불가")
+            self._set_sub_title(f"출입이 거부되었습니다.\n{auth_result.detail}")
+            log_manager.service.insert_log("외부인출입", "차단", f"출입이 거부되었습니다. detail={auth_result.detail}")
+            speaker_manager.service.play(config.WRONG_SOUND_PATH)
         
         self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
     

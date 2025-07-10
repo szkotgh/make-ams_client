@@ -1,5 +1,7 @@
 # MAKE; AMS Client(Device)
 
+![](src/ams.jpeg)
+
 ## Run this script
 ```bash
 sudo apt update; sudo apt upgrade;

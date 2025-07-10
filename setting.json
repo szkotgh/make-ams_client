@@ -1,6 +1,6 @@
 {
   "connection": {
-    "server_url": "http://www.google.com",
+    "server_url": "https://ams.szk.kr",
     "connection_interval": 1.0,
     "time_out": 3
   },
