@@ -4,7 +4,16 @@
 
 ## Run this script
 ```bash
-sudo apt update; sudo apt upgrade;
+sudo apt update; sudo apt upgrade -y;
+
+# reboot permision added
+USERNAME="administrator"
+
+USER_HOME=$(eval echo "~$USERNAME")
+BASHRC="$USER_HOME/.bashrc"
+ALIAS_LINE="alias reboot='sudo /sbin/reboot'"
+
+chown "$USERNAME":"$USERNAME" "$BASHRC"
 
 # Font
 sudo apt install fonts-nanum
