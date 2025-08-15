@@ -243,16 +243,16 @@ class PageAuthNFC(tk.Frame):
 
     def auth_nfc(self):
         self.main_frame.config(bg=config.AUTH_COLOR)
+        self._set_title("NFC 인증")
+        
         if not auth_manager.service.get_nfc_status() == config.STATUS_ENABLE:
             self._set_title("NFC 인증 실패")
-            self._set_sub_title("비활성화 되어있습니다")
+            self._set_sub_title("현재 이용할 수 없습니다.")
             speaker_manager.service.play(config.WRONG_SOUND_PATH)
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             return
         
-        self._set_title("NFC 인증")
         self._set_sub_title("정보를 가져오고 있습니다")
-        time.sleep(0.5)
         
         # user info logic
         result = False

@@ -18,6 +18,7 @@ class PageAdminMain(tk.Frame):
 
         tk.Label(title_frame, text="관리자 메뉴", font=(config.DEFAULT_FONT, 28, "bold"), fg="black").pack(pady=10)
         tk.Label(title_frame, text=f"디스플레이 크기: {utils.get_display_size()}", font=(config.DEFAULT_FONT, 16), fg="black").pack()
+        tk.Label(title_frame, text=f"PID: {utils.get_program_pid()}", font=(config.DEFAULT_FONT, 16), fg="black").pack()
         self.uptime = utils.get_now_datetime() - config.START_TIME
         self.uptime_label = tk.Label(title_frame, text=f"작동시간: {self.uptime}", font=(config.DEFAULT_FONT, 16), fg="black")
         def update_uptime():
@@ -40,33 +41,35 @@ class PageAdminMain(tk.Frame):
 
         tk.Button(self.admin_frame, text="문 열어놓기", font=(config.DEFAULT_FONT, 16, 'bold'), height=2, width=56, command=lambda: self.controller.show_page("PageAdminForceOpen")).pack()
         
-        tk.Button(self.admin_frame, text="관리자 종료", font=(config.DEFAULT_FONT, 14), width=14, height=2, command=lambda: self.controller.show_page("MainPage")).pack(pady=10)
+        tk.Button(self.admin_frame, text="관리자 종료", font=(config.DEFAULT_FONT, 14), width=14, height=2, command=self.close_admin_page).pack(pady=10)
 
     def reboot_system(self):
-        log_manager.service.insert_log("관리자", "종료", "관리자가 시스템을 재시작했습니다.")
+        log_manager.service.insert_log("관리자", "종료", "시스템을 재시작했습니다.")
         hardware_manager.service.hardware_close()
         log_manager.service.log_close()
         os.system("sudo reboot now")
         
     def program_exit(self):
-        log_manager.service.insert_log("관리자", "종료", "관리자가 프로그램을 종료했습니다.")
+        log_manager.service.insert_log("관리자", "종료", "프로그램을 종료했습니다.")
         hardware_manager.service.hardware_close()
         log_manager.service.log_close()
         os._exit(0)
         
     def program_restart(self):
-        log_manager.service.insert_log("관리자", "종료 ", "관리자가 프로그램을 재시작했습니다.")
+        log_manager.service.insert_log("관리자", "종료", "프로그램을 재시작했습니다.")
         hardware_manager.service.hardware_close()
         log_manager.service.log_close()
         os._exit(1)
 
     def open_door(self):
-        log_manager.service.insert_log("관리자", "승인", "수동으로 문을 열었습니다.")
         hardware_manager.service.auto_open_door()
         self.button3.config(state="disabled")
-        def reset_button():
-            self.button3.config(state="normal")
-        self.after(3000, reset_button)
+        self.after(3000, lambda: self.button3.config(state="normal"))
+        log_manager.service.insert_log("관리자", "승인", "수동으로 문을 열었습니다.")
+
+    def close_admin_page(self):
+        log_manager.service.insert_log("관리자", "종료", "관리자 페이지를 종료했습니다.")
+        self.controller.show_page("MainPage")
 
     def on_show(self):
         pass

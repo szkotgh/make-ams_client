@@ -6,7 +6,7 @@
 ```bash
 sudo apt update; sudo apt upgrade -y;
 
-# reboot permision added
+# reboot permission added
 USERNAME="administrator"
 
 USER_HOME=$(eval echo "~$USERNAME")
@@ -23,7 +23,7 @@ sudo raspi-config  # -> Interface Options -> I2C -> Enable
 sudo apt-get install i2c-tools
 i2cdetect -y 1     # PN532가 0x24, 0x48, 0x68 등으로 보여야 함
 
-# etc...
+# etc... (for Fast boot)
 sudo usermod -aG input administrator
 sudo apt-get install python3-evdev
 sudo systemctl disable bluetooth.service

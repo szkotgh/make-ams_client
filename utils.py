@@ -1,11 +1,16 @@
 import config
 import tkinter as tk
 from datetime import datetime
+import psutil
+import os
 
-def get_now_datetime():
+def get_program_pid() -> int:
+    return os.getpid()
+
+def get_now_datetime() -> datetime:
     return datetime.now()
 
-def get_display_size():
+def get_display_size() -> tuple[int, int]:
     root = tk.Tk()
     root.withdraw()
     screen_width = root.winfo_screenwidth()
@@ -13,7 +18,7 @@ def get_display_size():
     root.destroy()
     return screen_width, screen_height
 
-def get_status_korean(status):
+def get_status_korean(status) -> str:
     status_map = {
         config.STATUS_ENABLE: "활성화",
         config.STATUS_DISABLE: "비활성화",

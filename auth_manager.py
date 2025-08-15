@@ -30,7 +30,7 @@ class AuthManager:
     def start_connection(self):
         def check_connection():
             try:
-                response = requests.get(config.SERVER_URL+"/device/get_status", timeout=config.TIME_OUT, headers={"Authorization": f"Bearer {self.AUTH_TOKEN}", "User-Agent": "MAKE-AMS Device"})
+                response = requests.get(config.SERVER_URL+"/device/status", timeout=config.TIME_OUT, headers={"Authorization": f"Bearer {self.AUTH_TOKEN}", "User-Agent": "MAKE-AMS Device"})
                 ping_ms = int(response.elapsed.total_seconds()*1000)
 
                 if response.ok:

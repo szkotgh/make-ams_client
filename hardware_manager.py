@@ -243,4 +243,4 @@ class HardwareManager():
         GPIO.cleanup()
         pass
 
-service = HardwareManager(DOOR_RELAY_PIN=23, BUTTON_PIN=24, BUTTON_LED_PIN=25)
+service = HardwareManager(DOOR_RELAY_PIN=17, BUTTON_PIN=24, BUTTON_LED_PIN=25)

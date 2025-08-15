@@ -5,7 +5,7 @@ from pages.page_admin_login import PageAdminLogin
 from pages.page_admin_main import PageAdminMain
 from pages.page_admin_log import PageAdminLog
 from pages.page_admin_force_open import PageAdminForceOpen
-from pages.page_auth_button import PageAuthButton
+from pages.page_auth_external_button import PageAuthButton
 from pages.page_auth_qr import PageAuthQR
 from pages.page_auth_nfc import PageAuthNFC
 import config

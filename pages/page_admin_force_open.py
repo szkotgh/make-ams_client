@@ -41,14 +41,14 @@ class PageAdminForceOpen(tk.Frame):
 
         self.title = tk.Label(content_frame, text="문 열어두기", font=(config.DEFAULT_FONT, 48, "bold"), fg="white", bg=config.AUTH_COLOR, anchor="center", justify="center")
         self.title.pack(pady=50)
-        self.sub_button = tk.Button(content_frame, text=" 다시 눌러 해제하십시오", font=(config.DEFAULT_FONT, 32, 'bold'), fg="black", height=2, width=18, command=self.status_release)
+        self.sub_button = tk.Button(content_frame, text="해제", font=(config.DEFAULT_FONT, 16, 'bold'), fg="black", height=1, width=8, command=self.status_release)
         self.sub_button.pack()
 
     def status_release(self):
-        log_manager.service.insert_log("관리자", "승인", "관리자가 문 열어두기를 해제했습니다.")
+        log_manager.service.insert_log("관리자", "승인", "문 열어두기를 해제했습니다.")
         hardware_manager.service.close_door()
         self.controller.show_page("MainPage")
 
     def on_show(self):
-        log_manager.service.insert_log("관리자", "승인", "관리자가 문 열어두기를 시작했습니다.")
+        log_manager.service.insert_log("관리자", "승인", "문 열어두기를 시작했습니다.")
         hardware_manager.service.open_door()

@@ -111,12 +111,11 @@ class PageAuthQR(tk.Frame):
 
         if not auth_manager.service.get_qr_status() == config.STATUS_ENABLE:
             self._set_title("QR 인증 불가")
-            self._set_sub_title("QR 모듈이 비활성화되어 있습니다.")
+            self._set_sub_title("현재 이용할 수 없습니다.")
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             return
 
         self._set_sub_title("정보를 가져오고 있습니다")
-        time.sleep(0.5)
 
         result = False
         user_name = None
