@@ -2,6 +2,7 @@ import os
 import time
 import threading
 from datetime import datetime, timedelta
+import hardware_manager
 import log_manager
 
 class TimerManager:
@@ -11,7 +12,6 @@ class TimerManager:
         def _update_timers():
             while True:
                 now = datetime.now()
-                print(f"now: {now.strftime('%Y-%m-%d %H:%M:%S')}")
                 for timer, end_time in list(self.timers.items()):
                     if now >= end_time:
                         timer.cancel()
@@ -19,7 +19,7 @@ class TimerManager:
                 time.sleep(1)
 
         # register timer
-        self.register_timer_at("20:16:00", self.reboot)
+        self.register_timer_at("00:00:00", self.reboot)
         
         threading.Thread(target=_update_timers, daemon=True).start()
 
