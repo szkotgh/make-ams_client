@@ -15,9 +15,11 @@ cd "$DIR"
 # fi
 
 # if git is installed, pull the latest changes
+echo "Checking updating..."
 if command -v git &> /dev/null
 then
     git pull
+    echo "Update complete"
 else
     echo "$SERVICE_NAME git not found, skipping pull . . ."
 fi
