@@ -8,13 +8,13 @@ from pages.page_admin_force_open import PageAdminForceOpen
 from pages.page_auth_external_button import PageAuthButton
 from pages.page_auth_qr import PageAuthQR
 from pages.page_auth_nfc import PageAuthNFC
-import config
+import setting
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title(config.TITLE)
-        self.geometry(f"{config.DISPLAY_WIDTH}x{config.DISPLAY_HEIGHT}")
+        self.title(setting.TITLE)
+        self.geometry(f"{setting.DISPLAY_WIDTH}x{setting.DISPLAY_HEIGHT}")
         self.resizable(False, False)
         self.attributes("-topmost", True)
         self.attributes("-fullscreen", True)

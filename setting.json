@@ -22,5 +22,15 @@
     "enable_color": "#079a3e",
     "warning_color": "#ffcc00",
     "auth_color": "#1c2087"
+  },
+  "gpio":{
+    "door_relay": 17,
+    "status_led_red": 16,
+    "status_led_yellow": 20,
+    "status_led_green": 21,
+    "internal_sw_btn": 19,
+    "internal_sw_led": 26,
+    "external_sw_btn": 23,
+    "external_sw_led": 24
   }
 }

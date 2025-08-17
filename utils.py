@@ -1,4 +1,4 @@
-import config
+import setting
 import tkinter as tk
 from datetime import datetime
 import psutil
@@ -20,10 +20,10 @@ def get_display_size() -> tuple[int, int]:
 
 def get_status_korean(status) -> str:
     status_map = {
-        config.STATUS_ENABLE: "활성화",
-        config.STATUS_DISABLE: "비활성화",
-        config.STATUS_OPEN: "열림",
-        config.STATUS_RESTRIC: "내부인",
-        config.STATUS_CLOSE: "제한"
+        setting.STATUS_ENABLE: "활성화",
+        setting.STATUS_DISABLE: "비활성화",
+        setting.STATUS_OPEN: "열림",
+        setting.STATUS_RESTRIC: "내부인",
+        setting.STATUS_CLOSE: "제한"
     }
     return status_map.get(status, "알 수 없음")

@@ -2,9 +2,9 @@ import os
 import threading
 import time
 import tkinter as tk
-import config
+import setting
 import log_manager
-import speaker_manager
+import hardware_manager
 
 class PageAdminLogin(tk.Frame):
     def __init__(self, parent, controller):
@@ -18,16 +18,16 @@ class PageAdminLogin(tk.Frame):
         # Title
         title_frame = tk.Frame(self)
         title_frame.pack(pady=10)
-        self.title_label = tk.Label(title_frame, text="AMS 관리자", font=(config.DEFAULT_FONT, 20, "bold"), fg="black")
+        self.title_label = tk.Label(title_frame, text="AMS 관리자", font=(setting.DEFAULT_FONT, 20, "bold"), fg="black")
         self.title_label.pack()
-        self.sub_title_label = tk.Label(title_frame, text="", font=(config.DEFAULT_FONT, 12), fg="black")
+        self.sub_title_label = tk.Label(title_frame, text="", font=(setting.DEFAULT_FONT, 12), fg="black")
         self.sub_title_label.pack()
 
         # Circles
         self.circles_frame = tk.Frame(self)
         self.circles_frame.pack()
         self.circles = [
-            tk.Label(self.circles_frame, text="○", font=(config.DEFAULT_FONT, 22))
+            tk.Label(self.circles_frame, text="○", font=(setting.DEFAULT_FONT, 22))
             for _ in range(6)
         ]
         for lbl in self.circles:
@@ -53,7 +53,7 @@ class PageAdminLogin(tk.Frame):
         def cancel_login():
             self.stop_inactivity_timer()
             self.controller.show_page("MainPage")
-        tk.Button(self, text="로그인 취소", font=(config.DEFAULT_FONT, 14), width=12, height=2,
+        tk.Button(self, text="로그인 취소", font=(setting.DEFAULT_FONT, 14), width=12, height=2,
                   command=cancel_login).pack(pady=3)
 
     def start_inactivity_timer(self):
@@ -72,24 +72,24 @@ class PageAdminLogin(tk.Frame):
         while self.inactivity_timer_active:
             if time.time() - self.last_input_time > 10:
                 self.stop_inactivity_timer()
-                speaker_manager.service.play(config.WRONG_SOUND_PATH)
+                hardware_manager.speaker_manager.play(setting.WRONG_SOUND_PATH)
                 self.controller.after(0, lambda: self.controller.show_page("MainPage"))
                 return
             time.sleep(0.2)
 
     def _create_keypad_button(self, parent, char):
         def on_click(action=None):
-            speaker_manager.service.play(config.CLICK_SOUND_PATH)
+            hardware_manager.speaker_manager.play(setting.CLICK_SOUND_PATH)
             if action:
                 action()
         if char == 'C':
-            return tk.Button(parent, text="C", font=(config.DEFAULT_FONT, 14, 'bold'), width=5, height=2,
+            return tk.Button(parent, text="C", font=(setting.DEFAULT_FONT, 14, 'bold'), width=5, height=2,
                              command=lambda: on_click(self.input_clear))
         elif char == '<':
-            return tk.Button(parent, text="←", font=(config.DEFAULT_FONT, 14, 'bold'), width=5, height=2,
+            return tk.Button(parent, text="←", font=(setting.DEFAULT_FONT, 14, 'bold'), width=5, height=2,
                              command=lambda: on_click(self.backspace))
         else:
-            return tk.Button(parent, text=char, font=(config.DEFAULT_FONT, 14, 'bold'), width=5, height=2,
+            return tk.Button(parent, text=char, font=(setting.DEFAULT_FONT, 14, 'bold'), width=5, height=2,
                              command=lambda ch=char: on_click(lambda: self.add_digit(ch)))
 
     def add_digit(self, digit):
@@ -119,8 +119,8 @@ class PageAdminLogin(tk.Frame):
             lbl.config(text="●" if i < len(self.input_digits) else "○")
 
     def check_password(self):
-        if ''.join(self.input_digits) == config.ADMIN_PW:
-            speaker_manager.service.play(config.SUCCESS_SOUND_PATH)
+        if ''.join(self.input_digits) == setting.ADMIN_PW:
+            hardware_manager.speaker_manager.play(setting.SUCCESS_SOUND_PATH)
             self.input_clear()
             self.stop_inactivity_timer()
             log_manager.service.insert_log("관리자", "로그인", "관리자페이지에 로그인했습니다.")
@@ -128,12 +128,12 @@ class PageAdminLogin(tk.Frame):
         else:
             self.error_count += 1
             if self.error_count == 3:
-                speaker_manager.service.play(config.DTMG)
+                hardware_manager.speaker_manager.play(setting.DTMG)
             elif self.error_count == 6:
-                speaker_manager.service.play(config.JTMG)
+                hardware_manager.speaker_manager.play(setting.JTMG)
             else:
-                speaker_manager.service.play(config.WRONG_SOUND_PATH)
-            self.sub_title_label.config(text="비밀번호가 일치하지 않습니다", fg=config.DISABLE_COLOR)
+                hardware_manager.speaker_manager.play(setting.WRONG_SOUND_PATH)
+            self.sub_title_label.config(text="비밀번호가 일치하지 않습니다", fg=setting.DISABLE_COLOR)
             threading.Timer(1.5, self._reset_subtitle).start()
             self.input_clear()
 

@@ -4,9 +4,8 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import hardware_manager
 import auth_manager
-import config
+import setting
 import log_manager
-import speaker_manager
 
 class PageAuthQR(tk.Frame):
     def __init__(self, parent, controller):
@@ -20,11 +19,11 @@ class PageAuthQR(tk.Frame):
         self._auth_lock = threading.Lock()
 
         # main frame
-        self.main_frame = tk.Frame(self, width=config.DISPLAY_WIDTH, height=config.DISPLAY_HEIGHT, background=config.AUTH_COLOR)
+        self.main_frame = tk.Frame(self, width=setting.DISPLAY_WIDTH, height=setting.DISPLAY_HEIGHT, background=setting.AUTH_COLOR)
         self.main_frame.pack(expand=True, fill=tk.BOTH)
 
         # left frame
-        self.left_frame = tk.Frame(self.main_frame, width=int(config.DISPLAY_WIDTH * 0.4), bg=config.AUTH_COLOR)
+        self.left_frame = tk.Frame(self.main_frame, width=int(setting.DISPLAY_WIDTH * 0.4), bg=setting.AUTH_COLOR)
         self.left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=False, padx=50)
         self.left_frame.pack_propagate(False)
     
@@ -32,28 +31,27 @@ class PageAuthQR(tk.Frame):
         self.left_frame.grid_rowconfigure(2, weight=1)
         self.left_frame.grid_columnconfigure(0, weight=1)
 
-        img_temp = Image.open(config.QR_ICON_IMG_PATH)
+        img_temp = Image.open(setting.QR_ICON_IMG_PATH)
         img_temp = img_temp.resize((140, 140))
         img_temp = ImageTk.PhotoImage(img_temp)
         self.img_temp = img_temp
-        self.image_label = tk.Label(self.left_frame, image=self.img_temp, bg=config.AUTH_COLOR, borderwidth=0, highlightthickness=0)
+        self.image_label = tk.Label(self.left_frame, image=self.img_temp, bg=setting.AUTH_COLOR, borderwidth=0, highlightthickness=0)
         self.image_label.grid(row=1, column=0, pady=0)
 
         # right frame
-        right_frame = tk.Frame(self.main_frame, width=int(config.DISPLAY_WIDTH * 0.6), bg=config.AUTH_COLOR)
+        right_frame = tk.Frame(self.main_frame, width=int(setting.DISPLAY_WIDTH * 0.6), bg=setting.AUTH_COLOR)
         right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
         right_frame.pack_propagate(False)
 
-        content_frame = tk.Frame(right_frame, bg=config.AUTH_COLOR)
+        content_frame = tk.Frame(right_frame, bg=setting.AUTH_COLOR)
         content_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-        self.title = tk.Label(content_frame, text="QR 인증", font=(config.DEFAULT_FONT, 48, "bold"), fg="white", bg=config.AUTH_COLOR, anchor="center", justify="center")
+        self.title = tk.Label(content_frame, text="QR 인증", font=(setting.DEFAULT_FONT, 48, "bold"), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
         self.title.pack()
-        self.sub_title = tk.Label(content_frame, text="QR을 인식시켜주세요", font=(config.DEFAULT_FONT, 32), fg="white", bg=config.AUTH_COLOR, anchor="center", justify="center")
+        self.sub_title = tk.Label(content_frame, text="QR을 인식시켜주세요", font=(setting.DEFAULT_FONT, 32), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
         
-        self.qr_listner = hardware_manager.QRListener()
-        self.qr_listner.start()
+        self.qr_listner = hardware_manager.qr
 
         self.auth_running = False
         threading.Thread(target=self._detect_qr, daemon=True).start()
@@ -80,7 +78,7 @@ class PageAuthQR(tk.Frame):
                 threading.Thread(target=self._run_auth_flow, daemon=True).start()
 
     def on_show(self):
-        self.main_frame.config(bg=config.AUTH_COLOR)
+        self.main_frame.config(bg=setting.AUTH_COLOR)
         self._set_title("QR 인증")
         
         if self.auth_running:
@@ -106,10 +104,10 @@ class PageAuthQR(tk.Frame):
         self.controller.after(0, lambda: self.controller.show_page("MainPage"))
 
     def _run_auth_flow(self):
-        self.main_frame.config(bg=config.AUTH_COLOR)
+        self.main_frame.config(bg=setting.AUTH_COLOR)
         self._set_title("QR 인증")
 
-        if not auth_manager.service.get_qr_status() == config.STATUS_ENABLE:
+        if not auth_manager.service.get_qr_status() == setting.STATUS_ENABLE:
             self._set_title("QR 인증 불가")
             self._set_sub_title("현재 이용할 수 없습니다.")
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
@@ -128,12 +126,12 @@ class PageAuthQR(tk.Frame):
             self._set_title("QR 인증 성공")
             self._set_sub_title(f"{user_name}님 환영합니다")
             log_manager.service.insert_log("QR출입", "승인", f"QR출입이 승인되었습니다: UNAME={user_name} VALUE={self.detect_qr_value}")
-            hardware_manager.service.auto_open_door()
+            hardware_manager.door.auto_open_door()
         else:
             self._set_title("QR 인증 실패")
             self._set_sub_title(f"인증에 실패하였습니다")
             log_manager.service.insert_log("QR출입", "차단", f"올바르지 않은 QR로 접근을 시도했습니다: VALUE={self.detect_qr_value}")
-            speaker_manager.service.play(config.WRONG_SOUND_PATH)
+            hardware_manager.speaker_manager.play(setting.WRONG_SOUND_PATH)
 
         def end_auth():
             self.qr_listner.get_qr_detect_result()

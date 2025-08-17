@@ -1,9 +1,9 @@
 import sqlite3
-import config
+import setting
 
 class LogManager:
     def __init__(self):
-        self.conn = sqlite3.connect(config.LOG_DB_PATH, isolation_level=None, check_same_thread=False)
+        self.conn = sqlite3.connect(setting.LOG_DB_PATH, isolation_level=None, check_same_thread=False)
         self.cursor = self.conn.cursor()
         self.cursor.execute('PRAGMA journal_mode=WAL;')
         self.cursor.execute('''
@@ -19,7 +19,7 @@ class LogManager:
 
     def insert_log(self, method, action, details=None):
         try:
-            with sqlite3.connect(config.LOG_DB_PATH, isolation_level=None) as conn:
+            with sqlite3.connect(setting.LOG_DB_PATH, isolation_level=None) as conn:
                 cursor = conn.cursor()
                 cursor.execute('''
                     INSERT INTO main (method, action, details)

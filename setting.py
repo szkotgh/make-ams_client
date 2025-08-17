@@ -8,6 +8,16 @@ dotenv.load_dotenv()
 with open("./setting.json", "r", encoding="utf-8") as f:
     config = json.load(f)
 
+# GPIO
+DOOR_RELAY = config["gpio"]["door_relay"]
+STATUS_LED_RED = config["gpio"]["status_led_red"]
+STATUS_LED_YELLOW = config["gpio"]["status_led_yellow"]
+STATUS_LED_GREEN = config["gpio"]["status_led_green"]
+INTERNAL_SW_BTN = config["gpio"]["internal_sw_btn"]
+INTERNAL_SW_LED = config["gpio"]["internal_sw_led"]
+EXTERNAL_SW_BTN = config["gpio"]["external_sw_btn"]
+EXTERNAL_SW_LED = config["gpio"]["external_sw_led"]
+
 # System
 SERVER_URL = config["connection"]["server_url"]
 TIME_OUT = config["connection"]["time_out"]
@@ -54,6 +64,7 @@ NFC_DISABLE_IMG_PATH = "./src/nfc_disable.png"
 CLICK_SOUND_PATH = "./src/sounds/click.mp3"
 WRONG_SOUND_PATH = "./src/sounds/wrong.mp3"
 SUCCESS_SOUND_PATH = "./src/sounds/success.mp3"
+TEST_MUSIC = "./src/sounds/test_music.mp3"
 DOOR_OPEN_SOUND_PATH = "./src/sounds/door_open.mp3"
 DOOR_CLOSE_SOUND_PATH = "./src/sounds/door_close.mp3"
 MINECRAFT_DEATH = "./src/sounds/minecraft_death.mp3"

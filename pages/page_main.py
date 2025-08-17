@@ -1,11 +1,11 @@
 import threading
 import tkinter as tk
 from PIL import Image, ImageTk
-import config
+import setting
 import time
 import auth_manager
 import log_manager
-import speaker_manager
+import hardware_manager
 import utils
 
 class MainPage(tk.Frame):
@@ -24,7 +24,7 @@ class MainPage(tk.Frame):
         top_frame.rowconfigure(0, weight=1)
 
         ## time label
-        self.time_label = tk.Label(top_frame, font=(config.DEFAULT_FONT, 18), bg="#000000", fg="#ffffff")
+        self.time_label = tk.Label(top_frame, font=(setting.DEFAULT_FONT, 18), bg="#000000", fg="#ffffff")
         self.time_label.grid(row=0, column=0, sticky="w", padx=10)
         self.time_label.bind("<Button-1>", lambda e: controller.show_page("PageAdminLogin"))
         def update_time(blink=False):
@@ -38,14 +38,14 @@ class MainPage(tk.Frame):
         top_frame.columnconfigure(3, weight=5)
         
         ## title label
-        tk.Label(top_frame, text=config.TITLE, font=(config.DEFAULT_FONT, 14), bg="#000000", fg="#ffffff").grid(row=0, column=1, sticky="nsew")
+        tk.Label(top_frame, text=setting.TITLE, font=(setting.DEFAULT_FONT, 14), bg="#000000", fg="#ffffff").grid(row=0, column=1, sticky="nsew")
         
         ## connection status label
-        self.conn_status_label = tk.Label(top_frame, font=(config.DEFAULT_FONT, 14), bg="#000000", fg=config.UNKNOWN_COLOR, text="con_status")
+        self.conn_status_label = tk.Label(top_frame, font=(setting.DEFAULT_FONT, 14), bg="#000000", fg=setting.UNKNOWN_COLOR, text="con_status")
         self.conn_status_label.grid(row=0, column=2, sticky="e")
 
         ## door status label
-        self.door_status_label = tk.Label(top_frame, font=(config.DEFAULT_FONT, 14), bg="#000000", fg=config.UNKNOWN_COLOR, text="door_status")
+        self.door_status_label = tk.Label(top_frame, font=(setting.DEFAULT_FONT, 14), bg="#000000", fg=setting.UNKNOWN_COLOR, text="door_status")
         self.door_status_label.grid(row=0, column=3, sticky="e", padx=10)
 
         # left frame
@@ -53,7 +53,7 @@ class MainPage(tk.Frame):
         left_frame.pack(side="left", fill="both", expand=True)
 
         ## GIF Update
-        img = Image.open(config.MAIN_IMAGE_PATH)
+        img = Image.open(setting.MAIN_IMAGE_PATH)
         frames = []
         for frame in range(getattr(img, "n_frames", 1)):
             img.seek(frame)
@@ -66,7 +66,7 @@ class MainPage(tk.Frame):
             frame = self.img_label.frames[ind]
             self.img_label.config(image=frame)
             ind = (ind + 1) % len(self.img_label.frames)
-            self.img_label.after(config.MAIN_GIF_INTERVAL, update_gif, ind)
+            self.img_label.after(setting.MAIN_GIF_INTERVAL, update_gif, ind)
         update_gif()
 
         # right frame
@@ -90,32 +90,32 @@ class MainPage(tk.Frame):
             connection_status = auth_manager.service.get_connection_status()
             if connection_status["success"]:
                 if connection_status['ping'] < 500:
-                    self.conn_status_label.config(text=f"연결됨 ({connection_status['ping']}ms)", fg=config.ENABLE_COLOR)
+                    self.conn_status_label.config(text=f"연결됨 ({connection_status['ping']}ms)", fg=setting.ENABLE_COLOR)
                 elif connection_status['ping'] < 1000:
-                    self.conn_status_label.config(text=f"연결됨 ({connection_status['ping']}ms)", fg=config.WARNING_COLOR)
+                    self.conn_status_label.config(text=f"연결됨 ({connection_status['ping']}ms)", fg=setting.WARNING_COLOR)
                 else:
-                    self.conn_status_label.config(text=f"연결됨 ({connection_status['ping']}ms)", fg=config.DISABLE_COLOR)
+                    self.conn_status_label.config(text=f"연결됨 ({connection_status['ping']}ms)", fg=setting.DISABLE_COLOR)
             else:
-                self.conn_status_label.config(text="통신불량", fg=config.DISABLE_COLOR)
+                self.conn_status_label.config(text="통신불량", fg=setting.DISABLE_COLOR)
             self.conn_status_label.update_idletasks()
 
             # Update door status label
             door_status = auth_manager.service.get_door_status()
-            if door_status == config.STATUS_OPEN:
-                self.door_status_label.config(text=f"{utils.get_status_korean(door_status)} 상태", fg=config.ENABLE_COLOR)
-            elif door_status == config.STATUS_RESTRIC:
-                self.door_status_label.config(text=f"{utils.get_status_korean(door_status)} 상태", fg=config.WARNING_COLOR)
-            elif door_status == config.STATUS_CLOSE:
-                self.door_status_label.config(text=f"{utils.get_status_korean(door_status)} 상태", fg=config.DISABLE_COLOR)
+            if door_status == setting.STATUS_OPEN:
+                self.door_status_label.config(text=f"{utils.get_status_korean(door_status)} 상태", fg=setting.ENABLE_COLOR)
+            elif door_status == setting.STATUS_RESTRIC:
+                self.door_status_label.config(text=f"{utils.get_status_korean(door_status)} 상태", fg=setting.WARNING_COLOR)
+            elif door_status == setting.STATUS_CLOSE:
+                self.door_status_label.config(text=f"{utils.get_status_korean(door_status)} 상태", fg=setting.DISABLE_COLOR)
             else:
-                self.door_status_label.config(text="알수없음", fg=config.UNKNOWN_COLOR)
+                self.door_status_label.config(text="알수없음", fg=setting.UNKNOWN_COLOR)
 
             # Update button1
-            if auth_manager.service.get_button_status() == config.STATUS_ENABLE:
-                img_btn1 = Image.open(config.BUTTON_ENABLE_IMG_PATH)
+            if auth_manager.service.get_button_status() == setting.STATUS_ENABLE:
+                img_btn1 = Image.open(setting.BUTTON_ENABLE_IMG_PATH)
                 self.button1.config(state=tk.NORMAL)
             else:
-                img_btn1 = Image.open(config.BUTTON_DISABLE_IMG_PATH)
+                img_btn1 = Image.open(setting.BUTTON_DISABLE_IMG_PATH)
                 self.button1.config(state=tk.DISABLED)
             img_btn1 = img_btn1.resize((140, 140))
             img_btn1 = ImageTk.PhotoImage(img_btn1)
@@ -123,11 +123,11 @@ class MainPage(tk.Frame):
             self.button1.config(image=self.img_btn1)
 
             # Update button2
-            if auth_manager.service.get_qr_status() == config.STATUS_ENABLE:
-                img_btn2 = Image.open(config.QR_ENABLE_IMG_PATH)
+            if auth_manager.service.get_qr_status() == setting.STATUS_ENABLE:
+                img_btn2 = Image.open(setting.QR_ENABLE_IMG_PATH)
                 self.button2.config(state=tk.NORMAL)
             else:
-                img_btn2 = Image.open(config.QR_DISABLE_IMG_PATH)
+                img_btn2 = Image.open(setting.QR_DISABLE_IMG_PATH)
                 self.button2.config(state=tk.DISABLED)
             img_btn2 = img_btn2.resize((140, 140))
             img_btn2 = ImageTk.PhotoImage(img_btn2)
@@ -135,11 +135,11 @@ class MainPage(tk.Frame):
             self.button2.config(image=self.img_btn2)
             
             # Update button3
-            if auth_manager.service.get_nfc_status() == config.STATUS_ENABLE:
-                img_btn3 = Image.open(config.NFC_ENABLE_IMG_PATH)
+            if auth_manager.service.get_nfc_status() == setting.STATUS_ENABLE:
+                img_btn3 = Image.open(setting.NFC_ENABLE_IMG_PATH)
                 self.button3.config(state=tk.NORMAL)
             else:
-                img_btn3 = Image.open(config.NFC_DISABLE_IMG_PATH)
+                img_btn3 = Image.open(setting.NFC_DISABLE_IMG_PATH)
                 self.button3.config(state=tk.DISABLED)
             img_btn3 = img_btn3.resize((140, 140))
             img_btn3 = ImageTk.PhotoImage(img_btn3)
@@ -151,17 +151,17 @@ class MainPage(tk.Frame):
 
     def button_auth(self):
         log_manager.service.insert_log("사용자", "인증", "사용자가 버튼 인증을 시도했습니다.")
-        speaker_manager.service.play(config.CLICK_SOUND_PATH)
+        hardware_manager.speaker_manager.play(setting.CLICK_SOUND_PATH)
         self.controller.show_page("PageAuthButton")
     
     def qr_auth(self):
         log_manager.service.insert_log("사용자", "인증", "사용자가 QR 인증을 시도했습니다.")
-        speaker_manager.service.play(config.CLICK_SOUND_PATH)
+        hardware_manager.speaker_manager.play(setting.CLICK_SOUND_PATH)
         self.controller.show_page("PageAuthQR")
         
     def nfc_auth(self):
         log_manager.service.insert_log("사용자", "인증", "사용자가 NFC 인증을 시도했습니다.")
-        speaker_manager.service.play(config.CLICK_SOUND_PATH)
+        hardware_manager.speaker_manager.play(setting.CLICK_SOUND_PATH)
         self.controller.show_page("PageAuthNFC")
     
     def on_show(self):
