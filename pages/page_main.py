@@ -152,7 +152,7 @@ class MainPage(tk.Frame):
     def button_auth(self):
         log_manager.service.insert_log("사용자", "인증", "사용자가 버튼 인증을 시도했습니다.")
         hardware_manager.speaker_manager.play(setting.CLICK_SOUND_PATH)
-        self.controller.show_page("PageAuthButton")
+        self.controller.show_page("PageAuthExternalButton")
     
     def qr_auth(self):
         log_manager.service.insert_log("사용자", "인증", "사용자가 QR 인증을 시도했습니다.")

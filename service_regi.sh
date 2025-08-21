@@ -45,13 +45,13 @@ if [ $? -ne 0 ]; then
 fi
 echo "Service enabled."
 
-# # Start the service
-# sudo systemctl start "$SERVICE_NAME"
-# if [ $? -ne 0 ]; then
-#     echo "Error: Failed to start $SERVICE_NAME."
-#     exit 1
-# fi
-# echo "Service started successfully."
+# Start the service
+sudo systemctl start "$SERVICE_NAME"
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to start $SERVICE_NAME."
+    exit 1
+fi
+echo "Service started successfully."
 
 # Check the status of the service
 sudo systemctl status "$SERVICE_NAME" --no-pager

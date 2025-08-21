@@ -1,4 +1,3 @@
-import json
 import threading
 import requests
 import setting
@@ -28,6 +27,7 @@ class AuthManager:
         self.start_connection()
     
     def start_connection(self):
+        import hardware_manager
         def check_connection():
             try:
                 response = requests.get(setting.SERVER_URL+"/device/status", timeout=setting.TIME_OUT, headers={"Authorization": f"Bearer {self.AUTH_TOKEN}", "User-Agent": "MAKE-AMS Device"})
@@ -52,20 +52,23 @@ class AuthManager:
 
             ## 열림 상태: 작업 안함
             if self.door_status == setting.STATUS_OPEN:
-                pass
+                hardware_manager.external_button.led_on()
             ## 내부인 상태: 버튼 기능 제한
             elif self.door_status == setting.STATUS_RESTRIC:
                 self.button_status = setting.STATUS_DISABLE
+                hardware_manager.external_button.led_off()
             ## 제한 상태: 모든 기능 제한(관리자 예외)
             elif self.door_status == setting.STATUS_CLOSE:
                 self.button_status = setting.STATUS_DISABLE
                 self.qr_status_server = setting.STATUS_DISABLE
                 self.nfc_status_server = setting.STATUS_DISABLE
+                hardware_manager.external_button.led_off()
             ## 알 수 없는 상태: 모든 기능 제한(관리자 예외)
             else:
                 self.button_status = setting.STATUS_DISABLE
                 self.qr_status_server = setting.STATUS_DISABLE
                 self.nfc_status_server = setting.STATUS_DISABLE
+                hardware_manager.external_button.led_off()
 
             threading.Timer(setting.CONNECTION_INTERVAL, check_connection).start()
 

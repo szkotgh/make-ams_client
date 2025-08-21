@@ -34,17 +34,40 @@ def test_relay():
     time.sleep(3)
     print("done")
 
+def test_qr():
+    print("[Test QR]")
+
+    is_testing = False
+    def _get():
+        return is_testing
+    def _set():
+        global is_testing
+        is_testing = False
+    
+    def detect(qr_result):
+        if _get():
+            print(f"QR code detected. value={qr_result}")
+            _set()
+    
+    print("Waiting for QR...")
+    is_testing = True
+    hardware_manager.qr.regi_callback(detect)
+
+    time.sleep(10)
+        
+    print("done")
+
 def test_nfc():
     print("[Test NFC]")
 
     while True:
         print("Waiting for RFID/NFC card...")
-        uid = hardware_manager.nfc.read_nfc()
+        uid = hardware_manager.nfc.read_nfc(timeout=10)
         if uid == False:
             print("NFC Module not initialized or not connected.")
-            break
+            return
         if uid is not None:
-            print("Found card with UID:", [hex(i) for i in uid])
+            print(f"Tag successful. UID={uid}")
             break
         time.sleep(1)
     print("done")
@@ -88,11 +111,12 @@ def test_all():
     test_led()
     test_relay()
     test_nfc()
+    test_qr()
     test_internal_sw()
     test_external_sw()
     test_speaker()
 
-test_options = [test_led, test_relay, test_nfc, test_internal_sw, test_external_sw, test_speaker, test_all]
+test_options = [test_led, test_relay, test_qr, test_nfc, test_internal_sw, test_external_sw, test_speaker, test_all]
 
 time.sleep(1)
 while True:

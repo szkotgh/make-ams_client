@@ -1,8 +1,9 @@
 import setting
 import tkinter as tk
 from datetime import datetime
-import psutil
 import os
+import subprocess
+import socket
 
 def get_program_pid() -> int:
     return os.getpid()
@@ -17,6 +18,26 @@ def get_display_size() -> tuple[int, int]:
     screen_height = root.winfo_screenheight()
     root.destroy()
     return screen_width, screen_height
+
+def get_wifi_ssid():
+    try:
+        result = subprocess.check_output(
+            ["iwgetid", "-r"], stderr=subprocess.DEVNULL
+        )
+        ssid = result.decode().strip()
+        return ssid if ssid else None
+    except subprocess.CalledProcessError:
+        return None
+
+def get_lan_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))  # Google DNS
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return None
 
 def get_status_korean(status) -> str:
     status_map = {

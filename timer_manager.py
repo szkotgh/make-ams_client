@@ -22,6 +22,7 @@ class TimerManager:
         self.register_timer_at("00:00:00", self.reboot)
         
         threading.Thread(target=_update_timers, daemon=True).start()
+        print("[TimerManager] Started.")
 
     def register_timer_at(self, target_time_str, callback):
         now = datetime.now()

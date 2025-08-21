@@ -6,7 +6,6 @@ import board
 import busio
 from adafruit_pn532.i2c import PN532_I2C
 import binascii
-import auth_manager
 import setting
 import evdev
 import pygame
@@ -135,12 +134,15 @@ class ExternalButtonSwitch():
     def read_button(self):
         return GPIO.input(self.BTN_PIN) == GPIO.LOW
 
-    def btn_callback(self, callback):
+    def regi_callback(self, callback):
+        def run_callback():
+            if GPIO.input(self.BTN_PIN) == GPIO.LOW: callback()
+
         GPIO.add_event_detect(
             self.BTN_PIN,
-            GPIO.RISING,
-            callback=lambda ch: callback(),
-            bouncetime=200
+            GPIO.FALLING,
+            callback=lambda ch: run_callback(),
+            bouncetime=50
         )
 
 class InternalButtonSwitch():
@@ -160,12 +162,15 @@ class InternalButtonSwitch():
     def read_button(self):
         return GPIO.input(self.BTN_PIN) == GPIO.LOW
 
-    def btn_callback(self, callback):
+    def regi_callback(self, callback):
+        def run_callback():
+            if GPIO.input(self.BTN_PIN) == GPIO.LOW: callback()
+
         GPIO.add_event_detect(
             self.BTN_PIN,
-            GPIO.RISING,
-            callback=lambda ch: callback(),
-            bouncetime=200
+            GPIO.FALLING,
+            callback=lambda ch: run_callback(),
+            bouncetime=50
         )
 
 class DoorRelay:
@@ -204,7 +209,7 @@ class DoorRelay:
 
 class NFCReader:
     def __init__(self):
-        self.nfc_initialized = False
+        self.initialized = False
         self._init_thread = threading.Thread(target=self._init_nfc, daemon=True)
         self._init_thread.start()
 
@@ -217,13 +222,13 @@ class NFCReader:
             now = time.time()
             need_reinit = False
 
-            if not self.nfc_initialized or now - last_init_time > reinit_interval:
+            if not self.initialized or now - last_init_time > reinit_interval:
                 need_reinit = True
-            elif self.nfc_initialized:
+            elif self.initialized:
                 try:
                     self.pn532.read_passive_target(timeout=0.1)
                 except Exception:
-                    self.nfc_initialized = False
+                    self.initialized = False
                     need_reinit = True
 
             if need_reinit:
@@ -236,19 +241,19 @@ class NFCReader:
                     self.i2c = busio.I2C(board.SCL, board.SDA)
                     self.pn532 = PN532_I2C(self.i2c, debug=False)
                     self.pn532.SAM_configuration()
-                    self.nfc_initialized = True
+                    self.initialized = True
                     last_init_time = now
                     import auth_manager, setting
                     auth_manager.service.nfc_status_hw = setting.STATUS_ENABLE
                 except Exception:
-                    self.nfc_initialized = False
+                    self.initialized = False
                     import auth_manager, setting
                     auth_manager.service.nfc_status_hw = setting.STATUS_DISABLE
 
             time.sleep(check_interval)
 
     def read_nfc(self, timeout=0.5):
-        if not self.nfc_initialized:
+        if not self.initialized:
             return False
 
         uid = self.pn532.read_passive_target(timeout=timeout)
@@ -265,6 +270,12 @@ class QRListener:
         self._device = None
         self.listener_thread = None
         self.qr_listener_name = "USBKey Chip USBKey Module"
+        self.callback_list = []
+        
+        self.start()
+
+    def regi_callback(self, callback):
+        self.callback_list.append(callback)
 
     def _handle_char(self, char):
         with self._lock:
@@ -276,6 +287,9 @@ class QRListener:
                     self._active = False
                     self._result = self._buffer
                     self._buffer = ""
+                    # Callback Run
+                    for callback in self.callback_list:
+                        callback(self._result)
                 else:
                     self._buffer += char
 
@@ -376,7 +390,6 @@ internal_button = InternalButtonSwitch()
 door = DoorRelay()
 nfc = NFCReader()
 qr = QRListener()
-qr.start()
 
 def close():
     GPIO.cleanup()

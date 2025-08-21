@@ -1,10 +1,13 @@
+import threading
+import time
 import tkinter as tk
 from PIL import Image, ImageTk
+import auth_manager
 import setting
-import log_manager
 import hardware_manager
+import log_manager
 
-class PageAdminForceOpen(tk.Frame):
+class PageAuthInternalButton(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -38,16 +41,35 @@ class PageAdminForceOpen(tk.Frame):
         content_frame = tk.Frame(right_frame, bg=setting.AUTH_COLOR)
         content_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-        self.title = tk.Label(content_frame, text="문 열어두기", font=(setting.DEFAULT_FONT, 48, "bold"), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
-        self.title.pack(pady=50)
-        self.sub_button = tk.Button(content_frame, text="해제", font=(setting.DEFAULT_FONT, 16, 'bold'), fg="black", height=1, width=8, command=self.status_release)
-        self.sub_button.pack()
-
-    def status_release(self):
-        log_manager.service.insert_log("관리자", "승인", "문 열어두기를 해제했습니다.")
-        hardware_manager.door.close_door()
-        self.controller.show_page("MainPage")
+        self.title = tk.Label(content_frame, text="문 열기", font=(setting.DEFAULT_FONT, 48, "bold"), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
+        self.title.pack()
+        self.sub_title = tk.Label(content_frame, text="문이 열립니다.", font=(setting.DEFAULT_FONT, 32), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
+        self.sub_title.pack(pady=30)
+        
+        hardware_manager.internal_button.led_on()
+        hardware_manager.internal_button.regi_callback(self._detect_button)
 
     def on_show(self):
-        log_manager.service.insert_log("관리자", "승인", "문 열어두기를 시작했습니다.")
-        hardware_manager.door.open_door()
+        threading.Thread(target=self.open_button, daemon=True).start()
+    
+    def _detect_button(self):
+        if self.controller.now_page != "MainPage":
+            return
+
+        self.controller.show_page("PageAuthInternalButton")
+            
+    def open_button(self):
+        self.main_frame.config(bg=setting.AUTH_COLOR)
+
+        self._set_title("내부인 퇴실")
+        self._set_sub_title("문이 열립니다")
+        log_manager.service.insert_log("시스템", "문열림", "내부에서 문을 열었습니다.")
+        hardware_manager.door.auto_open_door()
+        
+        self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
+    
+    def _set_title(self, text):
+        self.title.after(0, lambda: self.title.config(text=text))
+
+    def _set_sub_title(self, text):
+        self.sub_title.after(0, lambda: self.sub_title.config(text=text))

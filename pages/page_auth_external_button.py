@@ -7,7 +7,7 @@ import setting
 import hardware_manager
 import log_manager
 
-class PageAuthButton(tk.Frame):
+class PageAuthExternalButton(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -46,21 +46,16 @@ class PageAuthButton(tk.Frame):
         self.sub_title = tk.Label(content_frame, text="잠시만 기다려주세요", font=(setting.DEFAULT_FONT, 32), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
         
-        threading.Thread(target=self._detect_button, daemon=True).start()
+        hardware_manager.external_button.regi_callback(self._detect_button)
 
     def on_show(self):
         threading.Thread(target=self.button_auth, daemon=True).start()
     
     def _detect_button(self):
-        while True:
-            time.sleep(0.05)
-            
-            if self.controller.now_page != "MainPage":
-                continue
-            
-            if False:
-                self.controller.show_page("PageAuthButton")
-                time.sleep(1)
+        if self.controller.now_page != "MainPage":
+            return
+
+        self.controller.show_page("PageAuthExternalButton")
             
     def button_auth(self):
         self.main_frame.config(bg=setting.AUTH_COLOR)

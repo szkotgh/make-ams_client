@@ -5,7 +5,8 @@ from pages.page_admin_login import PageAdminLogin
 from pages.page_admin_main import PageAdminMain
 from pages.page_admin_log import PageAdminLog
 from pages.page_admin_force_open import PageAdminForceOpen
-from pages.page_auth_external_button import PageAuthButton
+from pages.page_auth_external_button import PageAuthExternalButton
+from pages.page_auth_internal_button import PageAuthInternalButton
 from pages.page_auth_qr import PageAuthQR
 from pages.page_auth_nfc import PageAuthNFC
 import setting
@@ -32,7 +33,7 @@ class App(tk.Tk):
         self.pages = {}
 
         # page initialization
-        for PageClass in (PageStart, MainPage, PageAdminLogin, PageAdminMain, PageAdminLog, PageAdminForceOpen, PageAuthButton, PageAuthQR, PageAuthNFC):
+        for PageClass in (PageStart, MainPage, PageAdminLogin, PageAdminMain, PageAdminLog, PageAdminForceOpen, PageAuthExternalButton, PageAuthInternalButton, PageAuthQR, PageAuthNFC):
             page_name = PageClass.__name__
             page = PageClass(parent=self.container, controller=self)
             self.pages[page_name] = page

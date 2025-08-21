@@ -54,28 +54,20 @@ class PageAuthQR(tk.Frame):
         self.qr_listner = hardware_manager.qr
 
         self.auth_running = False
-        threading.Thread(target=self._detect_qr, daemon=True).start()
-    
-    def _detect_qr(self):
-        while True:
-            time.sleep(0.05)
+        hardware_manager.qr.regi_callback(self._detect_qr)
 
-            # 메인페이지에 있는가?
-            if self.controller.now_page != "MainPage":
-                continue
+    def _detect_qr(self, _qr_result: str):
+        # 메인페이지에 있는가?
+        if self.controller.now_page != "MainPage":
+            return
 
-            # QR 인식이 되었는가?
-            detect_qr_value = self.qr_listner.get_qr_detect_result()
-            if detect_qr_value is None:
-                continue
-
-            with self._auth_lock:
-                if self.auth_running:
-                    continue
-                self.detect_qr_value = detect_qr_value
-                self.auth_running = True
-                self.controller.after(0, lambda: self.controller.show_page("PageAuthQR"))
-                threading.Thread(target=self._run_auth_flow, daemon=True).start()
+        with self._auth_lock:
+            if self.auth_running:
+                return
+            self.detect_qr_value = _qr_result
+            self.auth_running = True
+            self.controller.show_page("PageAuthQR")
+            threading.Thread(target=self._run_auth_flow, daemon=True).start()
 
     def on_show(self):
         self.main_frame.config(bg=setting.AUTH_COLOR)
