@@ -2,13 +2,14 @@ import threading
 import requests
 import setting
 import log_manager
+import hardware_manager
 
 class AuthResultDTO:
-    def __init__(self, success: bool, detail: str, user_name: str, user_id: str):
+    def __init__(self, code: int, message: str, data=None, success: bool=False):
+        self.code = code
+        self.message = message
+        self.data = data
         self.success = success
-        self.detail = detail
-        self.user_name = user_name
-        self.user_id = user_id
 
 class AuthManager:
     def __init__(self):
@@ -18,29 +19,42 @@ class AuthManager:
         self.connection_ping = -1
 
         self.door_status = setting.STATUS_CLOSE
-        self.button_status = setting.STATUS_DISABLE
+        self.button_status_server = setting.STATUS_DISABLE
         self.qr_status_server = setting.STATUS_DISABLE
         self.nfc_status_server = setting.STATUS_DISABLE
         self.qr_status_hw = setting.STATUS_DISABLE
         self.nfc_status_hw = setting.STATUS_DISABLE
-
+        self.remote_open_callback = None
+        
         self.start_connection()
     
+    def regi_remote_open_callback(self, callback):
+        self.remote_open_callback = callback
+    
     def start_connection(self):
-        import hardware_manager
         def check_connection():
             try:
                 response = requests.get(setting.SERVER_URL+"/device/status", timeout=setting.TIME_OUT, headers={"Authorization": f"Bearer {self.AUTH_TOKEN}", "User-Agent": "MAKE-AMS Device"})
                 ping_ms = int(response.elapsed.total_seconds()*1000)
 
-                if response.ok:
+                result_json = response.json()
+                result_code = result_json["code"]
+                result_message = result_json["message"]
+                result_data = result_json["data"]
+
+                if result_code == 200:
                     self.connection_success = True
                     self.connection_ping = ping_ms
 
-                    self.door_status = setting.STATUS_OPEN
-                    self.button_status = setting.STATUS_ENABLE
-                    self.qr_status_server = setting.STATUS_ENABLE
-                    self.nfc_status_server = setting.STATUS_ENABLE
+                    self.door_status = result_data['door_status']
+                    self.button_status_server = result_data['button_status']
+                    self.qr_status_server = result_data['qr_status']
+                    self.nfc_status_server = result_data['nfc_status']
+                    self.remote_open_door = result_data['remote_open_door']
+                    self.remote_open_door_by = result_data['remote_open_door_by']
+                    
+                    if self.remote_open_door == setting.STATUS_ENABLE:
+                        threading.Thread(target=self.remote_open_callback, args=(self.remote_open_door_by,)).start()
                 else:
                     self.connection_success = False
             except Exception as e:
@@ -55,17 +69,17 @@ class AuthManager:
                 hardware_manager.external_button.led_on()
             ## 내부인 상태: 버튼 기능 제한
             elif self.door_status == setting.STATUS_RESTRIC:
-                self.button_status = setting.STATUS_DISABLE
+                self.button_status_server = setting.STATUS_DISABLE
                 hardware_manager.external_button.led_off()
             ## 제한 상태: 모든 기능 제한(관리자 예외)
             elif self.door_status == setting.STATUS_CLOSE:
-                self.button_status = setting.STATUS_DISABLE
+                self.button_status_server = setting.STATUS_DISABLE
                 self.qr_status_server = setting.STATUS_DISABLE
                 self.nfc_status_server = setting.STATUS_DISABLE
                 hardware_manager.external_button.led_off()
             ## 알 수 없는 상태: 모든 기능 제한(관리자 예외)
             else:
-                self.button_status = setting.STATUS_DISABLE
+                self.button_status_server = setting.STATUS_DISABLE
                 self.qr_status_server = setting.STATUS_DISABLE
                 self.nfc_status_server = setting.STATUS_DISABLE
                 hardware_manager.external_button.led_off()
@@ -76,86 +90,123 @@ class AuthManager:
 
     # 버튼 눌렀을 때
     def request_button_auth(self) -> AuthResultDTO:
-        url = setting.SERVER_URL + "/auth/button"
+        url = f"{setting.SERVER_URL}/device/auth/button"
+        header = {
+            "Authorization": f"Bearer {self.AUTH_TOKEN}",
+            "User-Agent": "MAKE-AMS Device"
+        }
         data = {}
         
         try:
-            response = requests.post(url, timeout=setting.TIME_OUT, headers={"Authorization": f"Bearer {self.AUTH_TOKEN}", "User-Agent": "MAKE-AMS Device"}, json=data)
+            response = requests.post(url, timeout=setting.TIME_OUT, headers=header, json=data)
 
             result_json = response.json()
-            result_success = result_json["success"]
-            result_detail = result_json["detail"]
-            result_user_name = result_json["user_name"]
-            result_user_id = result_json["user_id"]
+            result_code = result_json["code"]
+            result_message = result_json["message"]
+            result_data = result_json["data"]
             
-            return AuthResultDTO(result_success, result_detail, result_user_name, result_user_id)
+            return AuthResultDTO(code=result_code, message=result_message, data=result_data, success=True)
         
         except requests.exceptions.ConnectionError as e:
             log_manager.service.insert_log("auth_manager", "에러", f"서버와 연결에 실패했습니다: {e}")
-            return AuthResultDTO(False, "서버와 연결에 실패했습니다.", "", "")
+            return AuthResultDTO(code=-1, message="서버와 연결에 실패했습니다.",  success=False)
         except requests.exceptions.Timeout as e:
             log_manager.service.insert_log("auth_manager", "에러", f"요청 시간이 초과되었습니다: {e}")
-            return AuthResultDTO(False, "요청 시간이 초과되었습니다.", "", "")
+            return AuthResultDTO(code=-1, message="요청 시간이 초과되었습니다.",  success=False)
         except Exception as e:
             log_manager.service.insert_log("auth_manager", "에러", f"알 수 없는 오류입니다: {e}")
-            return AuthResultDTO(False, "알 수 없는 오류입니다.", "", "")
+            return AuthResultDTO(code=-1, message="알 수 없는 오류입니다.",  success=False)
 
     # QR 인식했을 때
     def request_qr_auth(self, qr_value: str):
-        url = setting.SERVER_URL + "/auth/qr"
+        url = f"{setting.SERVER_URL}/device/auth/qr"
+        header = {
+            "Authorization": f"Bearer {self.AUTH_TOKEN}",
+            "User-Agent": "MAKE-AMS Device"
+        }
         body = {
             "value": qr_value
         }
 
         try:
-            response = requests.post(url, timeout=setting.TIME_OUT, headers={"Authorization": f"Bearer {self.AUTH_TOKEN}", "User-Agent": "MAKE-AMS Device"}, json=body)
-            
+            response = requests.post(url, timeout=setting.TIME_OUT, headers=header, json=body)
+
             result_json = response.json()
-            result_success = result_json["success"]
-            result_detail = result_json["detail"]
-            result_user_name = result_json["user_name"]
-            result_user_id = result_json["user_id"]
+            result_code = result_json["code"]
+            result_message = result_json["message"]
+            result_data = result_json["data"]
             
-            return AuthResultDTO(result_success, result_detail, result_user_name, result_user_id)
+            return AuthResultDTO(result_code, result_message, result_data)
         
         except requests.exceptions.ConnectionError as e:
             log_manager.service.insert_log("auth_manager", "에러", f"서버와 연결에 실패했습니다: {e}")
-            return AuthResultDTO(False, "서버와 연결에 실패했습니다.", "", "")
+            return AuthResultDTO(code=-1, message="서버와 연결에 실패했습니다.",  success=False)
         except requests.exceptions.Timeout as e:
             log_manager.service.insert_log("auth_manager", "에러", f"요청 시간이 초과되었습니다: {e}")
-            return AuthResultDTO(False, "요청 시간이 초과되었습니다.", "", "")
+            return AuthResultDTO(code=-1, message="요청 시간이 초과되었습니다.",  success=False)
         except Exception as e:
             log_manager.service.insert_log("auth_manager", "에러", f"알 수 없는 오류입니다: {e}")
-            return AuthResultDTO(False, "알 수 없는 오류입니다.", "", "")
+            return AuthResultDTO(code=-1, message="알 수 없는 오류입니다.",  success=False)
     
     # NFC 인식했을 때
     def request_nfc_auth(self, nfc_value: str) -> AuthResultDTO:
-        url = setting.SERVER_URL + "/auth/nfc"
+        url = f"{setting.SERVER_URL}/device/auth/nfc"
+        header = {
+            "Authorization": f"Bearer {self.AUTH_TOKEN}",
+            "User-Agent": "MAKE-AMS Device"
+        }
         body = {
             "value": nfc_value
         }
         
         try:
-            response = requests.post(url, timeout=setting.TIME_OUT, headers={"Authorization": f"Bearer {self.AUTH_TOKEN}", "User-Agent": "MAKE-AMS Device"}, json=body)
-            response.raise_for_status()
-            
+            response = requests.post(url, timeout=setting.TIME_OUT, headers=header, json=body)
+
             result_json = response.json()
-            result_success = result_json["success"]
-            result_detail = result_json["detail"]
-            result_user_name = result_json["user_name"]
-            result_user_id = result_json["user_id"]
+            result_code = result_json["code"]
+            result_message = result_json["message"]
+            result_data = result_json["data"]
             
-            return AuthResultDTO(result_success, result_detail, result_user_name, result_user_id)
+            return AuthResultDTO(code=result_code, message=result_message, data=result_data, success=True)
         
         except requests.exceptions.ConnectionError as e:
             log_manager.service.insert_log("auth_manager", "에러", f"서버와 연결에 실패했습니다: {e}")
-            return AuthResultDTO(False, "서버와 연결에 실패했습니다.", "", "")
+            return AuthResultDTO(code=-1, message="서버와 연결에 실패했습니다.", success=False)
         except requests.exceptions.Timeout as e:
             log_manager.service.insert_log("auth_manager", "에러", f"요청 시간이 초과되었습니다: {e}")
-            return AuthResultDTO(False, "요청 시간이 초과되었습니다.", "", "")
+            return AuthResultDTO(code=-1, message="요청 시간이 초과되었습니다.", success=False)
         except Exception as e:
             log_manager.service.insert_log("auth_manager", "에러", f"알 수 없는 오류입니다: {e}")
-            return AuthResultDTO(False, "알 수 없는 오류입니다.", "", "")
+            return AuthResultDTO(code=-1, message=f"알 수 없는 오류입니다.", success=False)
+
+    def request_open_door(self) -> AuthResultDTO:
+        url = f"{setting.SERVER_URL}/device/request_open_door"
+        header = {
+            "Authorization": f"Bearer {self.AUTH_TOKEN}",
+            "User-Agent": "MAKE-AMS Device"
+        }
+        body = {
+        }
+
+        try:
+            response = requests.post(url, timeout=setting.TIME_OUT, headers=header, json=body)
+
+            result_json = response.json()
+            result_code = result_json["code"]
+            result_message = result_json["message"]
+            result_data = result_json["data"]
+
+            return AuthResultDTO(code=result_code, message=result_message, data=result_data, success=True)
+        
+        except requests.exceptions.ConnectionError as e:
+            log_manager.service.insert_log("auth_manager", "에러", f"서버와 연결에 실패했습니다: {e}")
+            return AuthResultDTO(code=-1, message="서버와 연결에 실패했습니다.", success=False)
+        except requests.exceptions.Timeout as e:
+            log_manager.service.insert_log("auth_manager", "에러", f"요청 시간이 초과되었습니다: {e}")
+            return AuthResultDTO(code=-1, message="요청 시간이 초과되었습니다.", success=False)
+        except Exception as e:
+            log_manager.service.insert_log("auth_manager", "에러", f"알 수 없는 오류입니다: {e}")
+            return AuthResultDTO(code=-1, message=f"알 수 없는 오류입니다.", success=False)
 
     def get_connection_status(self):
         return {"success": self.connection_success, "ping": self.connection_ping}
@@ -164,7 +215,7 @@ class AuthManager:
         return self.door_status
     
     def get_button_status(self):
-        return self.button_status
+        return self.button_status_server
     
     def get_qr_status(self):
         return setting.STATUS_ENABLE if self.is_qr_enabled() else setting.STATUS_DISABLE

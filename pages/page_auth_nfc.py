@@ -135,7 +135,7 @@ class PageAuthNFC(tk.Frame):
     def _password_timeout(self):
         self._set_title("NFC 인증 실패")
         self._set_sub_title("입력 시간이 초과되었습니다")
-        log_manager.service.insert_log("NFC출입", "차단", f"PIN번호 입력시간이 초과되었습니다: UNAME={self.user_name} UID={self.nfc_uid}")
+        log_manager.service.insert_log("NFC출입", "차단", f"PIN번호 입력시간이 초과되었습니다: NFC_UID={self.nfc_uid}")
         hardware_manager.speaker_manager.play(setting.WRONG_SOUND_PATH)
         self._hide_password_frame()
         self._stop_password_timer()
@@ -166,12 +166,12 @@ class PageAuthNFC(tk.Frame):
         self.controller.show_page("MainPage")
 
     def _verify_password(self):
-        if self.password_entry == self.user_password:
-            self._set_title(f"{self.user_name}님 환영합니다")
-            self._set_sub_title("문이 열립니다")
+        if self.password_entry == self.user_nfc_pin:
+            self._set_title("NFC 인증 성공")
+            self._set_sub_title(f"{self.auth_result.message}")
             self._hide_password_frame()
             self._stop_password_timer()
-            log_manager.service.insert_log("NFC출입", "승인", f"문이 열렸습니다: UNAME={self.user_name} UID={self.nfc_uid}")
+            log_manager.service.insert_log("NFC출입", "승인", f"문이 열렸습니다: NFC_UID={self.nfc_uid}")
             hardware_manager.door.auto_open_door()
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
         else:
@@ -243,55 +243,31 @@ class PageAuthNFC(tk.Frame):
     def auth_nfc(self):
         self.main_frame.config(bg=setting.AUTH_COLOR)
         self._set_title("NFC 인증")
-        
-        if not auth_manager.service.get_nfc_status() == setting.STATUS_ENABLE:
-            self._set_title("NFC 인증 실패")
-            self._set_sub_title("현재 이용할 수 없습니다.")
-            self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
-            return
-        
+
+        # auth logic
         self._set_sub_title("정보를 가져오고 있습니다")
+        self.auth_result = auth_manager.service.request_nfc_auth(self.nfc_uid)
         
-        # user info logic
-        result = False
-        enable = True
-        if self.nfc_uid == "0497e436bc2a81" or self.nfc_uid == "c996123f":
-            result = True
-            self.user_name = "관리자"
-            self.user_password = "1234"
-        if self.nfc_uid == "0491b736bc2a81":
-            result = True
-            self.user_name = "이건희"
-            self.user_password = "5678"
-        if self.nfc_uid == "af6572d7" or self.nfc_uid == "60ea625c" or self.nfc_uid == "41bbacad":
-            result = True
-            self.user_name = "박여웅"
-            self.user_password = "2162"
-        if self.nfc_uid == "a503670b":
-            result = True
-            self.user_name = "송명근"
-            self.user_password = "0000"
-            enable = False
-        
-        # if not enable
-        if enable == False:
-            self._set_title("차단된 카드")
-            self._set_sub_title("이 카드는 사용이 불가능합니다")
-            log_manager.service.insert_log("NFC출입", "차단", f"차단된 카드로 접근을 시도했습니다: UID={self.nfc_uid}")
+        if not self.auth_result.success or self.auth_result.code != 200:
+            self._set_title("NFC 인증 실패")
+            self._set_sub_title(self.auth_result.message)
+            self._hide_password_frame()
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             return
         
-        if result:
+        self.user_name = self.auth_result.data.get("user_name", None)
+        self.user_nfc_pin = self.auth_result.data.get("user_nfc_pin", None)
+
+        if self.user_nfc_pin:
             self._set_title("PIN번호 인증")
             self._set_sub_title("PIN번호를 입력해주세요")
             self._create_password_frame()
             self._on_clear_press()
         else:
-            self._set_title("NFC 인증 실패")
-            # self._set_sub_title("알 수 없는 카드입니다")
-            self._set_sub_title(f"알 수 없는 카드입니다\n{self.nfc_uid}")
+            self._set_title("NFC 인증 성공")
+            self._set_sub_title(f"{self.auth_result.message}")
             self._hide_password_frame()
-            log_manager.service.insert_log("NFC출입", "차단", f"알 수 없는 카드로 접근 시도했습니다: UID={self.nfc_uid}")
+            log_manager.service.insert_log("NFC출입", "승인", f"문이 열렸습니다: NFC_UID={self.nfc_uid}")
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
     
     def _set_title(self, text):

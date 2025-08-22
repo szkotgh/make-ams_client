@@ -55,7 +55,7 @@ class PageAuthInternalButton(tk.Frame):
     def _detect_button(self):
         if self.controller.now_page != "MainPage":
             return
-
+        
         self.controller.show_page("PageAuthInternalButton")
             
     def open_button(self):

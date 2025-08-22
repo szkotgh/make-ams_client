@@ -30,11 +30,11 @@ CONNECTION_INTERVAL = config["connection"]["connection_interval"]
 START_TIME = utils.get_now_datetime()
 
 # Status
-STATUS_ENABLE = config["status"]["enable"]
-STATUS_DISABLE = config["status"]["disable"]
-STATUS_OPEN = config["status"]["open"]
-STATUS_RESTRIC = config["status"]["restrict"]
-STATUS_CLOSE = config["status"]["close"]
+STATUS_ENABLE = "enable"
+STATUS_DISABLE = "disable"
+STATUS_OPEN = "open"
+STATUS_RESTRIC = "restrict"
+STATUS_CLOSE = "close"
 
 # UI
 TITLE = config["ui"]["title"]

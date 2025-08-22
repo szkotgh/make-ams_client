@@ -9,6 +9,8 @@ from pages.page_auth_external_button import PageAuthExternalButton
 from pages.page_auth_internal_button import PageAuthInternalButton
 from pages.page_auth_qr import PageAuthQR
 from pages.page_auth_nfc import PageAuthNFC
+from pages.page_remote_open import PageRemoteOpen
+from pages.page_request_open_door import PageRequestOpenDoor
 import setting
 
 class App(tk.Tk):
@@ -33,7 +35,7 @@ class App(tk.Tk):
         self.pages = {}
 
         # page initialization
-        for PageClass in (PageStart, MainPage, PageAdminLogin, PageAdminMain, PageAdminLog, PageAdminForceOpen, PageAuthExternalButton, PageAuthInternalButton, PageAuthQR, PageAuthNFC):
+        for PageClass in (PageStart, MainPage, PageAdminLogin, PageAdminMain, PageAdminLog, PageAdminForceOpen, PageAuthExternalButton, PageAuthInternalButton, PageAuthQR, PageAuthNFC, PageRemoteOpen, PageRequestOpenDoor):
             page_name = PageClass.__name__
             page = PageClass(parent=self.container, controller=self)
             self.pages[page_name] = page

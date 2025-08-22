@@ -4,13 +4,6 @@
     "connection_interval": 1.0,
     "time_out": 3
   },
-  "status": {
-      "enable": "enable",
-      "disable": "disable",
-      "open": "open",
-      "restrict": "restrict",
-      "close": "close"
-  },
   "ui": {
     "display_width": 800,
     "display_height": 480,

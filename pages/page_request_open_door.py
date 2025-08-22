@@ -1,13 +1,11 @@
 import threading
-import time
 import tkinter as tk
 from PIL import Image, ImageTk
 import auth_manager
 import setting
-import hardware_manager
 import log_manager
 
-class PageAuthExternalButton(tk.Frame):
+class PageRequestOpenDoor(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -41,50 +39,30 @@ class PageAuthExternalButton(tk.Frame):
         content_frame = tk.Frame(right_frame, bg=setting.AUTH_COLOR)
         content_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-        self.title = tk.Label(content_frame, text="외부인 출입", font=(setting.DEFAULT_FONT, 48, "bold"), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
+        self.title = tk.Label(content_frame, text="문 열기 요청", font=(setting.DEFAULT_FONT, 48, "bold"), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
         self.title.pack()
-        self.sub_title = tk.Label(content_frame, text="잠시만 기다려주세요", font=(setting.DEFAULT_FONT, 32), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
+        self.sub_title = tk.Label(content_frame, text="잠시만 기다려주세요.", font=(setting.DEFAULT_FONT, 32), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
-        
-        hardware_manager.external_button.regi_callback(self._detect_button)
 
     def on_show(self):
-        threading.Thread(target=self.button_auth, daemon=True).start()
-    
-    def _detect_button(self):
-        if self.controller.now_page != "MainPage":
-            return
-
-        self.controller.show_page("PageAuthExternalButton")
+        threading.Thread(target=self._on_show, daemon=True).start()
             
-    def button_auth(self):
-        self._set_title("외부인 출입")
+    def _on_show(self):
+        self._set_title("문 열기 요청")
         self.main_frame.config(bg=setting.AUTH_COLOR)
 
-        # Check button enabled
-        if not auth_manager.service.get_button_status() == setting.STATUS_ENABLE:
-            self._set_title("외부인 출입 불가")
-            self._set_sub_title("비활성화되어 있습니다")
-            hardware_manager.speaker_manager.play(setting.WRONG_SOUND_PATH)
-            self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
-            return
-
-        # Auth Request
-        self._set_sub_title("정보를 가져오고 있습니다")
-        self.auth_result = auth_manager.service.request_button_auth()
+        self._set_sub_title("잠시만 기다려주세요.")
+        self.auth_result = auth_manager.service.request_open_door()
         
         if not self.auth_result.success or self.auth_result.code != 200:
-            self._set_title("외부인 출입 불가")
+            self._set_title("문 열기 요청 실패")
             self._set_sub_title(f"{self.auth_result.message}")
-            log_manager.service.insert_log("외부인출입", "차단", f"출입이 거부되었습니다. detail={self.auth_result.message}")
-            hardware_manager.speaker_manager.play(setting.WRONG_SOUND_PATH)
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             return
-
-        self._set_title("환영합니다")
+        
+        self._set_title("문 열기 요청 성공")
         self._set_sub_title(f"{self.auth_result.message}")
-        log_manager.service.insert_log("외부인출입", "승인", f"문이 열렸습니다.")
-        hardware_manager.door.auto_open_door()
+        log_manager.service.insert_log("시스템", "문열림요청", "문 열림 요청을 전송하였습니다.")
         self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
     
     def _set_title(self, text):

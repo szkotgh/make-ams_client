@@ -99,38 +99,26 @@ class PageAuthQR(tk.Frame):
         self.main_frame.config(bg=setting.AUTH_COLOR)
         self._set_title("QR 인증")
 
-        if not auth_manager.service.get_qr_status() == setting.STATUS_ENABLE:
-            self._set_title("QR 인증 불가")
-            self._set_sub_title("현재 이용할 수 없습니다.")
-            self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
-            return
-
         self._set_sub_title("정보를 가져오고 있습니다")
-
-        result = False
-        user_name = None
-
-        if self.detect_qr_value == "GMLASD12".lower():
-            result = True
-            user_name = "관리자"
-
-        if result:
-            self._set_title("QR 인증 성공")
-            self._set_sub_title(f"{user_name}님 환영합니다")
-            log_manager.service.insert_log("QR출입", "승인", f"QR출입이 승인되었습니다: UNAME={user_name} VALUE={self.detect_qr_value}")
-            hardware_manager.door.auto_open_door()
-        else:
-            self._set_title("QR 인증 실패")
-            self._set_sub_title(f"인증에 실패하였습니다")
-            log_manager.service.insert_log("QR출입", "차단", f"올바르지 않은 QR로 접근을 시도했습니다: VALUE={self.detect_qr_value}")
-            hardware_manager.speaker_manager.play(setting.WRONG_SOUND_PATH)
+        self.auth_result = auth_manager.service.request_qr_auth(self.detect_qr_value)
 
         def end_auth():
             self.qr_listner.get_qr_detect_result()
             self.controller.show_page("MainPage")
             with self._auth_lock:
                 self.auth_running = False
-            
+        
+        if not self.auth_result.success or self.auth_result.code != 200:
+            self._set_title("QR 인증 실패")
+            self._set_sub_title(self.auth_result.message)
+            self.controller.after(3000, lambda: end_auth())
+            return
+        
+        self._set_title("QR 인증 성공")
+        self._set_sub_title(f"{self.auth_result.message}")
+        log_manager.service.insert_log("QR출입", "승인", f"QR출입이 승인되었습니다: VALUE={self.detect_qr_value}")
+        hardware_manager.door.auto_open_door()
+        
         self.controller.after(3000, lambda: end_auth())
 
     def _set_title(self, text):
