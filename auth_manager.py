@@ -18,13 +18,16 @@ class AuthManager:
         self.connection_success = False
         self.connection_ping = -1
 
-        self.door_status = setting.STATUS_CLOSE
-        self.button_status_server = setting.STATUS_DISABLE
-        self.qr_status_server = setting.STATUS_DISABLE
-        self.nfc_status_server = setting.STATUS_DISABLE
+        self.door_access_level = setting.STATUS_CLOSE
+        self.button_status_enabled = setting.STATUS_DISABLE
+        self.qr_status_enabled = setting.STATUS_DISABLE
+        self.nfc_status_enabled = setting.STATUS_DISABLE
         self.qr_status_hw = setting.STATUS_DISABLE
         self.nfc_status_hw = setting.STATUS_DISABLE
         self.remote_open_callback = None
+        self.remote_open_enabled = setting.STATUS_DISABLE
+        self.remote_open_by = None
+        self.open_request_enabled = setting.STATUS_DISABLE
         
         self.start_connection()
     
@@ -46,15 +49,16 @@ class AuthManager:
                     self.connection_success = True
                     self.connection_ping = ping_ms
 
-                    self.door_status = result_data['door_status']
-                    self.button_status_server = result_data['button_status']
-                    self.qr_status_server = result_data['qr_status']
-                    self.nfc_status_server = result_data['nfc_status']
-                    self.remote_open_door = result_data['remote_open_door']
-                    self.remote_open_door_by = result_data['remote_open_door_by']
+                    self.door_access_level = result_data['door_access_level']
+                    self.button_status_enabled = result_data['button_status_enabled']
+                    self.qr_status_enabled = result_data['qr_status_enabled']
+                    self.nfc_status_enabled = result_data['nfc_status_enabled']
+                    self.remote_open_enabled = result_data['remote_open_enabled']
+                    self.remote_open_by = result_data['remote_open_door_by']
+                    self.open_request_enabled = result_data['open_request_enabled']
                     
-                    if self.remote_open_door == setting.STATUS_ENABLE:
-                        threading.Thread(target=self.remote_open_callback, args=(self.remote_open_door_by,)).start()
+                    if self.remote_open_enabled == setting.STATUS_ENABLE:
+                        threading.Thread(target=self.remote_open_callback, args=(self.remote_open_by,)).start()
                 else:
                     self.connection_success = False
             except Exception as e:
@@ -62,26 +66,27 @@ class AuthManager:
             
             ## 인터넷 연결 불량: 전체 기능 제한
             if not self.connection_success:
-                self.door_status = setting.STATUS_CLOSE
+                self.door_access_level = setting.STATUS_CLOSE
+                self.open_request_enabled = setting.STATUS_DISABLE
 
             ## 열림 상태: 작업 안함
-            if self.door_status == setting.STATUS_OPEN:
+            if self.door_access_level == setting.STATUS_OPEN:
                 hardware_manager.external_button.led_on()
             ## 내부인 상태: 버튼 기능 제한
-            elif self.door_status == setting.STATUS_RESTRIC:
-                self.button_status_server = setting.STATUS_DISABLE
+            elif self.door_access_level == setting.STATUS_RESTRIC:
+                self.button_status_enabled = setting.STATUS_DISABLE
                 hardware_manager.external_button.led_off()
             ## 제한 상태: 모든 기능 제한(관리자 예외)
-            elif self.door_status == setting.STATUS_CLOSE:
-                self.button_status_server = setting.STATUS_DISABLE
-                self.qr_status_server = setting.STATUS_DISABLE
-                self.nfc_status_server = setting.STATUS_DISABLE
+            elif self.door_access_level == setting.STATUS_CLOSE:
+                self.button_status_enabled = setting.STATUS_DISABLE
+                self.qr_status_enabled = setting.STATUS_DISABLE
+                self.nfc_status_enabled = setting.STATUS_DISABLE
                 hardware_manager.external_button.led_off()
             ## 알 수 없는 상태: 모든 기능 제한(관리자 예외)
             else:
-                self.button_status_server = setting.STATUS_DISABLE
-                self.qr_status_server = setting.STATUS_DISABLE
-                self.nfc_status_server = setting.STATUS_DISABLE
+                self.button_status_enabled = setting.STATUS_DISABLE
+                self.qr_status_enabled = setting.STATUS_DISABLE
+                self.nfc_status_enabled = setting.STATUS_DISABLE
                 hardware_manager.external_button.led_off()
 
             threading.Timer(setting.CONNECTION_INTERVAL, check_connection).start()
@@ -136,7 +141,7 @@ class AuthManager:
             result_message = result_json["message"]
             result_data = result_json["data"]
             
-            return AuthResultDTO(result_code, result_message, result_data)
+            return AuthResultDTO(code=result_code, message=result_message, data=result_data, success=True)
         
         except requests.exceptions.ConnectionError as e:
             log_manager.service.insert_log("auth_manager", "에러", f"서버와 연결에 실패했습니다: {e}")
@@ -212,10 +217,10 @@ class AuthManager:
         return {"success": self.connection_success, "ping": self.connection_ping}
 
     def get_door_status(self):
-        return self.door_status
+        return self.door_access_level
     
     def get_button_status(self):
-        return self.button_status_server
+        return self.button_status_enabled
     
     def get_qr_status(self):
         return setting.STATUS_ENABLE if self.is_qr_enabled() else setting.STATUS_DISABLE
@@ -224,9 +229,9 @@ class AuthManager:
         return setting.STATUS_ENABLE if self.is_nfc_enabled() else setting.STATUS_DISABLE
 
     def is_qr_enabled(self):
-        return self.qr_status_server == setting.STATUS_ENABLE and self.qr_status_hw == setting.STATUS_ENABLE
+        return self.qr_status_enabled == setting.STATUS_ENABLE and self.qr_status_hw == setting.STATUS_ENABLE
 
     def is_nfc_enabled(self):
-        return self.nfc_status_server == setting.STATUS_ENABLE and self.nfc_status_hw == setting.STATUS_ENABLE
+        return self.nfc_status_enabled == setting.STATUS_ENABLE and self.nfc_status_hw == setting.STATUS_ENABLE
 
 service = AuthManager()

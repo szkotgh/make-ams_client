@@ -167,12 +167,7 @@ class PageAuthNFC(tk.Frame):
 
     def _verify_password(self):
         if self.password_entry == self.user_nfc_pin:
-            self._set_title("NFC 인증 성공")
-            self._set_sub_title(f"{self.auth_result.message}")
-            self._hide_password_frame()
-            self._stop_password_timer()
-            log_manager.service.insert_log("NFC출입", "승인", f"문이 열렸습니다: NFC_UID={self.nfc_uid}")
-            hardware_manager.door.auto_open_door()
+            self._open_door()
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
         else:
             self.password_fail_count += 1
@@ -264,11 +259,16 @@ class PageAuthNFC(tk.Frame):
             self._create_password_frame()
             self._on_clear_press()
         else:
-            self._set_title("NFC 인증 성공")
-            self._set_sub_title(f"{self.auth_result.message}")
-            self._hide_password_frame()
-            log_manager.service.insert_log("NFC출입", "승인", f"문이 열렸습니다: NFC_UID={self.nfc_uid}")
+            self._open_door()
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
+    
+    def _open_door(self):
+        self._hide_password_frame()
+        self._stop_password_timer()
+        self._set_title("NFC 인증 성공")
+        self._set_sub_title(f"{self.auth_result.message}")
+        log_manager.service.insert_log("NFC출입", "승인", f"문이 열렸습니다: NFC_UID={self.nfc_uid}")
+        hardware_manager.door.auto_open_door()
     
     def _set_title(self, text):
         self.title.config(text=text)

@@ -115,8 +115,12 @@ class MainPage(tk.Frame):
                 img_btn1 = Image.open(setting.BUTTON_ENABLE_IMG_PATH)
                 self.button1.config(state=tk.NORMAL)
             else:
-                img_btn1 = Image.open(setting.BUTTON_DISABLE_IMG_PATH)
-                # self.button1.config(state=tk.DISABLED)
+                if auth_manager.service.open_request_enabled == setting.STATUS_ENABLE:
+                    img_btn1 = Image.open(setting.BUTTON_OPEN_REQUEST_IMG_PATH)
+                    self.button1.config(state=tk.NORMAL)
+                else:
+                    img_btn1 = Image.open(setting.BUTTON_DISABLE_IMG_PATH)
+                    self.button1.config(state=tk.DISABLED)
             img_btn1 = img_btn1.resize((140, 140))
             img_btn1 = ImageTk.PhotoImage(img_btn1)
             self.img_btn1 = img_btn1
@@ -155,9 +159,12 @@ class MainPage(tk.Frame):
             hardware_manager.speaker_manager.play(setting.CLICK_SOUND_PATH)
             self.controller.show_page("PageAuthExternalButton")
         else:
-            log_manager.service.insert_log("사용자", "인증", "사용자가 문열기 요청을 시도했습니다")
-            hardware_manager.speaker_manager.play(setting.CLICK_SOUND_PATH)
-            self.controller.show_page("PageRequestOpenDoor")
+            if auth_manager.service.open_request_enabled == setting.STATUS_ENABLE:
+                log_manager.service.insert_log("사용자", "인증", "사용자가 문열기 요청을 시도했습니다")
+                hardware_manager.speaker_manager.play(setting.CLICK_SOUND_PATH)
+                self.controller.show_page("PageRequestOpenDoor")
+            else:
+                pass
     
     def qr_auth(self):
         log_manager.service.insert_log("사용자", "인증", "사용자가 QR 인증을 시도했습니다.")
