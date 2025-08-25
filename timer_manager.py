@@ -8,20 +8,11 @@ import log_manager
 class TimerManager:
     def __init__(self):
         self.timers = {}
-        
-        def _update_timers():
-            while True:
-                now = datetime.now()
-                for timer, end_time in list(self.timers.items()):
-                    if now >= end_time:
-                        timer.cancel()
-                        del self.timers[timer]
-                time.sleep(1)
+        self.lock = threading.Lock()
 
-        # register timer
         self.register_timer_at("00:00:00", self.reboot)
-        
-        threading.Thread(target=_update_timers, daemon=True).start()
+
+        threading.Thread(target=self._update_timers, daemon=True).start()
         print("[TimerManager] Started.")
 
     def register_timer_at(self, target_time_str, callback):
@@ -33,14 +24,48 @@ class TimerManager:
             target_datetime += timedelta(days=1)
 
         duration = (target_datetime - now).total_seconds()
-        timer = threading.Timer(duration, callback)
-        self.timers[timer] = target_datetime
+        timer = threading.Timer(duration, self._wrap_callback, args=(callback,))
+        with self.lock:
+            self.timers[timer] = {
+                "end_time": target_datetime,
+                "callback": callback,
+                "is_used": False
+            }
         timer.start()
+
+    def _wrap_callback(self, callback):
+        for t, info in list(self.timers.items()):
+            if info["callback"] == callback:
+                info["is_used"] = True
+        callback()
+
+    def _update_timers(self):
+        last_date = datetime.now().date()
+        while True:
+            now = datetime.now()
+
+            # reset all is_used at midnight
+            if now.date() != last_date:
+                with self.lock:
+                    for info in self.timers.values():
+                        info["is_used"] = False
+                last_date = now.date()
+
+            with self.lock:
+                for timer, info in list(self.timers.items()):
+                    if now >= info["end_time"]:
+                        target_time_str = info["end_time"].strftime("%H:%M:%S")
+                        callback = info["callback"]
+                        del self.timers[timer]
+                        self.register_timer_at(target_time_str, callback)
+
+            time.sleep(0.5)
 
     def reboot(self):
         log_manager.service.insert_log("시스템", "재부팅", "시스템을 자동으로 재부팅합니다.")
         hardware_manager.service.hardware_close()
         log_manager.service.log_close()
         os.system("sudo reboot now")
-        
+
+
 service = TimerManager()
