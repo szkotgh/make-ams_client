@@ -42,7 +42,7 @@ class AuthManager:
 
                 result_json = response.json()
                 result_code = result_json["code"]
-                result_message = result_json["message"]
+                _ = result_json["message"]
                 result_data = result_json["data"]
 
                 if result_code == 200:
@@ -61,7 +61,7 @@ class AuthManager:
                         threading.Thread(target=self.remote_open_callback, args=(self.remote_open_by,)).start()
                 else:
                     self.connection_success = False
-            except Exception as e:
+            except Exception:
                 self.connection_success = False
             
             ## 인터넷 연결 불량: 전체 기능 제한
@@ -71,23 +71,27 @@ class AuthManager:
 
             ## 열림 상태: 작업 안함
             if self.door_access_level == setting.STATUS_OPEN:
-                hardware_manager.external_button.led_on()
+                if hardware_manager.external_button is not None:
+                    hardware_manager.external_button.led_on()
             ## 내부인 상태: 버튼 기능 제한
             elif self.door_access_level == setting.STATUS_RESTRIC:
                 self.button_status_enabled = setting.STATUS_DISABLE
-                hardware_manager.external_button.led_off()
+                if hardware_manager.external_button is not None:
+                    hardware_manager.external_button.led_off()
             ## 제한 상태: 모든 기능 제한(관리자 예외)
             elif self.door_access_level == setting.STATUS_CLOSE:
                 self.button_status_enabled = setting.STATUS_DISABLE
                 self.qr_status_enabled = setting.STATUS_DISABLE
                 self.nfc_status_enabled = setting.STATUS_DISABLE
-                hardware_manager.external_button.led_off()
+                if hardware_manager.external_button is not None:
+                    hardware_manager.external_button.led_off()
             ## 알 수 없는 상태: 모든 기능 제한(관리자 예외)
             else:
                 self.button_status_enabled = setting.STATUS_DISABLE
                 self.qr_status_enabled = setting.STATUS_DISABLE
                 self.nfc_status_enabled = setting.STATUS_DISABLE
-                hardware_manager.external_button.led_off()
+                if hardware_manager.external_button is not None:
+                    hardware_manager.external_button.led_off()
 
             threading.Timer(setting.CONNECTION_INTERVAL, check_connection).start()
 

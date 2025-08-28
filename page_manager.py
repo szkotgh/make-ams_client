@@ -33,17 +33,40 @@ class App(tk.Tk):
 
         self.now_page = None
         self.pages = {}
+        self.page_classes = {
+            "PageStart": PageStart,
+            "MainPage": MainPage,
+            "PageAdminLogin": PageAdminLogin,
+            "PageAdminMain": PageAdminMain,
+            "PageAdminLog": PageAdminLog,
+            "PageAdminForceOpen": PageAdminForceOpen,
+            "PageAuthExternalButton": PageAuthExternalButton,
+            "PageAuthInternalButton": PageAuthInternalButton,
+            "PageAuthQR": PageAuthQR,
+            "PageAuthNFC": PageAuthNFC,
+            "PageRemoteOpen": PageRemoteOpen,
+            "PageRequestOpenDoor": PageRequestOpenDoor
+        }
 
-        # page initialization
-        for PageClass in (PageStart, MainPage, PageAdminLogin, PageAdminMain, PageAdminLog, PageAdminForceOpen, PageAuthExternalButton, PageAuthInternalButton, PageAuthQR, PageAuthNFC, PageRemoteOpen, PageRequestOpenDoor):
-            page_name = PageClass.__name__
-            page = PageClass(parent=self.container, controller=self)
-            self.pages[page_name] = page
-            page.grid(row=0, column=0, sticky="nsew")
-
+        # Load only start page first to reduce initial loading time
+        self._load_page("PageStart")
         self.show_page("PageStart")
 
+    def _load_page(self, page_name):
+        """Lazy load pages to improve memory efficiency"""
+        if page_name not in self.pages:
+            PageClass = self.page_classes.get(page_name)
+            if PageClass:
+                page = PageClass(parent=self.container, controller=self)
+                self.pages[page_name] = page
+                page.grid(row=0, column=0, sticky="nsew")
+                print(f"Page loaded: {page_name}")
+
     def show_page(self, page_name):
+        # Load page first if not already loaded
+        if page_name not in self.pages:
+            self._load_page(page_name)
+        
         self.now_page = page_name
         page = self.pages[page_name]
         page.tkraise()

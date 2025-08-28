@@ -50,7 +50,13 @@ class SpeakerManager:
                 except Exception as e:
                     print(f"Error playing sound: {e}")
 
-        threading.Thread(target=_play, daemon=True).start()
+        # 스레드 생성 최적화 - 기존 스레드가 실행 중이면 재사용
+        if not hasattr(self, '_play_thread') or not self._play_thread.is_alive():
+            self._play_thread = threading.Thread(target=_play, daemon=True)
+            self._play_thread.start()
+        else:
+            # 기존 스레드가 실행 중이면 직접 실행
+            _play()
 
     def stop(self):
         with self._lock:
@@ -135,14 +141,16 @@ class ExternalButtonSwitch():
         return GPIO.input(self.BTN_PIN) == GPIO.LOW
 
     def regi_callback(self, callback):
-        def run_callback():
-            if GPIO.input(self.BTN_PIN) == GPIO.LOW: callback()
+        def run_callback(ch):
+            # Increase debouncing time to reduce CPU usage
+            if GPIO.input(self.BTN_PIN) == GPIO.LOW: 
+                callback()
 
         GPIO.add_event_detect(
             self.BTN_PIN,
             GPIO.FALLING,
-            callback=lambda ch: run_callback(),
-            bouncetime=50
+            callback=run_callback,
+            bouncetime=100  # Increased from 50ms to 100ms to reduce CPU usage
         )
 
 class InternalButtonSwitch():
@@ -163,14 +171,16 @@ class InternalButtonSwitch():
         return GPIO.input(self.BTN_PIN) == GPIO.LOW
 
     def regi_callback(self, callback):
-        def run_callback():
-            if GPIO.input(self.BTN_PIN) == GPIO.LOW: callback()
+        def run_callback(ch):
+            # Increase debouncing time to reduce CPU usage
+            if GPIO.input(self.BTN_PIN) == GPIO.LOW: 
+                callback()
 
         GPIO.add_event_detect(
             self.BTN_PIN,
             GPIO.FALLING,
-            callback=lambda ch: run_callback(),
-            bouncetime=50
+            callback=run_callback,
+            bouncetime=100  # Increased from 50ms to 100ms to reduce CPU usage
         )
 
 class DoorRelay:
@@ -197,7 +207,12 @@ class DoorRelay:
             if not self._door_close_cancel_flag:
                 self.set_door(False)
 
-        threading.Timer(close_duration, _close).start()
+        # 기존 타이머가 있으면 취소
+        if hasattr(self, '_close_timer') and self._close_timer:
+            self._close_timer.cancel()
+        
+        self._close_timer = threading.Timer(close_duration, _close)
+        self._close_timer.start()
 
     def auto_open_door(self, wait_duration=3):
         if self._door_timer is not None:
@@ -210,47 +225,84 @@ class DoorRelay:
 class NFCReader:
     def __init__(self):
         self.initialized = False
+        self._stop_event = threading.Event()
         self._init_thread = threading.Thread(target=self._init_nfc, daemon=True)
         self._init_thread.start()
 
+    def cleanup(self):
+        """Clean up resources and terminate threads"""
+        self._stop_event.set()
+        if self._init_thread.is_alive():
+            self._init_thread.join(timeout=5)
+        if hasattr(self, "i2c"):
+            try:
+                self.i2c.deinit()
+            except Exception:
+                pass
+
     def _init_nfc(self):
+        # Lower thread priority to improve GUI performance
+        import os
+        try:
+            os.nice(10)  # Set low priority
+        except:
+            pass
+            
         last_init_time = 0
-        check_interval = 10
+        check_interval = 30  # Increased from 10s to 30s to reduce CPU usage
         reinit_interval = 3600
+        consecutive_errors = 0
+        max_errors = 3
 
-        while True:
-            now = time.time()
-            need_reinit = False
+        while not self._stop_event.is_set():
+            try:
+                now = time.time()
+                need_reinit = False
 
-            if not self.initialized or now - last_init_time > reinit_interval:
-                need_reinit = True
-            elif self.initialized:
-                try:
-                    self.pn532.read_passive_target(timeout=0.1)
-                except Exception:
-                    self.initialized = False
+                # Increase hardware status check interval to reduce CPU usage
+                if not self.initialized or now - last_init_time > reinit_interval:
                     need_reinit = True
+                elif self.initialized and consecutive_errors < max_errors:
+                    try:
+                        # Reduce timeout from 0.1s to 0.05s to improve responsiveness
+                        self.pn532.read_passive_target(timeout=0.05)
+                        consecutive_errors = 0  # Reset error counter on success
+                    except Exception:
+                        consecutive_errors += 1
+                        if consecutive_errors >= max_errors:
+                            need_reinit = True
 
-            if need_reinit:
-                try:
-                    if hasattr(self, "i2c"):
-                        try:
-                            self.i2c.deinit()
-                        except Exception:
-                            pass
-                    self.i2c = busio.I2C(board.SCL, board.SDA)
-                    self.pn532 = PN532_I2C(self.i2c, debug=False)
-                    self.pn532.SAM_configuration()
-                    self.initialized = True
-                    last_init_time = now
-                    import auth_manager, setting
-                    auth_manager.service.nfc_status_hw = setting.STATUS_ENABLE
-                except Exception:
-                    self.initialized = False
-                    import auth_manager, setting
-                    auth_manager.service.nfc_status_hw = setting.STATUS_DISABLE
+                if need_reinit:
+                    try:
+                        if hasattr(self, "i2c"):
+                            try:
+                                self.i2c.deinit()
+                            except Exception:
+                                pass
+                        self.i2c = busio.I2C(board.SCL, board.SDA)
+                        self.pn532 = PN532_I2C(self.i2c, debug=False)
+                        self.pn532.SAM_configuration()
+                        self.initialized = True
+                        last_init_time = now
+                        consecutive_errors = 0
+                        import auth_manager, setting
+                        auth_manager.service.nfc_status_hw = setting.STATUS_ENABLE
+                    except Exception as e:
+                        self.initialized = False
+                        consecutive_errors += 1
+                        import auth_manager, setting
+                        auth_manager.service.nfc_status_hw = setting.STATUS_DISABLE
 
-            time.sleep(check_interval)
+                # Wait longer when there are many errors
+                if consecutive_errors > 0:
+                    time.sleep(check_interval * 2)
+                else:
+                    time.sleep(check_interval)
+                    
+            except Exception as e:
+                # Log and continue on exception
+                print(f"NFC initialization error: {e}")
+                time.sleep(check_interval)
 
     def read_nfc(self, timeout=0.5):
         if not self.initialized:
@@ -269,10 +321,22 @@ class QRListener:
         self._result = None
         self._device = None
         self.listener_thread = None
+        self._stop_event = threading.Event()
         self.qr_listener_name = "USBKey Chip USBKey Module"
         self.callback_list = []
         
         self.start()
+
+    def cleanup(self):
+        """Clean up resources and terminate threads"""
+        self._stop_event.set()
+        if self._device:
+            try:
+                self._device.close()
+            except Exception:
+                pass
+        if self.listener_thread and self.listener_thread.is_alive():
+            self.listener_thread.join(timeout=5)
 
     def regi_callback(self, callback):
         self.callback_list.append(callback)
@@ -287,7 +351,7 @@ class QRListener:
                     self._active = False
                     self._result = self._buffer
                     self._buffer = ""
-                    # Callback Run
+                    # Execute callbacks
                     for callback in self.callback_list:
                         callback(self._result)
                 else:
@@ -308,18 +372,38 @@ class QRListener:
         return None
 
     def _listen(self):
+        # Lower thread priority to improve GUI performance
+        import os
+        try:
+            os.nice(10)  # Set low priority
+        except:
+            pass
+            
         print("QR Listener Initializing...")
-        while True:
+        retry_count = 0
+        max_retries = 5
+        base_delay = 5  # Increased from 1s to 5s to reduce CPU usage
+        
+        while not self._stop_event.is_set():
             try:
                 self._device = self._find_input_device()
                 if not self._device:
-                    print(f"QR Listener not found. QR_DEVICE_NAME={self.qr_listener_name}")
+                    retry_count += 1
+                    delay = min(base_delay * (2 ** retry_count), 60)  # Apply exponential backoff
+                    print(f"QR Listener not found. QR_DEVICE_NAME={self.qr_listener_name}. Retry {retry_count}/{max_retries} in {delay}s")
                     import auth_manager, setting
                     auth_manager.service.qr_status_hw = setting.STATUS_DISABLE
-                    time.sleep(1)
+                    
+                    if retry_count >= max_retries:
+                        print("QR Listener max retries reached. Waiting longer before next attempt...")
+                        time.sleep(120)  # Wait 2 minutes before retry
+                        retry_count = 0
+                    else:
+                        time.sleep(delay)
                     continue
 
                 print("QR Listener Initialized Successfully")
+                retry_count = 0  # Reset retry counter on success
                 import auth_manager, setting
                 auth_manager.service.qr_status_hw = setting.STATUS_ENABLE
                 keymap = {
@@ -383,13 +467,110 @@ class QRListener:
         self.listener_thread = threading.Thread(target=self._listen, daemon=True)
         self.listener_thread.start()
 
-speaker_manager = SpeakerManager()
-status_led = StatusLED()
-external_button = ExternalButtonSwitch()
-internal_button = InternalButtonSwitch()
-door = DoorRelay()
-nfc = NFCReader()
-qr = QRListener()
+_speaker_manager = None
+_status_led = None
+_external_button = None
+_internal_button = None
+_door = None
+_nfc = None
+_qr = None
+
+def get_speaker_manager():
+    global _speaker_manager
+    if _speaker_manager is None:
+        _speaker_manager = SpeakerManager()
+    return _speaker_manager
+
+def get_status_led():
+    global _status_led
+    if _status_led is None:
+        _status_led = StatusLED()
+    return _status_led
+
+def get_external_button():
+    global _external_button
+    if _external_button is None:
+        _external_button = ExternalButtonSwitch()
+    return _external_button
+
+def get_internal_button():
+    global _internal_button
+    if _internal_button is None:
+        _internal_button = InternalButtonSwitch()
+    return _internal_button
+
+def get_door():
+    global _door
+    if _door is None:
+        _door = DoorRelay()
+    return _door
+
+def get_nfc():
+    global _nfc
+    if _nfc is None:
+        _nfc = NFCReader()
+    return _nfc
+
+def get_qr():
+    global _qr
+    if _qr is None:
+        _qr = QRListener()
+    return _qr
+
+# 기존 코드와의 호환성을 위한 별칭 - 지연 초기화로 변경
+def _init_hardware_components():
+    """하드웨어 컴포넌트를 지연 초기화하여 GUI 우선 실행 보장"""
+    global speaker_manager, status_led, external_button, internal_button, door, nfc, qr
+    
+    # 3초 후 하드웨어 초기화 시작
+    import threading
+    import time
+    
+    def delayed_init():
+        time.sleep(3)
+        print("Starting hardware components initialization...")
+        speaker_manager = get_speaker_manager()
+        status_led = get_status_led()
+        external_button = get_external_button()
+        internal_button = get_internal_button()
+        door = get_door()
+        nfc = get_nfc()
+        qr = get_qr()
+        print("Hardware components initialization completed")
+    
+    init_thread = threading.Thread(target=delayed_init, daemon=True, name="HardwareInit")
+    init_thread.start()
+
+# 하드웨어 초기화를 별도 스레드에서 지연 실행
+_init_hardware_components()
+
+# 초기값 설정 (실제 객체는 지연 초기화됨)
+speaker_manager = None
+status_led = None
+external_button = None
+internal_button = None
+door = None
+nfc = None
+qr = None
 
 def close():
-    GPIO.cleanup()
+    """모든 하드웨어 리소스 정리 및 스레드 종료"""
+    try:
+        # 각 컴포넌트의 cleanup 메서드 호출 - None 체크 추가
+        if 'nfc' in globals() and nfc is not None:
+            nfc.cleanup()
+        if 'qr' in globals() and qr is not None:
+            qr.cleanup()
+        if 'status_led' in globals() and status_led is not None:
+            status_led.cleanup()
+        
+        # GPIO 정리
+        GPIO.cleanup()
+        print("Hardware manager cleanup completed successfully")
+    except Exception as e:
+        print(f"Error during cleanup: {e}")
+        # 오류 발생 시에도 GPIO는 정리
+        try:
+            GPIO.cleanup()
+        except:
+            pass

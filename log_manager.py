@@ -19,15 +19,23 @@ class LogManager:
 
     def insert_log(self, method, action, details=None):
         try:
-            with sqlite3.connect(setting.LOG_DB_PATH, isolation_level=None) as conn:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    INSERT INTO main (method, action, details)
-                    VALUES (?, ?, ?)
-                ''', (method, action, details))
-                conn.commit()
+            # Use existing connection to prevent creating new connections
+            cursor = self.cursor
+            cursor.execute('''
+                INSERT INTO main (method, action, details)
+                VALUES (?, ?, ?)
+            ''', (method, action, details))
+            self.conn.commit()
         except sqlite3.OperationalError as e:
             print("Failed to write log:", e)
+            # Try to reconnect on connection error
+            try:
+                self.conn.close()
+                self.conn = sqlite3.connect(setting.LOG_DB_PATH, isolation_level=None, check_same_thread=False)
+                self.cursor = self.conn.cursor()
+                self.cursor.execute('PRAGMA journal_mode=WAL;')
+            except Exception as reconnect_error:
+                print(f"Failed to reconnect to database: {reconnect_error}")
 
     def get_logs(self, limit=100):
         self.cursor.execute('''
