@@ -72,14 +72,14 @@ class PageAdminLogin(tk.Frame):
         while self.inactivity_timer_active:
             if time.time() - self.last_input_time > 10:
                 self.stop_inactivity_timer()
-                hardware_manager.speaker_manager.play(setting.WRONG_SOUND_PATH)
+                hardware_manager.safe_speaker_manager().play(setting.WRONG_SOUND_PATH)
                 self.controller.after(0, lambda: self.controller.show_page("MainPage"))
                 return
             time.sleep(0.2)
 
     def _create_keypad_button(self, parent, char):
         def on_click(action=None):
-            hardware_manager.speaker_manager.play(setting.CLICK_SOUND_PATH)
+            hardware_manager.safe_speaker_manager().play(setting.CLICK_SOUND_PATH)
             if action:
                 action()
         if char == 'C':
@@ -120,7 +120,7 @@ class PageAdminLogin(tk.Frame):
 
     def check_password(self):
         if ''.join(self.input_digits) == setting.ADMIN_PW:
-            hardware_manager.speaker_manager.play(setting.SUCCESS_SOUND_PATH)
+            hardware_manager.safe_speaker_manager().play(setting.SUCCESS_SOUND_PATH)
             self.input_clear()
             self.stop_inactivity_timer()
             log_manager.service.insert_log("관리자", "로그인", "관리자페이지에 로그인했습니다.")
@@ -128,11 +128,11 @@ class PageAdminLogin(tk.Frame):
         else:
             self.error_count += 1
             if self.error_count == 3:
-                hardware_manager.speaker_manager.play(setting.DTMG)
+                hardware_manager.safe_speaker_manager().play(setting.DTMG)
             elif self.error_count == 6:
-                hardware_manager.speaker_manager.play(setting.JTMG)
+                hardware_manager.safe_speaker_manager().play(setting.JTMG)
             else:
-                hardware_manager.speaker_manager.play(setting.WRONG_SOUND_PATH)
+                hardware_manager.safe_speaker_manager().play(setting.WRONG_SOUND_PATH)
             self.sub_title_label.config(text="비밀번호가 일치하지 않습니다", fg=setting.DISABLE_COLOR)
             threading.Timer(1.5, self._reset_subtitle).start()
             self.input_clear()

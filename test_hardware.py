@@ -5,32 +5,32 @@ import setting
 def test_led():
     print("[Test LED]")
     print("Testing STATUS_LED_RED...")
-    hardware_manager.status_led.on('red')
+    hardware_manager.safe_status_led().on('red')
     time.sleep(1)
-    hardware_manager.status_led.off('red')
+    hardware_manager.safe_status_led().off('red')
     time.sleep(1)
     print("done")
 
     print("Testing STATUS_LED_YELLOW...")
-    hardware_manager.status_led.on('yellow')
+    hardware_manager.safe_status_led().on('yellow')
     time.sleep(1)
-    hardware_manager.status_led.off('yellow')
+    hardware_manager.safe_status_led().off('yellow')
     time.sleep(1)
     print("done")
     
     print("Testing STATUS_LED_GREEN...")
-    hardware_manager.status_led.on('green')
+    hardware_manager.safe_status_led().on('green')
     time.sleep(1)
-    hardware_manager.status_led.off('green')
+    hardware_manager.safe_status_led().off('green')
     time.sleep(1)
     print("done")
 
 def test_relay():
     print("[Test Relay]")
     print("Testing DOOR_RELAY...")
-    hardware_manager.door.open_door()
+    hardware_manager.safe_door().open_door()
     time.sleep(3)
-    hardware_manager.door.close_door()
+    hardware_manager.safe_door().close_door()
     time.sleep(3)
     print("done")
 
@@ -51,7 +51,7 @@ def test_qr():
     
     print("Waiting for QR...")
     is_testing = True
-    hardware_manager.qr.regi_callback(detect)
+    hardware_manager.safe_qr().regi_callback(detect)
 
     time.sleep(10)
         
@@ -62,7 +62,7 @@ def test_nfc():
 
     while True:
         print("Waiting for RFID/NFC card...")
-        uid = hardware_manager.nfc.read_nfc(timeout=10)
+        uid = hardware_manager.safe_nfc().read_nfc(timeout=10)
         if uid == False:
             print("NFC Module not initialized or not connected.")
             return
@@ -75,35 +75,35 @@ def test_nfc():
 def test_internal_sw():
     print("[Test Internal Switch]")
     print("Testing INTERNAL_SW_LED...")
-    hardware_manager.internal_button.led_on()
+    hardware_manager.safe_internal_button().led_on()
     time.sleep(1)
-    hardware_manager.internal_button.led_off()
+    hardware_manager.safe_internal_button().led_off()
     time.sleep(1)
     print("done")
 
     print("Waiting for INTERNAL_SW_BTN...")
-    while not hardware_manager.internal_button.read_button():
+    while not hardware_manager.safe_internal_button().read_button():
         time.sleep(0.1)
     print("done")
 
 def test_external_sw():
     print("[Test External Switch]")
     print("Testing EXTERNAL_SW_LED...")
-    hardware_manager.external_button.led_on()
+    hardware_manager.safe_external_button().led_on()
     time.sleep(1)
-    hardware_manager.external_button.led_off()
+    hardware_manager.safe_external_button().led_off()
     time.sleep(1)
     print("done")
 
     print("Waiting for EXTERNAL_SW_BTN...")
-    while not hardware_manager.external_button.read_button():
+    while not hardware_manager.safe_external_button().read_button():
         time.sleep(0.1)
     print("done")
 
 def test_speaker():
     print("[Test Speaker]")
     print("Testing SPEAKER...")
-    hardware_manager.speaker_manager.play(setting.TEST_MUSIC)
+    hardware_manager.safe_speaker_manager().play(setting.TEST_MUSIC)
     print("Sound sended.")
     print("done")
 

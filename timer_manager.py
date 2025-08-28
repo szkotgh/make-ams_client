@@ -77,7 +77,7 @@ class TimerManager:
 
     def reboot(self):
         log_manager.service.insert_log("시스템", "재부팅", "시스템을 자동으로 재부팅합니다.")
-        hardware_manager.service.hardware_close()
+        hardware_manager.close()
         log_manager.service.log_close()
         os.system("sudo reboot now")
 

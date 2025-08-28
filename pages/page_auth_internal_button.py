@@ -46,8 +46,9 @@ class PageAuthInternalButton(tk.Frame):
         self.sub_title = tk.Label(content_frame, text="문이 열립니다.", font=(setting.DEFAULT_FONT, 32), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
         
-        hardware_manager.internal_button.led_on()
-        hardware_manager.internal_button.regi_callback(self._detect_button)
+        hardware_manager.safe_internal_button().led_on()
+        # Register callback for automatic re-registration after hardware init
+        hardware_manager.register_callback('internal_button', self._detect_button)
 
     def on_show(self):
         threading.Thread(target=self.open_button, daemon=True).start()
@@ -64,7 +65,7 @@ class PageAuthInternalButton(tk.Frame):
         self._set_title("내부인 퇴실")
         self._set_sub_title("문이 열립니다")
         log_manager.service.insert_log("시스템", "문열림", "내부에서 문을 열었습니다.")
-        hardware_manager.door.auto_open_door()
+        hardware_manager.safe_door().auto_open_door()
         
         self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
     

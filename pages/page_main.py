@@ -99,6 +99,7 @@ class MainPage(tk.Frame):
                 self.conn_status_label.config(text="통신불량", fg=setting.DISABLE_COLOR)
             self.conn_status_label.update_idletasks()
 
+
             # Update door status label
             door_status = auth_manager.service.get_door_status()
             if door_status == setting.STATUS_OPEN:
@@ -152,29 +153,32 @@ class MainPage(tk.Frame):
 
             self.conn_status_label.after(100, update_status)
         update_status()
+        
+
 
     def button_auth(self):
         if auth_manager.service.get_button_status() == setting.STATUS_ENABLE:
             log_manager.service.insert_log("사용자", "인증", "사용자가 버튼 인증을 시도했습니다.")
-            hardware_manager.speaker_manager.play(setting.CLICK_SOUND_PATH)
+            hardware_manager.safe_speaker_manager().play(setting.CLICK_SOUND_PATH)
             self.controller.show_page("PageAuthExternalButton")
         else:
             if auth_manager.service.open_request_enabled == setting.STATUS_ENABLE:
                 log_manager.service.insert_log("사용자", "인증", "사용자가 문열기 요청을 시도했습니다")
-                hardware_manager.speaker_manager.play(setting.CLICK_SOUND_PATH)
+                hardware_manager.safe_speaker_manager().play(setting.CLICK_SOUND_PATH)
                 self.controller.show_page("PageRequestOpenDoor")
             else:
                 pass
     
     def qr_auth(self):
         log_manager.service.insert_log("사용자", "인증", "사용자가 QR 인증을 시도했습니다.")
-        hardware_manager.speaker_manager.play(setting.CLICK_SOUND_PATH)
+        hardware_manager.safe_speaker_manager().play(setting.CLICK_SOUND_PATH)
         self.controller.show_page("PageAuthQR")
         
     def nfc_auth(self):
         log_manager.service.insert_log("사용자", "인증", "사용자가 NFC 인증을 시도했습니다.")
-        hardware_manager.speaker_manager.play(setting.CLICK_SOUND_PATH)
+        hardware_manager.safe_speaker_manager().play(setting.CLICK_SOUND_PATH)
         self.controller.show_page("PageAuthNFC")
     
     def on_show(self):
-        pass
+        # Debug callback status when main page is shown
+        hardware_manager.debug_callback_status()

@@ -46,7 +46,8 @@ class PageAuthExternalButton(tk.Frame):
         self.sub_title = tk.Label(content_frame, text="잠시만 기다려주세요", font=(setting.DEFAULT_FONT, 32), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
         
-        hardware_manager.external_button.regi_callback(self._detect_button)
+        # Register callback for automatic re-registration after hardware init
+        hardware_manager.register_callback('external_button', self._detect_button)
 
     def on_show(self):
         threading.Thread(target=self.button_auth, daemon=True).start()
@@ -65,7 +66,7 @@ class PageAuthExternalButton(tk.Frame):
         if not auth_manager.service.get_button_status() == setting.STATUS_ENABLE:
             self._set_title("외부인 출입 불가")
             self._set_sub_title("비활성화되어 있습니다")
-            hardware_manager.speaker_manager.play(setting.WRONG_SOUND_PATH)
+            hardware_manager.safe_speaker_manager().play(setting.WRONG_SOUND_PATH)
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             return
 
@@ -77,14 +78,14 @@ class PageAuthExternalButton(tk.Frame):
             self._set_title("외부인 출입 불가")
             self._set_sub_title(f"{self.auth_result.message}")
             log_manager.service.insert_log("외부인출입", "차단", f"출입이 거부되었습니다. detail={self.auth_result.message}")
-            hardware_manager.speaker_manager.play(setting.WRONG_SOUND_PATH)
+            hardware_manager.safe_speaker_manager().play(setting.WRONG_SOUND_PATH)
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             return
 
         self._set_title("환영합니다")
         self._set_sub_title(f"{self.auth_result.message}")
         log_manager.service.insert_log("외부인출입", "승인", f"문이 열렸습니다.")
-        hardware_manager.door.auto_open_door()
+        hardware_manager.safe_door().auto_open_door()
         self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
     
     def _set_title(self, text):

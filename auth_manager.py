@@ -71,27 +71,27 @@ class AuthManager:
 
             ## 열림 상태: 작업 안함
             if self.door_access_level == setting.STATUS_OPEN:
-                if hardware_manager.external_button is not None:
-                    hardware_manager.external_button.led_on()
+                if hardware_manager.safe_external_button() is not None:
+                    hardware_manager.safe_external_button().led_on()
             ## 내부인 상태: 버튼 기능 제한
             elif self.door_access_level == setting.STATUS_RESTRIC:
                 self.button_status_enabled = setting.STATUS_DISABLE
-                if hardware_manager.external_button is not None:
-                    hardware_manager.external_button.led_off()
+                if hardware_manager.safe_external_button() is not None:
+                    hardware_manager.safe_external_button().led_off()
             ## 제한 상태: 모든 기능 제한(관리자 예외)
             elif self.door_access_level == setting.STATUS_CLOSE:
                 self.button_status_enabled = setting.STATUS_DISABLE
                 self.qr_status_enabled = setting.STATUS_DISABLE
                 self.nfc_status_enabled = setting.STATUS_DISABLE
-                if hardware_manager.external_button is not None:
-                    hardware_manager.external_button.led_off()
+                if hardware_manager.safe_external_button() is not None:
+                    hardware_manager.safe_external_button().led_off()
             ## 알 수 없는 상태: 모든 기능 제한(관리자 예외)
             else:
                 self.button_status_enabled = setting.STATUS_DISABLE
                 self.qr_status_enabled = setting.STATUS_DISABLE
                 self.nfc_status_enabled = setting.STATUS_DISABLE
-                if hardware_manager.external_button is not None:
-                    hardware_manager.external_button.led_off()
+                if hardware_manager.safe_external_button() is not None:
+                    hardware_manager.safe_external_button().led_off()
 
             threading.Timer(setting.CONNECTION_INTERVAL, check_connection).start()
 

@@ -51,14 +51,17 @@ class PageAuthQR(tk.Frame):
         self.sub_title = tk.Label(content_frame, text="QR을 인식시켜주세요", font=(setting.DEFAULT_FONT, 32), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
         
-        self.qr_listner = hardware_manager.qr
+        self.qr_listner = hardware_manager.safe_qr()
 
         self.auth_running = False
-        hardware_manager.qr.regi_callback(self._detect_qr)
+        # Register callback for automatic re-registration after hardware init
+        hardware_manager.register_callback('qr', self._detect_qr)
 
     def _detect_qr(self, _qr_result: str):
-        # 메인페이지에 있는가?
-        if self.controller.now_page != "MainPage":
+        print(f"QR detected: {_qr_result}")
+        
+        if self.controller.now_page != "MainPage" or self.auth_running:
+            print(f"QR ignored - current page: {self.controller.now_page}, auth running: {self.auth_running}")
             return
 
         with self._auth_lock:
@@ -66,6 +69,7 @@ class PageAuthQR(tk.Frame):
                 return
             self.detect_qr_value = _qr_result
             self.auth_running = True
+            print(f"QR auth started, transitioning to PageAuthQR")
             self.controller.show_page("PageAuthQR")
             threading.Thread(target=self._run_auth_flow, daemon=True).start()
 
@@ -117,7 +121,7 @@ class PageAuthQR(tk.Frame):
         self._set_title("QR 인증 성공")
         self._set_sub_title(f"{self.auth_result.message}")
         log_manager.service.insert_log("QR출입", "승인", f"QR출입이 승인되었습니다: VALUE={self.detect_qr_value}")
-        hardware_manager.door.auto_open_door()
+        hardware_manager.safe_door().auto_open_door()
         
         self.controller.after(3000, lambda: end_auth())
 

@@ -65,7 +65,7 @@ class PageRemoteOpen(tk.Frame):
 
         self._set_sub_title(f"문이 열립니다.\n문 연 사람: {self.remote_open_by}")
         log_manager.service.insert_log("시스템", "문열림", "원격으로 문이 열렸습니다.")
-        hardware_manager.door.auto_open_door()
+        hardware_manager.safe_door().auto_open_door()
         
         self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
     

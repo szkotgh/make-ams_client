@@ -69,7 +69,7 @@ class PageAdminMain(tk.Frame):
         os._exit(1)
 
     def open_door(self):
-        hardware_manager.door.auto_open_door()
+        hardware_manager.safe_door().auto_open_door()
         self.button3.config(state="disabled")
         self.after(3000, lambda: self.button3.config(state="normal"))
         log_manager.service.insert_log("관리자", "승인", "수동으로 문을 열었습니다.")

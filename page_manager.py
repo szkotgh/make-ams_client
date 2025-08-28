@@ -48,9 +48,16 @@ class App(tk.Tk):
             "PageRequestOpenDoor": PageRequestOpenDoor
         }
 
-        # Load only start page first to reduce initial loading time
+        # Load start page first
         self._load_page("PageStart")
         self.show_page("PageStart")
+        
+        # Pre-load all authentication pages to ensure callbacks are registered
+        print("Pre-loading authentication pages for callback registration...")
+        auth_pages = ["PageAuthQR", "PageAuthNFC", "PageAuthExternalButton", "PageAuthInternalButton"]
+        for page_name in auth_pages:
+            self._load_page(page_name)
+            print(f"Pre-loaded: {page_name}")
 
     def _load_page(self, page_name):
         """Lazy load pages to improve memory efficiency"""

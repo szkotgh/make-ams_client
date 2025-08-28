@@ -45,9 +45,9 @@ class PageAdminForceOpen(tk.Frame):
 
     def status_release(self):
         log_manager.service.insert_log("관리자", "승인", "문 열어두기를 해제했습니다.")
-        hardware_manager.door.close_door()
+        hardware_manager.safe_door().close_door()
         self.controller.show_page("MainPage")
 
     def on_show(self):
         log_manager.service.insert_log("관리자", "승인", "문 열어두기를 시작했습니다.")
-        hardware_manager.door.open_door()
+        hardware_manager.safe_door().open_door()
