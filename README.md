@@ -31,5 +31,5 @@ sudo systemctl disable hciuart.service
 sudo systemctl disable avahi-daemon.service
 sudo systemctl disable cups.service
 sudo apt remove rpi-connect -y
-sudo pip3 install -r requirements.txt 
+pip3 install -r requirements.txt --break-system-packages
 ```
