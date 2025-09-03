@@ -1,6 +1,6 @@
 {
   "connection": {
-    "server_url": "https://amsmk2.szk.kr",
+    "server_url": "https://amsmk2.dyhs.kr",
     "connection_interval": 3.0,
     "time_out": 3.0
   },
