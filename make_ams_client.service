@@ -1,16 +1,14 @@
 [Unit]
 Description=MAKE; AMS Client
 Documentation=https://github.com/szkotgh/make-ams_client.git
-After=graphical.target
-Requires=graphical.target
+After=network.target
 
 [Service]
-Environment=DISPLAY=:0
-ExecStartPre=/bin/bash -c 'while ! lsusb | grep -q "0525:a4ac"; do sleep 1; done'
-ExecStart=/bin/bash /home/administrator/make-ams_client/stater.sh
 User=administrator
+Environment=DISPLAY=:0
+ExecStart=/bin/bash /home/administrator/make-ams_client/stater.sh
 Restart=on-failure
-RestartSec=3
+RestartSec=1
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=graphical.target
