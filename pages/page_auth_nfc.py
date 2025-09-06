@@ -1,11 +1,11 @@
 import threading
 import time
 import tkinter as tk
-import auth_manager
+import managers.auth_manager as auth_manager
 import setting
 from PIL import Image, ImageTk
 import hardware_manager
-import log_manager
+import managers.log_manager as log_manager
 
 class PageAuthNFC(tk.Frame):
     def __init__(self, parent, controller):
@@ -50,9 +50,6 @@ class PageAuthNFC(tk.Frame):
         self.title.pack()
         self.sub_title = tk.Label(content_frame, text="NFC 태그를 인식시켜주세요", font=(setting.DEFAULT_FONT, 32), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
-        
-        # NFC 감지 스레드 시작
-        threading.Thread(target=self._detect_nfc, daemon=True).start()
         
         # Register callback for automatic re-registration after hardware init
         hardware_manager.register_callback('nfc', self._nfc_callback)
@@ -223,41 +220,14 @@ class PageAuthNFC(tk.Frame):
         threading.Thread(target=nfc_auth_process, daemon=True).start()
 
     def _nfc_callback(self, nfc_uid: str):
-        """NFC 감지 콜백 - 어느 페이지에서든 작동"""
-        print(f"NFC callback triggered: {nfc_uid}")
-        
-        # 이미 NFC 인증 페이지에 있거나 인증 진행 중이면 무시
-        if self.controller.now_page == "PageAuthNFC" or self.detect_nfc:
+        if self.controller.now_page != "MainPage" or self.detect_nfc:
             print(f"NFC callback ignored - current page: {self.controller.now_page}, auth running: {self.detect_nfc}")
             return
         
-        print(f"NFC auth started via callback, transitioning to PageAuthNFC")
         self.detect_nfc = True
         self.nfc_uid = nfc_uid
         self.controller.show_page("PageAuthNFC")
         self.auth_nfc()
-
-    def _detect_nfc(self):
-        while True:
-            time.sleep(0.3)
-            
-            if self.controller.now_page != "MainPage" or self.detect_nfc:
-                continue
-            
-            try:
-                self.nfc_uid = hardware_manager.safe_nfc().read_nfc()
-            except Exception as e:
-                print(f"NFC detection error: {e}")
-                continue
-            
-            if self.nfc_uid == None:
-                continue
-                
-            print(f"NFC detected: {self.nfc_uid}")
-            self.detect_nfc = True
-            print(f"NFC auth started, transitioning to PageAuthNFC")
-            self.controller.show_page("PageAuthNFC")
-            self.auth_nfc()
 
     def auth_nfc(self):
         self.main_frame.config(bg=setting.AUTH_COLOR)

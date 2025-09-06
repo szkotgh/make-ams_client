@@ -2,10 +2,10 @@ import threading
 import time
 import tkinter as tk
 from PIL import Image, ImageTk
-import auth_manager
+import managers.auth_manager as auth_manager
 import setting
 import hardware_manager
-import log_manager
+import managers.log_manager as log_manager
 
 class PageAuthExternalButton(tk.Frame):
     def __init__(self, parent, controller):

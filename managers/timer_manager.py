@@ -3,7 +3,7 @@ import time
 import threading
 from datetime import datetime, timedelta
 import hardware_manager
-import log_manager
+import managers.log_manager as log_manager
 
 class TimerManager:
     def __init__(self):

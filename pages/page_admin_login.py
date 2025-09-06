@@ -3,7 +3,7 @@ import threading
 import time
 import tkinter as tk
 import setting
-import log_manager
+import managers.log_manager as log_manager
 import hardware_manager
 
 class PageAdminLogin(tk.Frame):

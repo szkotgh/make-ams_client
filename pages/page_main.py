@@ -3,8 +3,8 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import setting
 import time
-import auth_manager
-import log_manager
+import managers.auth_manager as auth_manager
+import managers.log_manager as log_manager
 import hardware_manager
 import utils
 

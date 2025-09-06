@@ -2,7 +2,7 @@ import os
 import tkinter as tk
 import setting
 import utils
-import log_manager
+import managers.log_manager as log_manager
 import hardware_manager
 
 class PageAdminMain(tk.Frame):

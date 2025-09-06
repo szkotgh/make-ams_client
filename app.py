@@ -1,10 +1,10 @@
 import os
 import threading
 import time
-from page_manager import App
-import log_manager
+from managers.page_manager import App
+import managers.log_manager as log_manager
 import hardware_manager
-import timer_manager
+import managers.timer_manager as timer_manager
 
 def initialize_hardware_after_gui():
     """Initialize hardware after GUI is fully loaded - CPU priority adjustment"""

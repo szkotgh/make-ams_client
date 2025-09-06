@@ -1,7 +1,7 @@
 import tkinter as tk
 import setting
 import utils
-import log_manager
+import managers.log_manager as log_manager
 
 class PageAdminLog(tk.Frame):
     def __init__(self, parent, controller):
