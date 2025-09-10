@@ -1,10 +1,10 @@
-import threading
 import tkinter as tk
 from PIL import Image, ImageTk
+import threading
 import managers.auth_manager as auth_manager
-import hardware_manager
-import setting
+import managers.hardware_manager as hardware_manager
 import managers.log_manager as log_manager
+import setting
 
 class PageRequestOpenDoor(tk.Frame):
     def __init__(self, parent, controller):
@@ -58,13 +58,13 @@ class PageRequestOpenDoor(tk.Frame):
         if not self.auth_result.success or self.auth_result.code != 200:
             self._set_title("문 열기 요청 실패")
             self._set_sub_title(f"{self.auth_result.message}")
-            hardware_manager.safe_speaker_manager().play(setting.WRONG_SOUND_PATH)
+            hardware_manager.speaker.play(setting.WRONG_SOUND_PATH)
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             return
         
         self._set_title("문 열기 요청 성공")
         self._set_sub_title(f"{self.auth_result.message}")
-        hardware_manager.safe_speaker_manager().play(setting.SUCCESS_SOUND_PATH)
+        hardware_manager.speaker.play(setting.SUCCESS_SOUND_PATH)
         log_manager.service.insert_log("시스템", "문열림요청", "문 열림 요청을 전송하였습니다.")
         self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
     

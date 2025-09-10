@@ -1,23 +1,25 @@
 import os
 import threading
 import time
-import pygame
+from pygame import mixer
 import logging
 
 logging.basicConfig(level=logging.WARNING)
 
 class Speaker:
     def __init__(self):
+        self.is_initialized = False
         os.environ['SDL_AUDIODRIVER'] = 'alsa'
         try:
-            pygame.mixer.init(
+            mixer.init(
                 frequency=44100,
                 size=-16,
                 channels=2,
-                buffer=512,
-                allowedchanges=pygame.AUDIO_ALLOW_FREQUENCY_CHANGE
+                buffer=512
             )
-        except pygame.error as e:
+            self.is_initialized = True
+        except Exception as e:
+            self.is_initialized = False
             logging.warning(f"[Speaker] Failed to initialize mixer: {e}")
         self._lock = threading.Lock()
         self._volume = 1.0
@@ -28,8 +30,8 @@ class Speaker:
         with self._lock:
             self._volume = max(0.0, min(1.0, volume))
             try:
-                pygame.mixer.music.set_volume(self._volume)
-            except pygame.error as e:
+                mixer.music.set_volume(self._volume)
+            except Exception as e:
                 logging.warning(f"[Speaker] Error setting volume: {e}")
 
     def get_volume(self):
@@ -37,6 +39,10 @@ class Speaker:
 
     def play(self, file_path):
         print(f"[Speaker] Playing sound: {file_path}")
+        if not self.is_initialized:
+            logging.warning(f"[Speaker] Speaker is not initialized")
+            return
+
         if not os.path.exists(file_path):
             logging.warning(f"[Speaker] Audio file not found: {file_path}")
             return
@@ -44,16 +50,16 @@ class Speaker:
         def _play():
             with self._lock:
                 try:
-                    if pygame.mixer.music.get_busy():
-                        pygame.mixer.music.stop()
-                        while pygame.mixer.music.get_busy():
+                    if mixer.music.get_busy():
+                        mixer.music.stop()
+                        while mixer.music.get_busy():
                             time.sleep(0.01)
 
-                    pygame.mixer.music.load(file_path)
-                    pygame.mixer.music.set_volume(self._volume)
-                    pygame.mixer.music.play()
+                    mixer.music.load(file_path)
+                    mixer.music.set_volume(self._volume)
+                    mixer.music.play()
                     self._current_file = file_path
-                except pygame.error as e:
+                except Exception as e:
                     logging.warning(f"[Speaker] Error playing sound: {e}")
 
         if self._play_thread is None or not self._play_thread.is_alive():
@@ -66,8 +72,9 @@ class Speaker:
     def stop(self):
         with self._lock:
             try:
-                pygame.mixer.music.stop()
-                while pygame.mixer.music.get_busy():
+                mixer.music.stop()
+                while mixer.music.get_busy():
                     time.sleep(0.01)
-            except pygame.error as e:
+            except mixer.error as e:
                 logging.warning(f"[Speaker] Error stopping sound: {e}")
+

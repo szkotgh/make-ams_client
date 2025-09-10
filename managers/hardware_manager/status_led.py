@@ -57,6 +57,7 @@ class StatusLED:
         t.start()
 
     def cleanup(self):
+        print("[StatusLED] Cleaning up...")
         for c in ["red", "yellow", "green"]:
             self.off(c)
-        self.GPIO.cleanup()
+        print("[StatusLED] Cleaned up.")

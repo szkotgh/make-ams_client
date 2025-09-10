@@ -2,7 +2,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import setting
 import managers.log_manager as log_manager
-import hardware_manager
+import managers.hardware_manager as hardware_manager
 
 class PageAdminForceOpen(tk.Frame):
     def __init__(self, parent, controller):
@@ -45,9 +45,9 @@ class PageAdminForceOpen(tk.Frame):
 
     def status_release(self):
         log_manager.service.insert_log("관리자", "승인", "문 열어두기를 해제했습니다.")
-        hardware_manager.safe_door().close_door()
+        hardware_manager.door.close_door()
         self.controller.show_page("MainPage")
 
     def on_show(self):
         log_manager.service.insert_log("관리자", "승인", "문 열어두기를 시작했습니다.")
-        hardware_manager.safe_door().open_door()
+        hardware_manager.door.open_door()

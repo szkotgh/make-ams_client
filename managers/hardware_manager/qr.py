@@ -1,7 +1,6 @@
 import threading
 import time
 import evdev
-
 import managers.hardware_manager as hardware_manager
 
 class QRListener:
@@ -15,11 +14,12 @@ class QRListener:
         self._stop_event = threading.Event()
         self.qr_listener_name = "USBKey Chip USBKey Module"
         self.callback_list = []
+        self.is_initialized = False
         
         self.start()
 
     def cleanup(self):
-        """Clean up resources and terminate threads"""
+        print("[QRListener] Cleaning up...")
         self._stop_event.set()
         if self._device:
             try:
@@ -27,9 +27,11 @@ class QRListener:
             except Exception:
                 pass
         if self.listener_thread and self.listener_thread.is_alive():
-            self.listener_thread.join(timeout=5)
-
-    def regi_callback(self, callback):
+            self.listener_thread.join(timeout=1)
+        print("[QRListener] Cleaned up.")
+        
+    def register_callback(self, callback):
+        print(f"[QRListener] Registering callback: {callback}")
         self.callback_list.append(callback)
 
     def _handle_char(self, char):
@@ -47,7 +49,7 @@ class QRListener:
                         try:
                             callback(self._result)
                         except Exception as e:
-                            print(f"Error executing callback: {e}")
+                            print(f"[QRListener] Error executing callback: {e}")
                 else:
                     self._buffer += char
 
@@ -66,40 +68,21 @@ class QRListener:
         return None
 
     def _listen(self):
-        # Lower thread priority to improve GUI performance
-        import os
-        try:
-            os.nice(10)  # Set low priority
-        except:
-            pass
-            
-        print("QR Listener Initializing...")
-        retry_count = 0
-        max_retries = 5
-        base_delay = 5  # Increased from 1s to 5s to reduce CPU usage
+        reconnect_delay = 1
+        print("[QRListener] Initializing...")
         
         while not self._stop_event.is_set():
             try:
                 self._device = self._find_input_device()
                 if not self._device:
-                    retry_count += 1
-                    delay = min(base_delay * (2 ** retry_count), 60)  # Apply exponential backoff
-                    print(f"QR Listener not found. QR_DEVICE_NAME={self.qr_listener_name}. Retry {retry_count}/{max_retries} in {delay}s")
-                    import managers.auth_manager as auth_manager, setting
-                    auth_manager.service.qr_status_hw = setting.STATUS_DISABLE
+                    print(f"[QRListener] not found. QR_DEVICE_NAME={self.qr_listener_name}. Retry in {reconnect_delay}s")
+                    self.is_initialized = False
                     
-                    if retry_count >= max_retries:
-                        print("QR Listener max retries reached. Waiting longer before next attempt...")
-                        time.sleep(120)  # Wait 2 minutes before retry
-                        retry_count = 0
-                    else:
-                        time.sleep(delay)
+                    time.sleep(reconnect_delay)
                     continue
 
-                print("QR Listener Initialized Successfully")
-                retry_count = 0  # Reset retry counter on success
-                import managers.auth_manager as auth_manager, setting
-                auth_manager.service.qr_status_hw = setting.STATUS_ENABLE
+                print("[QRListener] Initialized Successfully")
+                self.is_initialized = True
                 keymap = {
                     evdev.ecodes.KEY_1: '1', evdev.ecodes.KEY_2: '2', evdev.ecodes.KEY_3: '3',
                     evdev.ecodes.KEY_4: '4', evdev.ecodes.KEY_5: '5', evdev.ecodes.KEY_6: '6',
@@ -152,11 +135,12 @@ class QRListener:
                                 shift = False
                 break
             except Exception as e:
-                print(f"QR Listener Initializing failed: {e}. Retrying in 1 second...")
-                import managers.auth_manager as auth_manager, setting
-                auth_manager.service.qr_status_hw = setting.STATUS_DISABLE
+                print(f"[QRListener] Initializing failed: {e}. Retrying in 1 second...")
+                self.is_initialized = False
                 time.sleep(1)
 
     def start(self):
+        if self.listener_thread is not None:
+            return
         self.listener_thread = threading.Thread(target=self._listen, daemon=True)
         self.listener_thread.start()

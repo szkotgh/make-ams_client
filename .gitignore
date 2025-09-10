@@ -1,9 +1,11 @@
 __pycache__/
 .venv/
-
 .DS_Store
-.env
 .lgd-nfy0
+
+.env
+google_auth.json
+.tts_temp.mp3
 
 src/log.db
 src/log.db-shm

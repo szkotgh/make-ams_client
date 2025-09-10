@@ -53,11 +53,14 @@ class App(tk.Tk):
         self.show_page("PageStart")
         
         # Pre-load all authentication pages to ensure callbacks are registered
-        print("Pre-loading authentication pages for callback registration...")
-        auth_pages = ["PageAuthQR", "PageAuthNFC", "PageAuthExternalButton", "PageAuthInternalButton"]
-        for page_name in auth_pages:
+        print("[PageManager] Pre-loading authentication pages for callback registration...")
+        # auth_pages = ["PageAuthQR", "PageAuthNFC", "PageAuthExternalButton", "PageAuthInternalButton"]
+        self.page_count = len(self.page_classes.keys())
+        self.page_preload_index = 0
+        for index, page_name in enumerate(self.page_classes.keys()):
+            print(f"[PageManager] Pre-loading: {page_name} {index+1}/{self.page_count}")
             self._load_page(page_name)
-            print(f"Pre-loaded: {page_name}")
+            self.page_preload_index += 1
 
     def _load_page(self, page_name):
         """Lazy load pages to improve memory efficiency"""
@@ -67,7 +70,7 @@ class App(tk.Tk):
                 page = PageClass(parent=self.container, controller=self)
                 self.pages[page_name] = page
                 page.grid(row=0, column=0, sticky="nsew")
-                print(f"Page loaded: {page_name}")
+                print(f"[PageManager] Page loaded: {page_name}")
 
     def show_page(self, page_name):
         # Load page first if not already loaded

@@ -3,14 +3,23 @@ import managers.hardware_manager as hardware_manager
 import setting
 
 # regi button callback
-def on_internal_button_pressed(ch):
-    print(f"[Test Internal Button] Pressed: {ch}")
+def on_internal_button_pressed():
+    print(f"[Test Internal Button] Pressed")
 
-def on_external_button_pressed(ch):
-    print(f"[Test External Button] Pressed: {ch}")
+def on_external_button_pressed():
+    print(f"[Test External Button] Pressed")
 
-# hardware_manager.internal_button.regi_callback(on_internal_button_pressed)
-# hardware_manager.external_button.regi_callback(on_external_button_pressed)
+def on_nfc_read(uid):
+    print(f"[Test NFC] Read: {uid}")
+
+def on_qr_read(qr_result):
+    print(f"[Test QR] Read: {qr_result}")
+
+
+hardware_manager.internal_button.register_callback(on_internal_button_pressed)
+hardware_manager.external_button.register_callback(on_external_button_pressed)
+hardware_manager.nfc.register_callback(on_nfc_read)
+hardware_manager.qr.register_callback(on_qr_read)
 
 
 # test functions
@@ -49,52 +58,15 @@ def test_led():
     time.sleep(1)
     print("done")
 
-def test_relay():
-    print("[Test Relay]")
+def test_door():
+    print("[Test Door]")
     print("Testing DOOR_RELAY...")
-    hardware_manager.safe_door().open_door()
+    hardware_manager.door.open_door()
     time.sleep(3)
-    hardware_manager.safe_door().close_door()
+    hardware_manager.door.close_door()
     time.sleep(3)
     print("done")
 
-def test_qr():
-    print("[Test QR]")
-
-    is_testing = False
-    def _get():
-        return is_testing
-    def _set():
-        global is_testing
-        is_testing = False
-    
-    def detect(qr_result):
-        if _get():
-            print(f"QR code detected. value={qr_result}")
-            _set()
-    
-    print("Waiting for QR...")
-    is_testing = True
-    hardware_manager.safe_qr().regi_callback(detect)
-
-    time.sleep(10)
-        
-    print("done")
-
-def test_nfc():
-    print("[Test NFC]")
-
-    while True:
-        print("Waiting for RFID/NFC card...")
-        uid = hardware_manager.safe_nfc().read_nfc(timeout=10)
-        if uid == False:
-            print("NFC Module not initialized or not connected.")
-            return
-        if uid is not None:
-            print(f"Tag successful. UID={uid}")
-            break
-        time.sleep(1)
-    print("done")
 
 def test_internal_sw():
     print("[Test Internal Switch LED]")
@@ -123,14 +95,12 @@ def test_speaker():
 
 def test_all():
     test_led()
-    test_relay()
-    test_nfc()
-    test_qr()
+    test_door()
     test_internal_sw()
     test_external_sw()
     test_speaker()
 
-test_options = [test_led, test_relay, test_qr, test_nfc, test_internal_sw, test_external_sw, test_speaker, test_all]
+test_options = [test_led, test_door, test_internal_sw, test_external_sw, test_speaker, test_all]
 
 time.sleep(1)
 while True:

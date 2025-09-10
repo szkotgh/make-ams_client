@@ -3,7 +3,7 @@ import tkinter as tk
 import setting
 import utils
 import managers.log_manager as log_manager
-import hardware_manager
+import managers.hardware_manager as hardware_manager
 
 class PageAdminMain(tk.Frame):
     def __init__(self, parent, controller):
@@ -38,38 +38,49 @@ class PageAdminMain(tk.Frame):
 
         button_frame = tk.Frame(self.admin_frame)
         button_frame.pack()
-        
-        tk.Button(button_frame, text="시스템 재시작", font=(setting.DEFAULT_FONT, 16, 'bold'), height=3, command=self.reboot_system).pack(side="left", padx=2)
-        tk.Button(button_frame, text="프로그램 종료", font=(setting.DEFAULT_FONT, 16, 'bold'), height=3, command=self.program_exit).pack(side="left", padx=2)
-        tk.Button(button_frame, text="프로그램 재시작", font=(setting.DEFAULT_FONT, 16, 'bold'), height=3, command=self.program_restart).pack(side="left", padx=2)
-        self.button3 = tk.Button(button_frame, text="자동문 작동", font=(setting.DEFAULT_FONT, 16, 'bold'), height=3, command=self.open_door)
-        self.button3.pack(side="left", padx=2)
-        tk.Button(button_frame, text="로그 열람", font=(setting.DEFAULT_FONT, 16, 'bold'), height=3, command=lambda: self.controller.show_page("PageAdminLog")).pack(side="left", padx=2)
 
-        tk.Button(self.admin_frame, text="문 열어놓기", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, width=55, command=lambda: self.controller.show_page("PageAdminForceOpen")).pack()
+        button_frame_two = tk.Frame(self.admin_frame)
+        button_frame_two.pack()
+        
+        tk.Button(button_frame, text="시스템 재시작", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.reboot_system).pack(side="left", padx=2)
+        tk.Button(button_frame, text="프로그램 종료", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.program_exit).pack(side="left", padx=2)
+        tk.Button(button_frame, text="프로그램 재시작", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.program_restart).pack(side="left", padx=2)
+        self.button3 = tk.Button(button_frame, text="자동문 작동", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.open_door)
+        self.button3.pack(side="left", padx=2)
+        tk.Button(button_frame, text="로그 열람", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=lambda: self.controller.show_page("PageAdminLog")).pack(side="left", padx=2)
+
+        tk.Button(button_frame_two, text="문 열어놓기", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=lambda: self.controller.show_page("PageAdminForceOpen")).pack(side="left", padx=2)
+        tk.Button(button_frame_two, text="TTS테스트", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.test_tts).pack(side="left", padx=2)
+        tk.Button(button_frame_two, text="소리테스트", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.test_sound).pack(side="left", padx=2)
         
         tk.Button(self.admin_frame, text="관리자 종료", font=(setting.DEFAULT_FONT, 14), width=14, height=2, command=self.close_admin_page).pack(pady=10)
 
+    def test_tts(self):
+        hardware_manager.tts.play("이 소리가 들리면 정상입니다.")
+
+    def test_sound(self):
+        hardware_manager.speaker.play(setting.ELEVATOR_MUSIC)
+
     def reboot_system(self):
         log_manager.service.insert_log("관리자", "종료", "시스템을 재시작했습니다.")
-        hardware_manager.close()
+        hardware_manager.cleanup()
         log_manager.service.log_close()
         os.system("sudo reboot now")
         
     def program_exit(self):
         log_manager.service.insert_log("관리자", "종료", "프로그램을 종료했습니다.")
-        hardware_manager.close()
+        hardware_manager.cleanup()
         log_manager.service.log_close()
         os._exit(0)
         
     def program_restart(self):
         log_manager.service.insert_log("관리자", "종료", "프로그램을 재시작했습니다.")
-        hardware_manager.close()
+        hardware_manager.cleanup()
         log_manager.service.log_close()
         os._exit(1)
 
     def open_door(self):
-        hardware_manager.safe_door().auto_open_door()
+        hardware_manager.door.auto_open_door()
         self.button3.config(state="disabled")
         self.after(3000, lambda: self.button3.config(state="normal"))
         log_manager.service.insert_log("관리자", "승인", "수동으로 문을 열었습니다.")

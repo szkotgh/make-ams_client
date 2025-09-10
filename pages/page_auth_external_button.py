@@ -1,10 +1,10 @@
-import threading
-import time
 import tkinter as tk
 from PIL import Image, ImageTk
-import managers.auth_manager as auth_manager
+import threading
+import time
 import setting
-import hardware_manager
+import managers.auth_manager as auth_manager
+import managers.hardware_manager as hardware_manager
 import managers.log_manager as log_manager
 
 class PageAuthExternalButton(tk.Frame):
@@ -47,7 +47,7 @@ class PageAuthExternalButton(tk.Frame):
         self.sub_title.pack(pady=30)
         
         # Register callback for automatic re-registration after hardware init
-        hardware_manager.register_callback('external_button', self._detect_button)
+        hardware_manager.external_button.register_callback(self._detect_button)
 
     def on_show(self):
         threading.Thread(target=self.button_auth, daemon=True).start()
@@ -66,7 +66,7 @@ class PageAuthExternalButton(tk.Frame):
         if not auth_manager.service.get_button_status() == setting.STATUS_ENABLE:
             self._set_title("외부인 출입 불가")
             self._set_sub_title("비활성화되어 있습니다")
-            hardware_manager.safe_speaker_manager().play(setting.WRONG_SOUND_PATH)
+            hardware_manager.speaker.play(setting.WRONG_SOUND_PATH)
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             return
 
@@ -78,14 +78,14 @@ class PageAuthExternalButton(tk.Frame):
             self._set_title("외부인 출입 불가")
             self._set_sub_title(f"{self.auth_result.message}")
             log_manager.service.insert_log("외부인출입", "차단", f"출입이 거부되었습니다. detail={self.auth_result.message}")
-            hardware_manager.safe_speaker_manager().play(setting.WRONG_SOUND_PATH)
+            hardware_manager.speaker.play(setting.WRONG_SOUND_PATH)
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             return
 
         self._set_title("환영합니다")
         self._set_sub_title(f"{self.auth_result.message}")
         log_manager.service.insert_log("외부인출입", "승인", f"문이 열렸습니다.")
-        hardware_manager.safe_door().auto_open_door()
+        hardware_manager.door.auto_open_door()
         self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
     
     def _set_title(self, text):

@@ -4,7 +4,7 @@ import tkinter as tk
 import managers.auth_manager as auth_manager
 import setting
 from PIL import Image, ImageTk
-import hardware_manager
+import managers.hardware_manager as hardware_manager
 import managers.log_manager as log_manager
 
 class PageAuthNFC(tk.Frame):
@@ -51,14 +51,14 @@ class PageAuthNFC(tk.Frame):
         self.sub_title = tk.Label(content_frame, text="NFC 태그를 인식시켜주세요", font=(setting.DEFAULT_FONT, 32), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
         
-        # Register callback for automatic re-registration after hardware init
-        hardware_manager.register_callback('nfc', self._nfc_callback)
+        self.nfc_listener = hardware_manager.nfc
+        
+        self.nfc_listener.register_callback(self._nfc_callback)
 
     def _create_password_frame(self):
         if self.password_frame:
             self.password_frame.destroy()
         
-        # 타이틀을 위로 이동
         self.content_frame.place_configure(rely=0.3)
 
         right_frame = self.main_frame.winfo_children()[1]
@@ -137,13 +137,13 @@ class PageAuthNFC(tk.Frame):
         self._set_title("NFC 인증 실패")
         self._set_sub_title("입력 시간이 초과되었습니다")
         log_manager.service.insert_log("NFC출입", "차단", f"PIN번호 입력시간이 초과되었습니다: NFC_UID={self.nfc_uid}")
-        hardware_manager.safe_speaker_manager().play(setting.WRONG_SOUND_PATH)
+        hardware_manager.speaker.play(setting.WRONG_SOUND_PATH)
         self._hide_password_frame()
         self._stop_password_timer()
         self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
 
     def _on_key_press(self, key):
-        hardware_manager.safe_speaker_manager().play(setting.CLICK_SOUND_PATH)
+        hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         self._start_password_timer()
         if len(self.password_entry) < 4:
             self.password_entry += key
@@ -152,14 +152,14 @@ class PageAuthNFC(tk.Frame):
                 self._verify_password()
 
     def _on_clear_press(self):
-        hardware_manager.safe_speaker_manager().play(setting.CLICK_SOUND_PATH)
+        hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         self._start_password_timer()
         self.password_entry = ""
         self.pw_display.config(text="")
 
     def _on_cancel_press(self):
         log_manager.service.insert_log("NFC출입", "차단", f"PIN번호 입력을 취소했습니다: UNAME={self.user_name} UID={self.nfc_uid}")
-        hardware_manager.safe_speaker_manager().play(setting.CLICK_SOUND_PATH)
+        hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         self._stop_password_timer()
         self.password_entry = ""
         self.pw_display.config(text="")
@@ -178,11 +178,11 @@ class PageAuthNFC(tk.Frame):
                 self._set_sub_title("PIN번호를 확인하십시오")
                 self._hide_password_frame()
                 log_manager.service.insert_log("NFC출입", "차단", f"PIN번호 인증에 실패했습니다: UNAME={self.user_name} UID={self.nfc_uid}")
-                hardware_manager.safe_speaker_manager().play(setting.WRONG_SOUND_PATH)
+                hardware_manager.speaker.play(setting.WRONG_SOUND_PATH)
                 self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             else:
                 self._set_sub_title("PIN번호가 틀렸습니다")
-                hardware_manager.safe_speaker_manager().play(setting.WRONG_SOUND_PATH)
+                hardware_manager.speaker.play(setting.WRONG_SOUND_PATH)
                 self.password_entry = ""
                 self.pw_display.config(text="")
 
@@ -200,7 +200,7 @@ class PageAuthNFC(tk.Frame):
         def nfc_auth_process():
             self.main_frame.after(0, lambda: self.main_frame.config(bg=setting.AUTH_COLOR))
             
-            if hardware_manager.safe_nfc().initialized == False:
+            if hardware_manager.nfc.initialized == False:
                 self._set_title("NFC 센서 오류")
                 self._set_sub_title("센서를 점검하십시오")
                 hardware_manager.safe_speaker_manager().play(setting.WRONG_SOUND_PATH)

@@ -4,7 +4,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import managers.auth_manager as auth_manager
 import setting
-import hardware_manager
+import managers.hardware_manager as hardware_manager
 import managers.log_manager as log_manager
 
 class PageRemoteOpen(tk.Frame):
@@ -51,21 +51,19 @@ class PageRemoteOpen(tk.Frame):
         auth_manager.service.regi_remote_open_callback(self._detect_event)
 
     def on_show(self):
-        threading.Thread(target=self.open_button, daemon=True).start()
+        threading.Thread(target=self._remote_open, daemon=True).start()
     
     def _detect_event(self, remote_open_by):
-        if self.controller.now_page != "MainPage":
-            return
-        
         self.remote_open_by = remote_open_by
         self.controller.show_page("PageRemoteOpen")
             
-    def open_button(self):
+    def _remote_open(self):
         self.main_frame.config(bg=setting.AUTH_COLOR)
 
         self._set_sub_title(f"문이 열립니다.\n문 연 사람: {self.remote_open_by}")
         log_manager.service.insert_log("시스템", "문열림", "원격으로 문이 열렸습니다.")
-        hardware_manager.safe_door().auto_open_door()
+        hardware_manager.tts.play(f"{self.remote_open_by}님이 문을 열었습니다.")
+        hardware_manager.door.auto_open_door()
         
         self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
     

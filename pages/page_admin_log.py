@@ -17,8 +17,13 @@ class PageAdminLog(tk.Frame):
         self.text_area = tk.Text(self, font=(setting.DEFAULT_FONT, 12), width=58, height=10)
         self.text_area.pack(expand=True, fill="both", padx=20)
 
-        tk.Button(self, text="뒤로가기", font=(setting.DEFAULT_FONT, 14), width=10, height=2,
-                  command=lambda: self.controller.show_page("PageAdminMain")).pack(pady=10)
+        buttons_frame = tk.Frame(self)
+        buttons_frame.pack(pady=10)
+
+        tk.Button(buttons_frame, text="뒤로가기", font=(setting.DEFAULT_FONT, 14), width=10, height=2,
+                  command=lambda: self.controller.show_page("PageAdminMain")).pack(side="left", padx=5)
+        tk.Button(buttons_frame, text="새로고침", font=(setting.DEFAULT_FONT, 14), width=10, height=2,
+                  command=lambda: self.refresh_log()).pack(side="left", padx=5)
 
     def refresh_log(self):
         self.text_area.delete("1.0", tk.END)
@@ -27,6 +32,7 @@ class PageAdminLog(tk.Frame):
             time, method, action, details = log[1], log[2], log[3], log[4]
             self.text_area.insert(tk.END, f"{time} | {method} | {action} | {details}\n")
         self.text_area.see(tk.END)
+        print("[PageAdminLog] Log refreshed")
 
     def on_show(self):
         log_manager.service.insert_log("관리자", "승인", "로그를 열람했습니다.")
