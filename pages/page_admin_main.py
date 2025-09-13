@@ -41,51 +41,86 @@ class PageAdminMain(tk.Frame):
 
         button_frame_two = tk.Frame(self.admin_frame)
         button_frame_two.pack()
-        
-        tk.Button(button_frame, text="시스템 재시작", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.reboot_system).pack(side="left", padx=2)
-        tk.Button(button_frame, text="프로그램 종료", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.program_exit).pack(side="left", padx=2)
-        tk.Button(button_frame, text="프로그램 재시작", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.program_restart).pack(side="left", padx=2)
-        self.button3 = tk.Button(button_frame, text="자동문 작동", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.open_door)
-        self.button3.pack(side="left", padx=2)
-        tk.Button(button_frame, text="로그 열람", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=lambda: self.controller.show_page("PageAdminLog")).pack(side="left", padx=2)
 
-        tk.Button(button_frame_two, text="문 열어놓기", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=lambda: self.controller.show_page("PageAdminForceOpen")).pack(side="left", padx=2)
-        tk.Button(button_frame_two, text="TTS테스트", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.test_tts).pack(side="left", padx=2)
-        tk.Button(button_frame_two, text="소리테스트", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.test_sound).pack(side="left", padx=2)
-        
-        tk.Button(self.admin_frame, text="관리자 종료", font=(setting.DEFAULT_FONT, 14), width=14, height=2, command=self.close_admin_page).pack(pady=10)
+        # 버튼 객체 저장
+        self.button_reboot = tk.Button(button_frame, text="시스템 재시작", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.reboot_system)
+        self.button_reboot.pack(side="left", padx=2)
+        self.button_exit = tk.Button(button_frame, text="프로그램 종료", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.program_exit)
+        self.button_exit.pack(side="left", padx=2)
+        self.button_restart = tk.Button(button_frame, text="프로그램 재시작", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.program_restart)
+        self.button_restart.pack(side="left", padx=2)
+        self.button_open_door = tk.Button(button_frame, text="자동문 작동", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.open_door)
+        self.button_open_door.pack(side="left", padx=2)
+        self.button_log = tk.Button(button_frame, text="로그 열람", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=lambda: self.controller.show_page("PageAdminLog"))
+        self.button_log.pack(side="left", padx=2)
+
+        self.button_force_open = tk.Button(button_frame_two, text="문 열어놓기", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=lambda: self.controller.show_page("PageAdminForceOpen"))
+        self.button_force_open.pack(side="left", padx=2)
+        self.button_tts = tk.Button(button_frame_two, text="TTS테스트", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.test_tts)
+        self.button_tts.pack(side="left", padx=2)
+        self.button_sound = tk.Button(button_frame_two, text="소리테스트", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.test_sound)
+        self.button_sound.pack(side="left", padx=2)
+        self.button_test_qr = tk.Button(button_frame_two, text="QR테스트", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.test_qr)
+        self.button_test_qr.pack(side="left", padx=2)
+        self.button_test_nfc = tk.Button(button_frame_two, text="NFC테스트", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=self.test_nfc)
+        self.button_test_nfc.pack(side="left", padx=2)
+        self.button_close_admin = tk.Button(self.admin_frame, text="관리자 종료", font=(setting.DEFAULT_FONT, 14), width=14, height=2, command=self.close_admin_page)
+        self.button_close_admin.pack(pady=10)
+
+        self.all_buttons = [self.button_reboot, self.button_exit, self.button_restart, self.button_open_door, self.button_log, self.button_force_open, self.button_tts, self.button_sound, self.button_test_qr, self.button_test_nfc, self.button_close_admin]
+
+    def disable_all_buttons(self):
+        for btn in self.all_buttons:
+            btn.config(state="disabled")
 
     def test_tts(self):
+        hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         hardware_manager.tts.play("이 소리가 들리면 정상입니다.")
 
     def test_sound(self):
         hardware_manager.speaker.play(setting.ELEVATOR_MUSIC)
 
+    def test_qr(self):
+        hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
+        self.controller.show_page("PageAdminTestQR")
+
+    def test_nfc(self):
+        hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
+        self.controller.show_page("PageAdminTestNFC")
+
     def reboot_system(self):
-        log_manager.service.insert_log("관리자", "종료", "시스템을 재시작했습니다.")
+        self.disable_all_buttons()
+        hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         hardware_manager.cleanup()
+        log_manager.service.insert_log("관리자", "종료", "시스템을 재시작했습니다.")
         log_manager.service.log_close()
-        os.system("sudo reboot now")
+        os.system("reboot now")
         
     def program_exit(self):
-        log_manager.service.insert_log("관리자", "종료", "프로그램을 종료했습니다.")
+        self.disable_all_buttons()
+        hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         hardware_manager.cleanup()
+        log_manager.service.insert_log("관리자", "종료", "프로그램을 종료했습니다.")
         log_manager.service.log_close()
         os._exit(0)
         
     def program_restart(self):
-        log_manager.service.insert_log("관리자", "종료", "프로그램을 재시작했습니다.")
+        self.disable_all_buttons()
+        hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         hardware_manager.cleanup()
+        log_manager.service.insert_log("관리자", "종료", "프로그램을 재시작했습니다.")
         log_manager.service.log_close()
         os._exit(1)
 
     def open_door(self):
+        hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         hardware_manager.door.auto_open_door()
-        self.button3.config(state="disabled")
-        self.after(3000, lambda: self.button3.config(state="normal"))
+        self.button_open_door.config(state="disabled")
+        self.after(3000, lambda: self.button_open_door.config(state="normal"))
         log_manager.service.insert_log("관리자", "승인", "수동으로 문을 열었습니다.")
 
     def close_admin_page(self):
+        hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         log_manager.service.insert_log("관리자", "종료", "관리자 페이지를 종료했습니다.")
         self.controller.show_page("MainPage")
 

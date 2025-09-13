@@ -21,13 +21,12 @@ class Door:
         self.set_door(True)
 
     def close_door(self, close_duration=3, sound_enable=True):
+        self._door_close_cancel_flag = False
         if sound_enable:
             hardware_manager.speaker.play(setting.DOOR_CLOSE_SOUND_PATH)
 
         def _close():
             if not self._door_close_cancel_flag:
-                if sound_enable:
-                    hardware_manager.speaker.play(setting.DOOR_CLOSE_SOUND_PATH)
                 self.set_door(False)
 
         if hasattr(self, '_close_timer') and self._close_timer:

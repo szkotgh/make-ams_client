@@ -31,7 +31,7 @@ class NFCReader:
         self.is_initialized = False
 
     def _init_nfc(self):
-        check_interval = 30
+        check_interval = 10
 
         while not self._stop_event.is_set():
             try:
@@ -57,6 +57,7 @@ class NFCReader:
                         last_init_time = now
                     except Exception as e:
                         self.is_initialized = False
+                        need_reinit = True
                         print(f"[NFCReader] Failed to initialize: {e}")
                 
                 time.sleep(check_interval)

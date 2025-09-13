@@ -33,7 +33,6 @@ print("[Hardware Manager] Initialized")
 
 def cleanup():
     print("[Hardware Manager] Cleanup GPIO")
-    status_led.blink('yellow')
     nfc.cleanup()
     qr.cleanup()
     door.close_door(close_duration=0)

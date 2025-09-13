@@ -1,6 +1,7 @@
 import tkinter as tk
+import threading
 import setting
-import utils
+import time
 import managers.log_manager as log_manager
 
 class PageAdminLog(tk.Frame):
@@ -22,16 +23,24 @@ class PageAdminLog(tk.Frame):
 
         tk.Button(buttons_frame, text="뒤로가기", font=(setting.DEFAULT_FONT, 14), width=10, height=2,
                   command=lambda: self.controller.show_page("PageAdminMain")).pack(side="left", padx=5)
-        tk.Button(buttons_frame, text="새로고침", font=(setting.DEFAULT_FONT, 14), width=10, height=2,
-                  command=lambda: self.refresh_log()).pack(side="left", padx=5)
+        self.refresh_button = tk.Button(buttons_frame, text="새로고침", font=(setting.DEFAULT_FONT, 14), width=10, height=2,
+                  command=lambda: self.refresh_log())
+        self.refresh_button.pack(side="left", padx=5)
 
     def refresh_log(self):
-        self.text_area.delete("1.0", tk.END)
-        logs = log_manager.service.get_logs(limit=500)
-        for log in reversed(logs):
-            time, method, action, details = log[1], log[2], log[3], log[4]
-            self.text_area.insert(tk.END, f"{time} | {method} | {action} | {details}\n")
-        self.text_area.see(tk.END)
+        def _refresh():
+            self.refresh_button.config(state="disabled")
+            self.text_area.delete("1.0", tk.END)
+            logs = log_manager.service.get_logs(limit=500)
+            for index, log in enumerate(reversed(logs)):
+                log_time, method, action, details = log[1], log[2], log[3], log[4]
+                self.text_area.insert(tk.END, f"{log_time} | {method} | {action} | {details}\n")
+                if index % 100 == 0: self.text_area.see(tk.END)
+                time.sleep(0.0001)
+            self.text_area.see(tk.END)
+            self.refresh_button.config(state="normal")
+        threading.Thread(target=_refresh, daemon=True).start()
+        
         print("[PageAdminLog] Log refreshed")
 
     def on_show(self):
