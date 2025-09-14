@@ -90,13 +90,27 @@ class PageAuthExternalButton(tk.Frame):
         hardware_manager.door.open_door()
 
         last_button_time = datetime.now()
+        led_toggle = True
+        toggle_level = 0
         while True:
             if hardware_manager.external_button.read_button():
                 last_button_time = datetime.now()
+                led_toggle = True
+                toggle_level = 0
+                hardware_manager.external_button.led_on()
+                continue
+            
             if datetime.now() - last_button_time > timedelta(seconds=3):
                 break
-            time.sleep(0.1)
+                
+            if toggle_level % 10 == 9:
+                led_toggle = not led_toggle
+            hardware_manager.external_button.led_on() if led_toggle else hardware_manager.external_button.led_off()
+
+            toggle_level += 1
+            time.sleep(0.05)
         
+        hardware_manager.external_button.led_on()
         hardware_manager.door.close_door()
         self.controller.after(0, lambda: self.controller.show_page("MainPage"))
     
