@@ -38,8 +38,9 @@ class PageAdminForceOpen(tk.Frame):
         content_frame = tk.Frame(right_frame, bg=setting.AUTH_COLOR)
         content_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-        self.title = tk.Label(content_frame, text="문 열어두기", font=(setting.DEFAULT_FONT, 48, "bold"), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
+        self.title = tk.Label(content_frame, text="환영합니다", font=(setting.DEFAULT_FONT, 48, "bold"), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
         self.title.pack(pady=50)
+        
         self.sub_button = tk.Button(content_frame, text="해제", font=(setting.DEFAULT_FONT, 16, 'bold'), fg="black", height=1, width=8, command=self.status_release)
         self.sub_button.pack()
 
