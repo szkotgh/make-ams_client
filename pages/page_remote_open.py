@@ -51,6 +51,7 @@ class PageRemoteOpen(tk.Frame):
         auth_manager.service.regi_remote_open_callback(self._detect_event)
 
     def on_show(self):
+        log_manager.service.insert_log("SYSTEM", "ACCESS", "원격 문 열기 페이지에 접근했습니다.")
         threading.Thread(target=self._remote_open, daemon=True).start()
     
     def _detect_event(self, remote_open_by):
@@ -61,7 +62,7 @@ class PageRemoteOpen(tk.Frame):
         self.main_frame.config(bg=setting.AUTH_COLOR)
 
         self._set_sub_title(f"문이 열립니다.\n문 연 사람: {self.remote_open_by}")
-        log_manager.service.insert_log("시스템", "문열림", "원격으로 문이 열렸습니다.")
+        log_manager.service.insert_log("SYSTEM", "DOOR_OPEN", f"원격으로 문이 열렸습니다. (요청자: {self.remote_open_by})")
         hardware_manager.tts.play(f"{self.remote_open_by}님이 문을 열었습니다.")
         hardware_manager.door.auto_open_door()
         

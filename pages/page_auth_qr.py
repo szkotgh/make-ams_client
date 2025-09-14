@@ -74,6 +74,7 @@ class PageAuthQR(tk.Frame):
     def on_show(self):
         self.main_frame.config(bg=setting.AUTH_COLOR)
         self._set_title("QR 인증")
+        log_manager.service.insert_log("QR_AUTH", "ACCESS", "QR 인증 페이지에 접근했습니다.")
         
         if self.auth_running:
             return
@@ -119,7 +120,8 @@ class PageAuthQR(tk.Frame):
         
         self._set_title("QR 인증 성공")
         self._set_sub_title(f"{self.auth_result.message}")
-        log_manager.service.insert_log("QR출입", "승인", f"QR출입이 승인되었습니다: VALUE={self.detect_qr_value}")
+        hardware_manager.tts.play(self.auth_result.message)
+        log_manager.service.insert_log("QR_AUTH", "SUCCESS", f"QR 인증 성공 (QR_VALUE: {self.detect_qr_value})")
         hardware_manager.door.auto_open_door()
         
         self.controller.after(3000, lambda: end_auth())

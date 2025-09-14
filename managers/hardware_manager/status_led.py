@@ -39,6 +39,16 @@ class StatusLED:
         self._stop(color)
         self._set_led(color, False)
 
+    def all_on(self):
+        self._set_led("red", True)
+        self._set_led("yellow", True)
+        self._set_led("green", True)
+
+    def all_off(self):
+        self._set_led("red", False)
+        self._set_led("yellow", False)
+        self._set_led("green", False)
+    
     def blink(self, color: str):
         self._stop(color)
         stop_event = threading.Event()
@@ -57,6 +67,7 @@ class StatusLED:
         t.start()
 
     def cleanup(self):
+        self.all_off()
         print("[StatusLED] Cleaning up...")
         for c in ["red", "yellow", "green"]:
             self.off(c)

@@ -136,7 +136,7 @@ class PageAuthNFC(tk.Frame):
     def _password_timeout(self):
         self._set_title("NFC 인증 실패")
         self._set_sub_title("입력 시간이 초과되었습니다")
-        log_manager.service.insert_log("NFC출입", "차단", f"PIN번호 입력시간이 초과되었습니다: NFC_UID={self.nfc_uid}")
+        log_manager.service.insert_log("NFC_AUTH", "FAIL", f"PIN번호 입력시간 초과 (NFC_UID: {self.nfc_uid})")
         hardware_manager.speaker.play(setting.WRONG_SOUND_PATH)
         self._hide_password_frame()
         self._stop_password_timer()
@@ -158,7 +158,7 @@ class PageAuthNFC(tk.Frame):
         self.pw_display.config(text="")
 
     def _on_cancel_press(self):
-        log_manager.service.insert_log("NFC출입", "차단", f"PIN번호 입력을 취소했습니다: UNAME={self.user_name} UID={self.nfc_uid}")
+        log_manager.service.insert_log("NFC_AUTH", "FAIL", f"PIN번호 입력 취소 (UNAME: {self.user_name}, UID: {self.nfc_uid})")
         hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         self._stop_password_timer()
         self.password_entry = ""
@@ -177,7 +177,7 @@ class PageAuthNFC(tk.Frame):
                 self._set_title("NFC 인증 실패")
                 self._set_sub_title("PIN번호를 확인하십시오")
                 self._hide_password_frame()
-                log_manager.service.insert_log("NFC출입", "차단", f"PIN번호 인증에 실패했습니다: UNAME={self.user_name} UID={self.nfc_uid}")
+                log_manager.service.insert_log("NFC_AUTH", "FAIL", f"PIN번호 인증 실패 (UNAME: {self.user_name}, UID: {self.nfc_uid})")
                 hardware_manager.speaker.play(setting.WRONG_SOUND_PATH)
                 self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             else:
@@ -196,6 +196,7 @@ class PageAuthNFC(tk.Frame):
         if self.detect_nfc:
             self.detect_nfc = False
             return
+        log_manager.service.insert_log("NFC_AUTH", "ACCESS", "NFC 인증 페이지에 접근했습니다.")
         
         def nfc_auth_process():
             self.main_frame.after(0, lambda: self.main_frame.config(bg=setting.AUTH_COLOR))
@@ -261,7 +262,8 @@ class PageAuthNFC(tk.Frame):
         self._stop_password_timer()
         self._set_title("NFC 인증 성공")
         self._set_sub_title(f"{self.auth_result.message}")
-        log_manager.service.insert_log("NFC출입", "승인", f"문이 열렸습니다: NFC_UID={self.nfc_uid}")
+        hardware_manager.tts.play(self.auth_result.message)
+        log_manager.service.insert_log("NFC_AUTH", "SUCCESS", f"NFC 인증 성공 (NFC_UID: {self.nfc_uid})")
         hardware_manager.safe_door().auto_open_door()
     
     def _set_title(self, text):

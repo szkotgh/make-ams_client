@@ -1,5 +1,7 @@
 import os
 import tkinter as tk
+import subprocess
+from managers import auth_manager
 import setting
 import utils
 import managers.log_manager as log_manager
@@ -20,19 +22,19 @@ class PageAdminMain(tk.Frame):
         tk.Label(title_frame, text=f"PID: {utils.get_program_pid()} | 디스플레이 크기: {utils.get_display_size()}", font=(setting.DEFAULT_FONT, 16), fg="black").pack()
         self.wifi_label = tk.Label(title_frame, text=f"연결정보: ", font=(setting.DEFAULT_FONT, 16), fg="black")
         self.uptime = utils.get_now_datetime() - setting.START_TIME
-        self.uptime_label = tk.Label(title_frame, text=f"작동시간: ", font=(setting.DEFAULT_FONT, 16), fg="black")
+        self.uptime_label = tk.Label(title_frame, text=f"작동시간: | 마지막 하트비트: ", font=(setting.DEFAULT_FONT, 16), fg="black")
         def update_wifi_info():
             ssid = utils.get_wifi_ssid()
             lan_ip = utils.get_lan_ip()
             self.wifi_label.config(text=f"연결정보: {ssid if ssid else '없음'}({lan_ip if lan_ip else '없음'})")
-            self.wifi_label.after(10000, update_wifi_info)
+            self.wifi_label.after(3000, update_wifi_info)
         update_wifi_info()
         self.wifi_label.pack()
         def update_uptime():
             time_label = str(self.uptime)[:-7]
             self.uptime = utils.get_now_datetime() - setting.START_TIME
-            self.uptime_label.config(text=f"작동시간: {time_label}")
-            self.uptime_label.after(3000, update_uptime)
+            self.uptime_label.config(text=f"작동시간: {time_label} | 마지막 하트비트: {auth_manager.service.last_internet_heartbeat}")
+            self.uptime_label.after(1000, update_uptime)
         update_uptime()
         self.uptime_label.pack()
 
@@ -75,32 +77,36 @@ class PageAdminMain(tk.Frame):
 
     def test_tts(self):
         hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
+        log_manager.service.insert_log("ADMIN", "TEST", "TTS 테스트를 실행했습니다.")
         hardware_manager.tts.play("이 소리가 들리면 정상입니다.")
 
     def test_sound(self):
+        log_manager.service.insert_log("ADMIN", "TEST", "소리 테스트를 실행했습니다.")
         hardware_manager.speaker.play(setting.ELEVATOR_MUSIC)
 
     def test_qr(self):
         hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
+        log_manager.service.insert_log("ADMIN", "TEST", "QR 테스트 페이지로 이동했습니다.")
         self.controller.show_page("PageAdminTestQR")
 
     def test_nfc(self):
         hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
+        log_manager.service.insert_log("ADMIN", "TEST", "NFC 테스트 페이지로 이동했습니다.")
         self.controller.show_page("PageAdminTestNFC")
 
     def reboot_system(self):
         self.disable_all_buttons()
         hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         hardware_manager.cleanup()
-        log_manager.service.insert_log("관리자", "종료", "시스템을 재시작했습니다.")
+        log_manager.service.insert_log("ADMIN", "REBOOT", "관리자가 시스템을 재시작했습니다.")
         log_manager.service.log_close()
-        os.system("reboot now")
+        subprocess.run("sudo reboot now", shell=True)
         
     def program_exit(self):
         self.disable_all_buttons()
         hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         hardware_manager.cleanup()
-        log_manager.service.insert_log("관리자", "종료", "프로그램을 종료했습니다.")
+        log_manager.service.insert_log("ADMIN", "STOP", "관리자가 프로그램을 종료했습니다.")
         log_manager.service.log_close()
         os._exit(0)
         
@@ -108,7 +114,7 @@ class PageAdminMain(tk.Frame):
         self.disable_all_buttons()
         hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         hardware_manager.cleanup()
-        log_manager.service.insert_log("관리자", "종료", "프로그램을 재시작했습니다.")
+        log_manager.service.insert_log("ADMIN", "RESTART", "관리자가 프로그램을 재시작했습니다.")
         log_manager.service.log_close()
         os._exit(1)
 
@@ -117,12 +123,12 @@ class PageAdminMain(tk.Frame):
         hardware_manager.door.auto_open_door()
         self.button_open_door.config(state="disabled")
         self.after(3000, lambda: self.button_open_door.config(state="normal"))
-        log_manager.service.insert_log("관리자", "승인", "수동으로 문을 열었습니다.")
+        log_manager.service.insert_log("ADMIN", "DOOR_OPEN", "관리자가 수동으로 문을 열었습니다.")
 
     def close_admin_page(self):
         hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
-        log_manager.service.insert_log("관리자", "종료", "관리자 페이지를 종료했습니다.")
+        log_manager.service.insert_log("ADMIN", "LOGOUT", "관리자 페이지를 종료했습니다.")
         self.controller.show_page("MainPage")
 
     def on_show(self):
-        pass
+        log_manager.service.insert_log("ADMIN", "ACCESS", "관리자 메인 페이지에 접근했습니다.")

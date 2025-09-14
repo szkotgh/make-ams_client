@@ -158,27 +158,27 @@ class MainPage(tk.Frame):
 
     def button_auth(self):
         if auth_manager.service.get_button_status() == setting.STATUS_ENABLE:
-            log_manager.service.insert_log("사용자", "인증", "사용자가 버튼 인증을 시도했습니다.")
+            log_manager.service.insert_log("USER", "ACCESS", "사용자가 버튼 인증을 시도했습니다.")
             hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
             self.controller.show_page("PageAuthExternalButton")
         else:
             if auth_manager.service.open_request_enabled == setting.STATUS_ENABLE:
-                log_manager.service.insert_log("사용자", "인증", "사용자가 문열기 요청을 시도했습니다")
+                log_manager.service.insert_log("USER", "ACCESS", "사용자가 문열기 요청을 시도했습니다.")
                 hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
                 self.controller.show_page("PageRequestOpenDoor")
             else:
                 pass
     
     def qr_auth(self):
-        log_manager.service.insert_log("사용자", "인증", "사용자가 QR 인증을 시도했습니다.")
+        log_manager.service.insert_log("USER", "ACCESS", "사용자가 QR 인증을 시도했습니다.")
         hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         self.controller.show_page("PageAuthQR")
         
     def nfc_auth(self):
-        log_manager.service.insert_log("사용자", "인증", "사용자가 NFC 인증을 시도했습니다.")
+        log_manager.service.insert_log("USER", "ACCESS", "사용자가 NFC 인증을 시도했습니다.")
         hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         self.controller.show_page("PageAuthNFC")
     
     def on_show(self):
         # Debug callback status when main page is shown
-        pass
+        log_manager.service.insert_log("USER", "ACCESS", "메인 페이지에 접근했습니다.")

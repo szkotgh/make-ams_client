@@ -25,11 +25,11 @@ class TTSManager:
             self.voice = texttospeech.VoiceSelectionParams(
                 language_code="ko-KR",
                 ssml_gender=texttospeech.SsmlVoiceGender.FEMALE,
-                name="ko-KR-Standard-A"
+                name="ko-KR-Standard-B"
             )
             self.audio_config = texttospeech.AudioConfig(
                 audio_encoding=texttospeech.AudioEncoding.MP3,
-                speaking_rate=1.0,
+                speaking_rate=1.1,
             )
             
             mixer.init(frequency=44100, size=-16, channels=2, buffer=512)

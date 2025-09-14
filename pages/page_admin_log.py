@@ -44,5 +44,5 @@ class PageAdminLog(tk.Frame):
         print("[PageAdminLog] Log refreshed")
 
     def on_show(self):
-        log_manager.service.insert_log("관리자", "승인", "로그를 열람했습니다.")
+        log_manager.service.insert_log("ADMIN", "ACCESS", "로그 열람 페이지에 접근했습니다.")
         self.refresh_log()

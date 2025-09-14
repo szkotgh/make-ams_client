@@ -123,7 +123,7 @@ class PageAdminLogin(tk.Frame):
             hardware_manager.speaker.play(setting.SUCCESS_SOUND_PATH)
             self.input_clear()
             self.stop_inactivity_timer()
-            log_manager.service.insert_log("관리자", "로그인", "관리자페이지에 로그인했습니다.")
+            log_manager.service.insert_log("ADMIN", "LOGIN", "관리자 페이지에 로그인했습니다.")
             self.controller.show_page("PageAdminMain")
         else:
             self.error_count += 1
@@ -145,4 +145,5 @@ class PageAdminLogin(tk.Frame):
         self.input_clear()
         self._reset_subtitle()
         self.start_inactivity_timer()
+        log_manager.service.insert_log("ADMIN", "ACCESS", "관리자 로그인 페이지에 접근했습니다.")
         

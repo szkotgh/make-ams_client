@@ -46,6 +46,7 @@ class PageRequestOpenDoor(tk.Frame):
         self.sub_title.pack(pady=30)
 
     def on_show(self):
+        log_manager.service.insert_log("USER", "ACCESS", "문 열기 요청 페이지에 접근했습니다.")
         threading.Thread(target=self._on_show, daemon=True).start()
             
     def _on_show(self):
@@ -65,7 +66,7 @@ class PageRequestOpenDoor(tk.Frame):
         self._set_title("문 열기 요청 성공")
         self._set_sub_title(f"{self.auth_result.message}")
         hardware_manager.speaker.play(setting.SUCCESS_SOUND_PATH)
-        log_manager.service.insert_log("시스템", "문열림요청", "문 열림 요청을 전송하였습니다.")
+        log_manager.service.insert_log("SYSTEM", "DOOR_OPEN_REQUEST", "문 열림 요청을 전송하였습니다.")
         self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
     
     def _set_title(self, text):

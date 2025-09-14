@@ -4,6 +4,7 @@ import threading
 import time
 import tkinter as tk
 import setting
+from datetime import datetime, timedelta
 import managers.hardware_manager as hardware_manager
 import managers.log_manager as log_manager
 
@@ -51,6 +52,7 @@ class PageAuthInternalButton(tk.Frame):
         hardware_manager.internal_button.register_callback(self._detect_button)
 
     def on_show(self):
+        log_manager.service.insert_log("SYSTEM", "ACCESS", "내부인 출입 페이지에 접근했습니다.")
         threading.Thread(target=self.open_button, daemon=True).start()
     
     def _detect_button(self):
@@ -64,10 +66,19 @@ class PageAuthInternalButton(tk.Frame):
 
         self._set_title("내부인 퇴실")
         self._set_sub_title("문이 열립니다")
-        log_manager.service.insert_log("시스템", "문열림", "내부에서 문을 열었습니다.")
-        hardware_manager.door.auto_open_door()
+        log_manager.service.insert_log("SYSTEM", "DOOR_OPEN", "내부에서 문을 열었습니다.")
+        hardware_manager.door.open_door()
+
+        last_button_time = datetime.now()
+        while True:
+            if hardware_manager.internal_button.read_button():
+                last_button_time = datetime.now()
+            if datetime.now() - last_button_time > timedelta(seconds=3):
+                break
+            time.sleep(0.1)
         
-        self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
+        hardware_manager.door.close_door()
+        self.controller.after(0, lambda: self.controller.show_page("MainPage"))
     
     def _set_title(self, text):
         self.title.after(0, lambda: self.title.config(text=text))

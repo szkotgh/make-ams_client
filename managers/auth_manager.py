@@ -1,6 +1,7 @@
 import threading
 import requests
 import setting
+from datetime import datetime
 import managers.log_manager as log_manager
 import managers.hardware_manager as hardware_manager
 
@@ -22,13 +23,13 @@ class AuthManager:
         self.button_status_enabled = setting.STATUS_DISABLE
         self.qr_status_enabled = setting.STATUS_DISABLE
         self.nfc_status_enabled = setting.STATUS_DISABLE
-        self.qr_status_hw = setting.STATUS_DISABLE
-        self.nfc_status_hw = setting.STATUS_DISABLE
         self.remote_open_callback = None
         self.remote_open_enabled = setting.STATUS_DISABLE
         self.remote_open_by = None
         self.open_request_enabled = setting.STATUS_DISABLE
         
+        self.last_internet_heartbeat = None
+
         self.start_connection()
     
     def regi_remote_open_callback(self, callback):
@@ -47,6 +48,7 @@ class AuthManager:
 
                 if result_code == 200:
                     self.connection_success = True
+                    self.last_internet_heartbeat = datetime.now()
                     self.connection_ping = ping_ms
 
                     self.door_access_level = result_data['door_access_level']
@@ -113,13 +115,13 @@ class AuthManager:
             return AuthResultDTO(code=result_code, message=result_message, data=result_data, success=True)
         
         except requests.exceptions.ConnectionError as e:
-            log_manager.service.insert_log("auth_manager", "에러", f"서버와 연결에 실패했습니다: {e}")
+            log_manager.service.insert_log("AUTH_MANAGER", "ERROR", f"서버와 연결에 실패했습니다: {e}")
             return AuthResultDTO(code=-1, message="서버와 연결에 실패했습니다.",  success=False)
         except requests.exceptions.Timeout as e:
-            log_manager.service.insert_log("auth_manager", "에러", f"요청 시간이 초과되었습니다: {e}")
+            log_manager.service.insert_log("AUTH_MANAGER", "ERROR", f"요청 시간이 초과되었습니다: {e}")
             return AuthResultDTO(code=-1, message="요청 시간이 초과되었습니다.",  success=False)
         except Exception as e:
-            log_manager.service.insert_log("auth_manager", "에러", f"알 수 없는 오류입니다: {e}")
+            log_manager.service.insert_log("AUTH_MANAGER", "ERROR", f"알 수 없는 오류입니다: {e}")
             return AuthResultDTO(code=-1, message="알 수 없는 오류입니다.",  success=False)
 
     # QR 인식했을 때
@@ -144,13 +146,13 @@ class AuthManager:
             return AuthResultDTO(code=result_code, message=result_message, data=result_data, success=True)
         
         except requests.exceptions.ConnectionError as e:
-            log_manager.service.insert_log("auth_manager", "에러", f"서버와 연결에 실패했습니다: {e}")
+            log_manager.service.insert_log("AUTH_MANAGER", "ERROR", f"서버와 연결에 실패했습니다: {e}")
             return AuthResultDTO(code=-1, message="서버와 연결에 실패했습니다.",  success=False)
         except requests.exceptions.Timeout as e:
-            log_manager.service.insert_log("auth_manager", "에러", f"요청 시간이 초과되었습니다: {e}")
+            log_manager.service.insert_log("AUTH_MANAGER", "ERROR", f"요청 시간이 초과되었습니다: {e}")
             return AuthResultDTO(code=-1, message="요청 시간이 초과되었습니다.",  success=False)
         except Exception as e:
-            log_manager.service.insert_log("auth_manager", "에러", f"알 수 없는 오류입니다: {e}")
+            log_manager.service.insert_log("AUTH_MANAGER", "ERROR", f"알 수 없는 오류입니다: {e}")
             return AuthResultDTO(code=-1, message="알 수 없는 오류입니다.",  success=False)
     
     # NFC 인식했을 때
@@ -175,13 +177,13 @@ class AuthManager:
             return AuthResultDTO(code=result_code, message=result_message, data=result_data, success=True)
         
         except requests.exceptions.ConnectionError as e:
-            log_manager.service.insert_log("auth_manager", "에러", f"서버와 연결에 실패했습니다: {e}")
+            log_manager.service.insert_log("AUTH_MANAGER", "ERROR", f"서버와 연결에 실패했습니다: {e}")
             return AuthResultDTO(code=-1, message="서버와 연결에 실패했습니다.", success=False)
         except requests.exceptions.Timeout as e:
-            log_manager.service.insert_log("auth_manager", "에러", f"요청 시간이 초과되었습니다: {e}")
+            log_manager.service.insert_log("AUTH_MANAGER", "ERROR", f"요청 시간이 초과되었습니다: {e}")
             return AuthResultDTO(code=-1, message="요청 시간이 초과되었습니다.", success=False)
         except Exception as e:
-            log_manager.service.insert_log("auth_manager", "에러", f"알 수 없는 오류입니다: {e}")
+            log_manager.service.insert_log("AUTH_MANAGER", "ERROR", f"알 수 없는 오류입니다: {e}")
             return AuthResultDTO(code=-1, message=f"알 수 없는 오류입니다.", success=False)
 
     def request_open_door(self) -> AuthResultDTO:
@@ -204,13 +206,13 @@ class AuthManager:
             return AuthResultDTO(code=result_code, message=result_message, data=result_data, success=True)
         
         except requests.exceptions.ConnectionError as e:
-            log_manager.service.insert_log("auth_manager", "에러", f"서버와 연결에 실패했습니다: {e}")
+            log_manager.service.insert_log("AUTH_MANAGER", "ERROR", f"서버와 연결에 실패했습니다: {e}")
             return AuthResultDTO(code=-1, message="서버와 연결에 실패했습니다.", success=False)
         except requests.exceptions.Timeout as e:
-            log_manager.service.insert_log("auth_manager", "에러", f"요청 시간이 초과되었습니다: {e}")
+            log_manager.service.insert_log("AUTH_MANAGER", "ERROR", f"요청 시간이 초과되었습니다: {e}")
             return AuthResultDTO(code=-1, message="요청 시간이 초과되었습니다.", success=False)
         except Exception as e:
-            log_manager.service.insert_log("auth_manager", "에러", f"알 수 없는 오류입니다: {e}")
+            log_manager.service.insert_log("AUTH_MANAGER", "ERROR", f"알 수 없는 오류입니다: {e}")
             return AuthResultDTO(code=-1, message=f"알 수 없는 오류입니다.", success=False)
 
     def get_connection_status(self):
@@ -229,9 +231,9 @@ class AuthManager:
         return setting.STATUS_ENABLE if self.is_nfc_enabled() else setting.STATUS_DISABLE
 
     def is_qr_enabled(self):
-        return self.qr_status_enabled == setting.STATUS_ENABLE and self.qr_status_hw == setting.STATUS_ENABLE
+        return self.qr_status_enabled == setting.STATUS_ENABLE and hardware_manager.qr.is_initialized
 
     def is_nfc_enabled(self):
-        return self.nfc_status_enabled == setting.STATUS_ENABLE and self.nfc_status_hw == setting.STATUS_ENABLE
+        return self.nfc_status_enabled == setting.STATUS_ENABLE and hardware_manager.nfc.is_initialized
 
 service = AuthManager()

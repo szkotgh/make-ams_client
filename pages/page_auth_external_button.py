@@ -6,6 +6,7 @@ import setting
 import managers.auth_manager as auth_manager
 import managers.hardware_manager as hardware_manager
 import managers.log_manager as log_manager
+from datetime import datetime, timedelta
 
 class PageAuthExternalButton(tk.Frame):
     def __init__(self, parent, controller):
@@ -50,6 +51,7 @@ class PageAuthExternalButton(tk.Frame):
         hardware_manager.external_button.register_callback(self._detect_button)
 
     def on_show(self):
+        log_manager.service.insert_log("EXTERNAL_AUTH", "ACCESS", "외부인 출입 인증 페이지에 접근했습니다.")
         threading.Thread(target=self.button_auth, daemon=True).start()
     
     def _detect_button(self):
@@ -77,16 +79,26 @@ class PageAuthExternalButton(tk.Frame):
         if not self.auth_result.success or self.auth_result.code != 200:
             self._set_title("외부인 출입 불가")
             self._set_sub_title(f"{self.auth_result.message}")
-            log_manager.service.insert_log("외부인출입", "차단", f"출입이 거부되었습니다. detail={self.auth_result.message}")
+            log_manager.service.insert_log("EXTERNAL_AUTH", "FAIL", f"외부인 출입 거부 (상세: {self.auth_result.message})")
             hardware_manager.speaker.play(setting.WRONG_SOUND_PATH)
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             return
 
         self._set_title("환영합니다")
         self._set_sub_title(f"{self.auth_result.message}")
-        log_manager.service.insert_log("외부인출입", "승인", f"문이 열렸습니다.")
-        hardware_manager.door.auto_open_door()
-        self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
+        log_manager.service.insert_log("EXTERNAL_AUTH", "SUCCESS", "외부인 출입 승인 - 문이 열렸습니다.")
+        hardware_manager.door.open_door()
+
+        last_button_time = datetime.now()
+        while True:
+            if hardware_manager.external_button.read_button():
+                last_button_time = datetime.now()
+            if datetime.now() - last_button_time > timedelta(seconds=3):
+                break
+            time.sleep(0.1)
+        
+        hardware_manager.door.close_door()
+        self.controller.after(0, lambda: self.controller.show_page("MainPage"))
     
     def _set_title(self, text):
         self.title.after(0, lambda: self.title.config(text=text))

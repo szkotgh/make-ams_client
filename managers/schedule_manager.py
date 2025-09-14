@@ -1,8 +1,8 @@
-import os
+import subprocess
 import time
 import threading
 import schedule
-import hardware_manager
+import managers.hardware_manager as hardware_manager
 import managers.log_manager as log_manager
 
 class ScheduleManager:
@@ -27,9 +27,10 @@ class ScheduleManager:
                 time.sleep(5)
 
     def reboot(self):
-        log_manager.service.insert_log("시스템", "재부팅", "시스템을 자동으로 재부팅합니다.")
-        hardware_manager.close()
+        print("[ScheduleManager] Run: reboot")
+        hardware_manager.cleanup()
+        log_manager.service.insert_log("SYSTEM", "REBOOT", "시스템을 자동으로 재부팅합니다.")
         log_manager.service.log_close()
-        os.system("sudo reboot now")
+        subprocess.run("sudo reboot now", shell=True)
 
 service = ScheduleManager()

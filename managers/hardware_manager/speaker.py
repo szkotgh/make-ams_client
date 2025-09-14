@@ -75,6 +75,6 @@ class Speaker:
                 mixer.music.stop()
                 while mixer.music.get_busy():
                     time.sleep(0.01)
-            except mixer.error as e:
+            except Exception as e:
                 logging.warning(f"[Speaker] Error stopping sound: {e}")
 
