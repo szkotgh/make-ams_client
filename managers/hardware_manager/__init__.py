@@ -58,28 +58,67 @@ def cleanup():
         print("[Hardware Manager] Hardware not initialized, skipping cleanup")
         return
     
-    if status_led is not None:
-        status_led.all_off()
-        status_led.blink('red')
-    if nfc is not None:
-        nfc.cleanup()
-    if qr is not None:
-        qr.cleanup()
-    if door is not None:
-        door.close_door(close_duration=0)
-    if speaker is not None:
-        speaker.stop()
-    if tts is not None:
-        tts.cleanup()
-    if internal_button is not None:
-        internal_button.led_off()
-        internal_button.cleanup()
-    if external_button is not None:
-        external_button.led_off()
-        external_button.cleanup()
-    if status_led is not None:
-        status_led.cleanup()
+    try:
+        if status_led is not None:
+            status_led.all_off()
+            status_led.blink('red')
+    except Exception as e:
+        print(f"[Hardware Manager] Error cleaning up status_led: {e}")
     
-    GPIO.cleanup()
+    try:
+        if nfc is not None:
+            nfc.cleanup()
+    except Exception as e:
+        print(f"[Hardware Manager] Error cleaning up nfc: {e}")
+    
+    try:
+        if qr is not None:
+            qr.cleanup()
+    except Exception as e:
+        print(f"[Hardware Manager] Error cleaning up qr: {e}")
+    
+    try:
+        if door is not None:
+            door.close_door(close_duration=0)
+    except Exception as e:
+        print(f"[Hardware Manager] Error cleaning up door: {e}")
+    
+    try:
+        if speaker is not None:
+            speaker.stop()
+    except Exception as e:
+        print(f"[Hardware Manager] Error cleaning up speaker: {e}")
+    
+    try:
+        if tts is not None:
+            tts.cleanup()
+    except Exception as e:
+        print(f"[Hardware Manager] Error cleaning up tts: {e}")
+    
+    try:
+        if internal_button is not None:
+            internal_button.led_off()
+            internal_button.cleanup()
+    except Exception as e:
+        print(f"[Hardware Manager] Error cleaning up internal_button: {e}")
+    
+    try:
+        if external_button is not None:
+            external_button.led_off()
+            external_button.cleanup()
+    except Exception as e:
+        print(f"[Hardware Manager] Error cleaning up external_button: {e}")
+    
+    try:
+        if status_led is not None:
+            status_led.cleanup()
+    except Exception as e:
+        print(f"[Hardware Manager] Error cleaning up status_led: {e}")
+    
+    try:
+        GPIO.cleanup()
+    except Exception as e:
+        print(f"[Hardware Manager] Error cleaning up GPIO: {e}")
+    
     print("[Hardware Manager] Ended.")
 atexit.register(cleanup)

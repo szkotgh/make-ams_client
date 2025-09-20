@@ -157,6 +157,8 @@ class MainPage(tk.Frame):
 
 
     def button_auth(self):
+        self.button1.config(state=tk.DISABLED)
+        
         if auth_manager.service.get_button_status() == setting.STATUS_ENABLE:
             log_manager.service.insert_log("USER", "ACCESS", "사용자가 버튼 인증을 시도했습니다.")
             hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
@@ -168,16 +170,35 @@ class MainPage(tk.Frame):
                 self.controller.show_page("PageRequestOpenDoor")
             else:
                 pass
+        
+        self.after(1000, self._enable_button1)
+    
+    def _enable_button1(self):
+        self.button1.config(state=tk.NORMAL)
     
     def qr_auth(self):
+        self.button2.config(state=tk.DISABLED)
+        
         log_manager.service.insert_log("USER", "ACCESS", "사용자가 QR 인증을 시도했습니다.")
         hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         self.controller.show_page("PageAuthQR")
         
+        self.after(1000, self._enable_button2)
+    
+    def _enable_button2(self):
+        self.button2.config(state=tk.NORMAL)
+        
     def nfc_auth(self):
+        self.button3.config(state=tk.DISABLED)
+        
         log_manager.service.insert_log("USER", "ACCESS", "사용자가 NFC 인증을 시도했습니다.")
         hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)
         self.controller.show_page("PageAuthNFC")
+        
+        self.after(1000, self._enable_button3)
+    
+    def _enable_button3(self):
+        self.button3.config(state=tk.NORMAL)
     
     def on_show(self):
         # Debug callback status when main page is shown

@@ -8,7 +8,7 @@ from adafruit_pn532.i2c import PN532_I2C
 class NFCReader:
     def __init__(self):
         self._stop_event = threading.Event()
-        self._init_thread = threading.Thread(target=self._init_nfc, daemon=True)
+        self._init_thread = threading.Thread(target=self._init_nfc, daemon=False)
         self._init_thread.start()
         self.nfc_thread = None
         self.callback_list = []
@@ -77,7 +77,7 @@ class NFCReader:
     def start(self):
         if self.nfc_thread is not None and self.nfc_thread.is_alive():
             return
-        self.nfc_thread = threading.Thread(target=self._thread_nfc, daemon=True)
+        self.nfc_thread = threading.Thread(target=self._thread_nfc, daemon=False)
         self.nfc_thread.start()
         print("[NFCReader] Started")
 
@@ -101,7 +101,7 @@ class NFCReader:
                 print(f"[NFCReader] NFC read: {uid}")
                 for callback in self.callback_list:
                     try:
-                        threading.Thread(target=callback, args=(uid,), daemon=True).start()
+                        threading.Thread(target=callback, args=(uid,), daemon=False).start()
                     except Exception as e:
                         print(f"[NFCReader] Error executing callback: {e}")
             time.sleep(1)

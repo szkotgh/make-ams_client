@@ -1,8 +1,8 @@
 {
   "connection": {
     "server_url": "https://amsmk2.dyhs.kr",
-    "connection_interval": 3.0,
-    "time_out": 3.0
+    "connection_interval": 1.0,
+    "time_out": 5.0
   },
   "ui": {
     "display_width": 800,

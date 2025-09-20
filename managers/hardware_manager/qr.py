@@ -142,5 +142,5 @@ class QRListener:
     def start(self):
         if self.listener_thread is not None:
             return
-        self.listener_thread = threading.Thread(target=self._listen, daemon=True)
+        self.listener_thread = threading.Thread(target=self._listen, daemon=False)
         self.listener_thread.start()
