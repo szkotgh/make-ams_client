@@ -13,6 +13,7 @@ from managers.hardware_manager.qr import QRListener
 from managers.hardware_manager.door import Door
 
 print("[Hardware Manager] Initializing...")
+initialized_text = "하드웨어 초기화 중입니다 . . ."
 is_initialized: bool = False
 
 internal_button: Optional[InternalButton] = None
@@ -25,23 +26,33 @@ qr: Optional[QRListener] = None
 door: Optional[Door] = None
 
 def initialize_hardware():
-    global is_initialized, internal_button, external_button, speaker, tts, status_led, nfc, qr, door
+    global is_initialized, initialized_text, internal_button, external_button, speaker, tts, status_led, nfc, qr, door
     
     try:
         GPIO.cleanup()
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BCM)
 
+        initialized_text = "하드웨어 초기화를 시작합니다 . . ."
+        initialized_text = "초기화 중: InternalButton"
         internal_button = InternalButton()
+        initialized_text = "초기화 중: ExternalButton"
         external_button = ExternalButton()
+        initialized_text = "초기화 중: Speaker"
         speaker = Speaker()
+        initialized_text = "초기화 중: TTSManager"
         tts = TTSManager()
+        initialized_text = "초기화 중: StatusLED"
         status_led = StatusLED()
+        initialized_text = "초기화 중: NFCReader"
         nfc = NFCReader()
+        initialized_text = "초기화 중: QRListener"
         qr = QRListener()
+        initialized_text = "초기화 중: Door"
         door = Door()
-        
+
         is_initialized = True
+        initialized_text = "하드웨어 초기화 완료"
         print("[Hardware Manager] Initialized successfully")
         
     except Exception as e:

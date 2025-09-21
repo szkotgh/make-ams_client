@@ -55,26 +55,6 @@ class App(tk.Tk):
         # Load start page first
         self._load_page("PageStart")
         self.show_page("PageStart")
-        
-        # Pre-load all authentication pages to ensure callbacks are registered
-        print("[PageManager] Pre-loading pages for callback registration...")
-        # Mark preloading state so pages can avoid activating their functionality
-        self.is_preloading = True
-        self.page_count = len(self.page_classes.keys())
-        self.page_preload_index = 0
-        for index, page_name in enumerate(self.page_classes.keys()):
-            print(f"[PageManager] Pre-loading: {page_name} {index+1}/{self.page_count}")
-            self._load_page(page_name)
-            self.page_preload_index += 1
-        # Preloading finished
-        self.is_preloading = False
-        # Notify pages that preloading has ended so they may enable interactions if needed
-        for page in self.pages.values():
-            if hasattr(page, "on_preload_end") and callable(getattr(page, "on_preload_end")):
-                try:
-                    page.on_preload_end()
-                except Exception as e:
-                    print(f"[PageManager] on_preload_end error in {page.__class__.__name__}: {e}")
 
     def _load_page(self, page_name):
         """Lazy load pages to improve memory efficiency"""
@@ -85,13 +65,6 @@ class App(tk.Tk):
                 self.pages[page_name] = page
                 page.grid(row=0, column=0, sticky="nsew")
                 print(f"[PageManager] Page loaded: {page_name}")
-                # If we are in preloading phase, allow page to disable its interactions
-                if hasattr(self, "is_preloading") and self.is_preloading:
-                    if hasattr(page, "on_preload") and callable(getattr(page, "on_preload")):
-                        try:
-                            page.on_preload()
-                        except Exception as e:
-                            print(f"[PageManager] on_preload error in {page_name}: {e}")
 
     def show_page(self, page_name):
         # Load page first if not already loaded

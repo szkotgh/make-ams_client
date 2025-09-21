@@ -10,3 +10,4 @@ google_auth.json
 src/log.db
 src/log.db-shm
 src/log.db-wal
+src/make_ams_client.log

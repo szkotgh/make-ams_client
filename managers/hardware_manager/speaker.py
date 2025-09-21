@@ -38,7 +38,7 @@ class Speaker:
             try:
                 mixer.music.set_volume(self._volume)
             except Exception as e:
-                logging.warning(f"[Speaker] Error setting volume: {e}")
+                print(f"[Speaker] Error setting volume: {e}")
 
     def get_volume(self):
         return self._volume
@@ -46,11 +46,11 @@ class Speaker:
     def play(self, file_path):
         print(f"[Speaker] Playing sound: {file_path}")
         if not self.is_initialized:
-            logging.warning(f"[Speaker] Speaker is not initialized")
+            print(f"[Speaker] Speaker is not initialized")
             return
 
         if not os.path.exists(file_path):
-            logging.warning(f"[Speaker] Audio file not found: {file_path}")
+            print(f"[Speaker] Audio file not found: {file_path}")
             return
 
         def _play():
@@ -66,7 +66,7 @@ class Speaker:
                     mixer.music.play()
                     self._current_file = file_path
                 except Exception as e:
-                    logging.warning(f"[Speaker] Error playing sound: {e}")
+                    print(f"[Speaker] Error playing sound: {e}")
 
         if self._play_thread is None or not self._play_thread.is_alive():
             self._play_thread = threading.Thread(target=_play, daemon=True)
@@ -82,5 +82,5 @@ class Speaker:
                 while mixer.music.get_busy():
                     time.sleep(0.01)
             except Exception as e:
-                logging.warning(f"[Speaker] Error stopping sound: {e}")
+                print(f"[Speaker] Error stopping sound: {e}")
 
