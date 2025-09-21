@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
 SERVICE_NAME="MAKE; AMS Client"
 DIR="$( cd "$( dirname "$0" )" && pwd -P )"
@@ -14,17 +14,21 @@ cd "$DIR"
 #     exit 1
 # fi
 
-# # if git is installed, pull the latest changes
-# echo "Checking updating..."
-# if command -v git &> /dev/null; then
-#     if git pull; then
-#         echo "Update complete"
-#     else
-#         echo "Update Fail"
-#     fi
-# else
-#     echo "$SERVICE_NAME git not found, skipping pull . . ."
-# fi
-
 # Start Script
 python3 app.py
+APP_EXIT_CODE=$?   # Save exit code of python3 app.py
+
+# # if git is installed, pull the latest changes
+echo "Checking updating..."
+if command -v git &> /dev/null; then
+    if git pull; then
+        echo "Update complete"
+    else
+        echo "Update Fail"
+    fi
+else
+    echo "$SERVICE_NAME git not found, skipping pull . . ."
+fi
+
+# Exit with the same code as python3 app.py
+exit $APP_EXIT_CODE
