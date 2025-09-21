@@ -34,21 +34,21 @@ def initialize_hardware():
         GPIO.setmode(GPIO.BCM)
 
         initialized_text = "하드웨어 초기화를 시작합니다 . . ."
-        initialized_text = "초기화 중: InternalButton"
+        initialized_text = "하드웨어 초기화 중: InternalButton"
         internal_button = InternalButton()
-        initialized_text = "초기화 중: ExternalButton"
+        initialized_text = "하드웨어 초기화 중: ExternalButton"
         external_button = ExternalButton()
-        initialized_text = "초기화 중: Speaker"
+        initialized_text = "하드웨어 초기화 중: Speaker"
         speaker = Speaker()
-        initialized_text = "초기화 중: TTSManager"
+        initialized_text = "하드웨어 초기화 중: TTSManager"
         tts = TTSManager()
-        initialized_text = "초기화 중: StatusLED"
+        initialized_text = "하드웨어 초기화 중: StatusLED"
         status_led = StatusLED()
-        initialized_text = "초기화 중: NFCReader"
+        initialized_text = "하드웨어 초기화 중: NFCReader"
         nfc = NFCReader()
-        initialized_text = "초기화 중: QRListener"
+        initialized_text = "하드웨어 초기화 중: QRListener"
         qr = QRListener()
-        initialized_text = "초기화 중: Door"
+        initialized_text = "하드웨어 초기화 중: Door"
         door = Door()
 
         is_initialized = True
