@@ -1,7 +1,7 @@
 [Unit]
 Description=MAKE; AMS Client
 Documentation=https://github.com/szkotgh/make-ams_client.git
-After=network.target
+After=network.target sound.target
 
 [Service]
 User=administrator

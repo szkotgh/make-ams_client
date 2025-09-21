@@ -2,25 +2,31 @@ import os
 import threading
 import time
 from pygame import mixer
-import logging
-
-logging.basicConfig(level=logging.WARNING)
 
 class Speaker:
     def __init__(self):
         self.is_initialized = False
         os.environ['SDL_AUDIODRIVER'] = 'alsa'
-        try:
-            mixer.init(
-                frequency=44100,
-                size=-16,
-                channels=2,
-                buffer=512
-            )
-            self.is_initialized = True
-        except Exception as e:
-            self.is_initialized = False
-            logging.warning(f"[Speaker] Failed to initialize mixer: {e}")
+
+        max_retry = 5
+        for attempt in range(max_retry):
+            try:
+                mixer.init(
+                    frequency=44100,
+                    size=-16,
+                    channels=2,
+                    buffer=512
+                )
+                self.is_initialized = True
+                print(f"[Speaker] Initialized successfully")
+                break
+            except Exception as e:
+                print(f"[Speaker] Failed to initialize mixer: {e}, retrying... ({attempt + 1}/{max_retry})")
+                if attempt < max_retry - 1:
+                    time.sleep(5)
+                else:
+                    self.is_initialized = False
+                    print(f"[Speaker] Failed to initialize mixer: {e}, giving up")
         self._lock = threading.Lock()
         self._volume = 1.0
         self._play_thread = None
