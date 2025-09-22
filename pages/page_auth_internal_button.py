@@ -47,8 +47,8 @@ class PageAuthInternalButton(tk.Frame):
         self.sub_title = tk.Label(content_frame, text="문이 열립니다.", font=(setting.DEFAULT_FONT, 32), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
         
+    def page_init(self):
         hardware_manager.internal_button.led_on()
-        # Register callback for automatic re-registration after hardware init
         hardware_manager.internal_button.register_callback(self._detect_button)
 
     def on_show(self):

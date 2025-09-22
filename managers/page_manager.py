@@ -51,9 +51,18 @@ class App(tk.Tk):
             "PageRemoteOpen": PageRemoteOpen,
             "PageRequestOpenDoor": PageRequestOpenDoor
         }
+        
+        for page_name, PageClass in self.page_classes.items():
+            page = PageClass(parent=self.container, controller=self)
+            self.pages[page_name] = page
+            page.grid(row=0, column=0, sticky="nsew")
+            if hasattr(page, "page_init") and callable(getattr(page, "page_init")):
+                print(f"[PageManager] Initializing page: {page_name}")
+                page.page_init()
+            else:
+                print(f"[PageManager] No initialization method for page: {page_name}")
 
         # Load start page first
-        self._load_page("PageStart")
         self.show_page("PageStart")
 
     def _load_page(self, page_name):

@@ -47,7 +47,7 @@ class PageAuthExternalButton(tk.Frame):
         self.sub_title = tk.Label(content_frame, text="잠시만 기다려주세요", font=(setting.DEFAULT_FONT, 32), fg="white", bg=setting.AUTH_COLOR, anchor="center", justify="center")
         self.sub_title.pack(pady=30)
         
-        # Register callback for automatic re-registration after hardware init
+    def page_init(self):
         hardware_manager.external_button.register_callback(self._detect_button)
 
     def on_show(self):

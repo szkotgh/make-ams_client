@@ -52,7 +52,8 @@ class PageAuthQR(tk.Frame):
         self.sub_title.pack(pady=30)
 
         self.auth_running = False
-        # Register callback for automatic re-registration after hardware init
+        
+    def page_init(self):
         hardware_manager.qr.register_callback(self._detect_qr)
 
     def _detect_qr(self, _qr_result: str):

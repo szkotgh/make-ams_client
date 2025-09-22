@@ -48,6 +48,7 @@ class PageRemoteOpen(tk.Frame):
         
         self.remote_open_by = "알 수 없음"
         
+    def page_init(self):
         auth_manager.service.regi_remote_open_callback(self._detect_event)
 
     def on_show(self):

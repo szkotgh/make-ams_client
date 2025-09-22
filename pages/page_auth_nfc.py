@@ -53,6 +53,7 @@ class PageAuthNFC(tk.Frame):
         
         self.nfc_listener = hardware_manager.nfc
         
+    def page_init(self):
         self.nfc_listener.register_callback(self._nfc_callback)
 
     def _create_password_frame(self):

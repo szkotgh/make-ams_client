@@ -51,6 +51,8 @@ class PageAdminTestNFC(tk.Frame):
         tk.Button(content_frame, text="나가기", font=(setting.DEFAULT_FONT, 16, 'bold'), fg="black", height=1, width=8, command=self._exit_test).pack()
 
         self.test_running = False
+    
+    def page_init(self):
         hardware_manager.nfc.register_callback(self._detect_nfc)
         threading.Thread(target=self._check_nfc_status, daemon=True).start()
 

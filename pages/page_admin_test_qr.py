@@ -51,8 +51,11 @@ class PageAdminTestQR(tk.Frame):
         tk.Button(content_frame, text="나가기", font=(setting.DEFAULT_FONT, 16, 'bold'), fg="black", height=1, width=8, command=self._exit_test).pack()
 
         self.test_running = False
+        
+    def page_init(self):
         hardware_manager.qr.register_callback(self._detect_qr)
         threading.Thread(target=self._check_qr_status, daemon=True).start()
+        
     def _detect_qr(self, _qr_result: str):
         print(f"[PageAdminTestQR] QR detected: {_qr_result}")
         
