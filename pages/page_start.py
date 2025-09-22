@@ -24,6 +24,7 @@ class PageStart(tk.Frame):
             if hardware_manager.is_initialized:
                 if hardware_manager.status_led:
                     hardware_manager.status_led.on('green')
+                self.controller.init_pages()
                 self.after(0, lambda: self.controller.show_page("MainPage"))
                 break
 

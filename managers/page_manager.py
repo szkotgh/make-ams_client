@@ -52,6 +52,10 @@ class App(tk.Tk):
             "PageRequestOpenDoor": PageRequestOpenDoor
         }
         
+        # Load start page first
+        self.show_page("PageStart")
+
+    def init_pages(self):
         for page_name, PageClass in self.page_classes.items():
             page = PageClass(parent=self.container, controller=self)
             self.pages[page_name] = page
@@ -61,9 +65,6 @@ class App(tk.Tk):
                 page.page_init()
             else:
                 print(f"[PageManager] No initialization method for page: {page_name}")
-
-        # Load start page first
-        self.show_page("PageStart")
 
     def _load_page(self, page_name):
         """Lazy load pages to improve memory efficiency"""
