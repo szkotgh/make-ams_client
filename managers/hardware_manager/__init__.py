@@ -5,7 +5,7 @@ from typing import Optional
 import setting
 from managers.hardware_manager.internal_button import InternalButton
 from managers.hardware_manager.external_button import ExternalButton
-from managers.hardware_manager.speaker import Speaker
+from managers.hardware_manager.speaker import SpeakerManager
 from managers.hardware_manager.tts import TTSManager
 from managers.hardware_manager.status_led import StatusLED
 from managers.hardware_manager.nfc import NFCReader
@@ -18,7 +18,7 @@ is_initialized: bool = False
 
 internal_button: Optional[InternalButton] = None
 external_button: Optional[ExternalButton] = None
-speaker: Optional[Speaker] = None
+speaker: Optional[SpeakerManager] = None
 tts: Optional[TTSManager] = None
 status_led: Optional[StatusLED] = None
 nfc: Optional[NFCReader] = None
@@ -39,7 +39,7 @@ def initialize_hardware():
         initialized_text = "하드웨어 초기화 중: ExternalButton"
         external_button = ExternalButton()
         initialized_text = "하드웨어 초기화 중: Speaker"
-        speaker = Speaker()
+        speaker = SpeakerManager()
         initialized_text = "하드웨어 초기화 중: TTSManager"
         tts = TTSManager()
         initialized_text = "하드웨어 초기화 중: StatusLED"

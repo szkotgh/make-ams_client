@@ -63,7 +63,7 @@ class PageRemoteOpen(tk.Frame):
         self.main_frame.config(bg=setting.AUTH_COLOR)
 
         self._set_sub_title(f"문이 열립니다.\n문 연 사람: {self.remote_open_by}")
-        log_manager.service.insert_log("SYSTEM", "DOOR_OPEN", f"원격으로 문이 열렸습니다. (요청자: {self.remote_open_by})")
+        log_manager.service.insert_log("SYSTEM", "DOOR_OPEN", f"원격으로 문이 열렸습니다. (문 연 사람: {self.remote_open_by})")
         hardware_manager.tts.play(f"{self.remote_open_by}님이 문을 열었습니다.")
         hardware_manager.door.auto_open_door()
         

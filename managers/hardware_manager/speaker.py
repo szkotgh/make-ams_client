@@ -1,86 +1,142 @@
-import os
-import threading
-import time
-from pygame import mixer
+import subprocess, threading, queue, shutil, time, os
 
-class Speaker:
-    def __init__(self):
-        self.is_initialized = False
-        os.environ['SDL_AUDIODRIVER'] = 'alsa'
+_MPG123_CMD = "mpg123"
+_WATCHDOG_INTERVAL = 1.0
 
-        max_retry = 5
-        for attempt in range(max_retry):
+class SpeakerManager:
+    def __init__(self, mpg123_cmd=_MPG123_CMD):
+        if shutil.which(mpg123_cmd) is None:
+            raise FileNotFoundError(f"{mpg123_cmd} not found. Install mpg123.")
+        self._cmd = mpg123_cmd
+        self._proc = None
+        self._lock = threading.RLock()
+        self._queue = queue.Queue()
+        self._stop = threading.Event()
+        self._current = None
+        self._volume = 100
+        self.STATUS_IDLE = "idle"
+        self.STATUS_PLAYING = "playing"
+        self.STATUS_STOPPED = "stopped"
+        self._status = self.STATUS_IDLE
+
+        self._worker = threading.Thread(target=self._worker_loop, daemon=True)
+        self._watchdog = threading.Thread(target=self._watchdog_loop, daemon=True)
+        self._reader = threading.Thread(target=self._reader_loop, daemon=True)
+
+        self._start_proc()
+        self._worker.start()
+        self._watchdog.start()
+        self._reader.start()
+
+    def _start_proc(self):
+        with self._lock:
+            if self._proc and self._proc.poll() is None:
+                return
+            self._proc = subprocess.Popen(
+                [self._cmd, "-R"],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                bufsize=1,
+            )
+            time.sleep(0.05)
+
+    def _send(self, cmd):
+        with self._lock:
+            if not self._proc or self._proc.poll() is not None:
+                return False
             try:
-                mixer.init(
-                    frequency=44100,
-                    size=-16,
-                    channels=2,
-                    buffer=512
-                )
-                self.is_initialized = True
-                print(f"[Speaker] Initialized successfully")
+                self._proc.stdin.write(cmd + "\n")
+                self._proc.stdin.flush()
+                return True
+            except Exception:
+                return False
+
+    def _reader_loop(self):
+        while not self._stop.is_set():
+            proc = self._proc
+            if not proc or not proc.stdout:
+                time.sleep(0.2)
+                continue
+            line = proc.stdout.readline()
+            if not line:
+                time.sleep(0.1)
+                continue
+            if line.startswith("@P 0"):
+                self._status = self.STATUS_IDLE
+                self._current = None
+
+    def _worker_loop(self):
+        while not self._stop.is_set():
+            try:
+                target = self._queue.get(timeout=0.2)
+            except queue.Empty:
+                continue
+            if target is None:
                 break
-            except Exception as e:
-                print(f"[Speaker] Failed to initialize mixer: {e}, retrying... ({attempt + 1}/{max_retry})")
-                if attempt < max_retry - 1:
-                    time.sleep(5)
-                else:
-                    self.is_initialized = False
-                    print(f"[Speaker] Failed to initialize mixer: {e}, giving up")
-        self._lock = threading.Lock()
-        self._volume = 1.0
-        self._play_thread = None
-        self._current_file = None
+            if not (target.startswith("http://") or target.startswith("https://") or target.startswith("rtsp://")):
+                if not os.path.isfile(target):
+                    continue
+            self._start_proc()
+            self._send(f"LOAD {target}")
+            self._send(f"VOLUME {self._volume}")
+            self._current = target
+            self._status = self.STATUS_PLAYING
+            while self._current == target and not self._stop.is_set():
+                time.sleep(0.2)
+        self._status = self.STATUS_IDLE
 
-    def set_volume(self, volume):
-        with self._lock:
-            self._volume = max(0.0, min(1.0, volume))
-            try:
-                mixer.music.set_volume(self._volume)
-            except Exception as e:
-                print(f"[Speaker] Error setting volume: {e}")
-
-    def get_volume(self):
-        return self._volume
-
-    def play(self, file_path):
-        print(f"[Speaker] Playing sound: {file_path}")
-        if not self.is_initialized:
-            print(f"[Speaker] Speaker is not initialized")
-            return
-
-        if not os.path.exists(file_path):
-            print(f"[Speaker] Audio file not found: {file_path}")
-            return
-
-        def _play():
+    def _watchdog_loop(self):
+        while not self._stop.is_set():
             with self._lock:
-                try:
-                    if mixer.music.get_busy():
-                        mixer.music.stop()
-                        while mixer.music.get_busy():
-                            time.sleep(0.01)
+                proc = self._proc
+            if not proc or proc.poll() is not None:
+                self._start_proc()
+            time.sleep(_WATCHDOG_INTERVAL)
 
-                    mixer.music.load(file_path)
-                    mixer.music.set_volume(self._volume)
-                    mixer.music.play()
-                    self._current_file = file_path
-                except Exception as e:
-                    print(f"[Speaker] Error playing sound: {e}")
+    def play(self, target):
+        self.cancel()
+        self._queue.queue.clear()
+        self._queue.put(target)
+        self._status = self.STATUS_PLAYING
 
-        if self._play_thread is None or not self._play_thread.is_alive():
-            self._play_thread = threading.Thread(target=_play, daemon=True)
-            self._play_thread.start()
-        else:
-            self._play_thread = threading.Thread(target=_play, daemon=True)
-            self._play_thread.start()
+    def enqueue(self, target):
+        self._queue.put(target)
 
-    def stop(self):
+    def cancel(self):
+        self._send("STOP")
+        self._current = None
+        self._status = self.STATUS_STOPPED
+
+    def set_volume(self, percent):
+        try:
+            val = int(percent)
+            val = max(0, min(100, val))
+        except Exception:
+            raise ValueError("Volume must be integer 0–100")
+        self._volume = val
+        self._send(f"VOLUME {val}")
+
+    def get_status(self):
+        return {
+            "status": self._status,
+            "current": self._current,
+            "volume": self._volume
+        }
+
+    def shutdown(self):
+        self._stop.set()
+        try:
+            self._queue.put_nowait(None)
+        except Exception:
+            pass
+        self._send("QUIT")
         with self._lock:
-            try:
-                mixer.music.stop()
-                while mixer.music.get_busy():
-                    time.sleep(0.01)
-            except Exception as e:
-                print(f"[Speaker] Error stopping sound: {e}")
-
+            if self._proc:
+                try:
+                    self._proc.stdin.close()
+                except Exception:
+                    pass
+                self._proc = None
+        self._status = self.STATUS_STOPPED

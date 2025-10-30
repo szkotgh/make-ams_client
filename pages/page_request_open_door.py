@@ -63,7 +63,7 @@ class PageRequestOpenDoor(tk.Frame):
             self.controller.after(3000, lambda: self.controller.show_page("MainPage"))
             return
         
-        self._set_title("문 열기 요청 성공")
+        self._set_title("문 열기 요청")
         self._set_sub_title(f"{self.auth_result.message}")
         hardware_manager.speaker.play(setting.SUCCESS_SOUND_PATH)
         log_manager.service.insert_log("SYSTEM", "DOOR_OPEN_REQUEST", "문 열림 요청을 전송하였습니다.")

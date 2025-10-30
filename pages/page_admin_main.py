@@ -19,10 +19,28 @@ class PageAdminMain(tk.Frame):
         title_frame.pack(pady=30)
 
         tk.Label(title_frame, text="관리자 메뉴", font=(setting.DEFAULT_FONT, 28, "bold"), fg="black").pack(pady=10)
-        tk.Label(title_frame, text=f"PID: {utils.get_program_pid()} | 디스플레이 크기: {utils.get_display_size()}", font=(setting.DEFAULT_FONT, 16), fg="black").pack()
-        self.wifi_label = tk.Label(title_frame, text=f"연결정보: ", font=(setting.DEFAULT_FONT, 16), fg="black")
+        self.src_label = tk.Label(title_frame, text=f"PID: {utils.get_program_pid()} | DS:{utils.get_display_size()}", font=(setting.DEFAULT_FONT, 12), fg="black")
+        self.wifi_label = tk.Label(title_frame, text=f"연결정보: ", font=(setting.DEFAULT_FONT, 12), fg="black")
+        self.system_label = tk.Label(title_frame, text=f"CPU:n% | RAM:n% | DISK:n%", font=(setting.DEFAULT_FONT, 12), fg="black")
         self.uptime = utils.get_now_datetime() - setting.START_TIME
-        self.uptime_label = tk.Label(title_frame, text=f"작동시간: | 마지막 하트비트: ", font=(setting.DEFAULT_FONT, 16), fg="black")
+        self.uptime_label = tk.Label(title_frame, text=f"작동시간: | 마지막 하트비트: ", font=(setting.DEFAULT_FONT, 12), fg="black")
+       
+        def update_src_info():
+            self.src_label.config(text=f"PID: {utils.get_program_pid()} | DS:{utils.get_display_size()}")
+            self.src_label.after(30000, update_src_info)
+        update_src_info()
+        self.src_label.pack()
+       
+        def update_system_info():
+            hardware_info = utils.get_hardware_info()
+            cpu_usage = round(sum(hardware_info["cpu_usages"]) / hardware_info["cpu_count"], 2)
+            memory_usage = f"{utils.format_bytes(hardware_info['total_memory'])}/{utils.format_bytes(hardware_info['used_memory'])}"
+            disk_usage = f"{utils.format_bytes(hardware_info['total_disk'])}/{utils.format_bytes(hardware_info['used_disk'])}"
+            self.system_label.config(text=f"CPU:{cpu_usage}% | RAM:{memory_usage} | DISK:{disk_usage}")
+            self.system_label.after(1000, update_system_info)
+        update_system_info()
+        self.system_label.pack()
+        
         def update_wifi_info():
             ssid = utils.get_wifi_ssid()
             lan_ip = utils.get_lan_ip()
@@ -30,11 +48,12 @@ class PageAdminMain(tk.Frame):
             self.wifi_label.after(3000, update_wifi_info)
         update_wifi_info()
         self.wifi_label.pack()
+        
         def update_uptime():
             time_label = str(self.uptime)[:-7]
             self.uptime = utils.get_now_datetime() - setting.START_TIME
             self.uptime_label.config(text=f"작동시간: {time_label} | 마지막 하트비트: {auth_manager.service.last_internet_heartbeat}")
-            self.uptime_label.after(1000, update_uptime)
+            self.uptime_label.after(10000, update_uptime)
         update_uptime()
         self.uptime_label.pack()
 

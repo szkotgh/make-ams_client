@@ -3,12 +3,13 @@
 # update and upgrade
 sudo apt update; sudo apt upgrade -y;
 
-# Font
+# Install dependencies
+sudo apt install i2c-tools -y;
+sudo apt install mpg123 -y;
 sudo apt install fonts-nanum -y;
 
 # NFC
 sudo raspi-config  # -> Interface Options -> I2C -> Enable
-sudo apt-get install i2c-tools
 sudo i2cdetect -y 1     # PN532가 0x24, 0x48, 0x68 등으로 보여야 함
 
 # etc... (for Fast boot)

@@ -91,7 +91,9 @@ class AuthManager:
                 self.nfc_status_enabled = setting.STATUS_DISABLE
                 hardware_manager.external_button.led_off()
 
-            threading.Timer(setting.CONNECTION_INTERVAL, check_connection).start()
+            timer = threading.Timer(setting.CONNECTION_INTERVAL, check_connection)
+            timer.daemon = True
+            timer.start()
 
         check_connection()
 

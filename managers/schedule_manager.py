@@ -9,8 +9,8 @@ class ScheduleManager:
     def __init__(self):
         print("[ScheduleManager] Initializing...")
         
-        # Register reboot task at midnight
-        schedule.every().day.at("00:00:00").do(self.reboot)
+        # # Register reboot task at midnight
+        # schedule.every().day.at("00:00:00").do(self.reboot)
 
         # Run scheduler loop in background thread
         threading.Thread(target=self._run_scheduler, daemon=True).start()
