@@ -31,8 +31,13 @@ class PageAdminMain(tk.Frame):
 
         # Update info sections
         def update_src_info():
-            self.src_label.config(text=f"PID: {utils.get_program_pid()} | DS:{utils.get_display_size()}")
-            self.src_label.after(30000, update_src_info)
+            def fetch_and_update():
+                pid = utils.get_program_pid()
+                display_size = utils.get_display_size()
+                text = f"PID: {pid} | DS:{display_size}"
+                self.src_label.after(0, lambda: self.src_label.config(text=text))
+            threading.Thread(target=fetch_and_update, daemon=True).start()
+            self.after(30000, update_src_info)
         update_src_info()
         self.src_label.pack()
 
@@ -51,18 +56,25 @@ class PageAdminMain(tk.Frame):
         self.system_label.pack()
 
         def update_wifi_info():
-            ssid = utils.get_wifi_ssid()
-            lan_ip = utils.get_lan_ip()
-            self.wifi_label.config(text=f"연결정보: {ssid if ssid else '없음'}({lan_ip if lan_ip else '없음'})")
-            self.wifi_label.after(5000, update_wifi_info)
+            def fetch_and_update():
+                ssid = utils.get_wifi_ssid()
+                lan_ip = utils.get_lan_ip()
+                text = f"연결정보: {ssid if ssid else '없음'}({lan_ip if lan_ip else '없음'})"
+                self.wifi_label.after(0, lambda: self.wifi_label.config(text=text))
+            threading.Thread(target=fetch_and_update, daemon=True).start()
+            self.after(5000, update_wifi_info)
         update_wifi_info()
         self.wifi_label.pack()
 
         def update_uptime():
-            time_label = str(self.uptime)[:-7]
-            self.uptime = utils.get_now_datetime() - setting.START_TIME
-            self.uptime_label.config(text=f"작동시간: {time_label} | 마지막 하트비트: {auth_manager.service.last_internet_heartbeat}")
-            self.uptime_label.after(3000, update_uptime)
+            def fetch_and_update():
+                self.uptime = utils.get_now_datetime() - setting.START_TIME
+                time_label = str(self.uptime)[:-7]
+                heartbeat = auth_manager.service.last_internet_heartbeat
+                text = f"작동시간: {time_label} | 마지막 하트비트: {heartbeat}"
+                self.uptime_label.after(0, lambda: self.uptime_label.config(text=text))
+            threading.Thread(target=fetch_and_update, daemon=True).start()
+            self.after(3000, update_uptime)
         update_uptime()
         self.uptime_label.pack()
 
