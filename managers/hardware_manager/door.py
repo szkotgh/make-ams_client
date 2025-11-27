@@ -52,7 +52,7 @@ class Door:
             if not self._cancel_close_flag.is_set():
                 self.set_door(False)
         
-        self._door_close_thread = threading.Thread(target=_close, daemon=False)
+        self._door_close_thread = threading.Thread(target=_close, daemon=True)
         self._door_close_thread.start()
 
     def auto_open_door(self, wait_duration=3, sound_enable=True):

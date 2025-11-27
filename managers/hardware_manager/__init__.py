@@ -59,7 +59,7 @@ def initialize_hardware():
         print(f"[Hardware Manager] Error initializing hardware manager: {e}")
         is_initialized = False
 
-init_thread = threading.Thread(target=initialize_hardware, daemon=False)
+init_thread = threading.Thread(target=initialize_hardware, daemon=True)
 init_thread.start()
 
 def cleanup():

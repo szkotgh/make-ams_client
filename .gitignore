@@ -4,10 +4,5 @@ __pycache__/
 .lgd-nfy0
 
 .env
-google_auth.json
 .tts_temp.mp3
-
-src/log.db
-src/log.db-shm
-src/log.db-wal
-src/make_ams_client.log
+db/

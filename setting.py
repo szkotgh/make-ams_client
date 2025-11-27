@@ -4,6 +4,8 @@ import os
 import utils
 
 # init
+PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
+
 dotenv.load_dotenv()
 with open("./setting.json", "r", encoding="utf-8") as f:
     config = json.load(f)
@@ -45,31 +47,40 @@ ENABLE_COLOR = config["ui"]["enable_color"]
 WARNING_COLOR = config["ui"]["warning_color"]
 AUTH_COLOR = config["ui"]["auth_color"]
 
-# File
 ## logs
-LOG_DB_PATH = "./src/log.db"
+DB_PATH = f"{PROJECT_PATH}/db"
+if not os.path.exists(DB_PATH): os.makedirs(DB_PATH)
+LOG_DB_PATH = f"{DB_PATH}/log.db"
+
+# Source Path
+SRC_PATH = f"{PROJECT_PATH}/src"
+
 ## images
-FILE_PATH = "./src/"
-MAIN_IMAGE_PATH = "./src/main.gif"
-DOOR_ICON_IMG_PATH = "./src/door_icon.png"
-BUTTON_ENABLE_IMG_PATH = "./src/button_enable.png"
-BUTTON_OPEN_REQUEST_IMG_PATH = "./src/button_open_request.png"
-BUTTON_DISABLE_IMG_PATH = "./src/button_disable.png"
-QR_ICON_IMG_PATH = "./src/qr_icon.png"
-QR_ENABLE_IMG_PATH = "./src/qr_enable.png"
-QR_DISABLE_IMG_PATH = "./src/qr_disable.png"
-NFC_ICON_IMG_PATH = "./src/nfc_icon.png"
-NFC_ENABLE_IMG_PATH = "./src/nfc_enable.png"
-NFC_DISABLE_IMG_PATH = "./src/nfc_disable.png"
+IMAGES_PATH = f"{SRC_PATH}/images"
+ICON_PATH                    = f"{IMAGES_PATH}/icon.png"
+ICON_ICO_PATH                = f"{IMAGES_PATH}/icon.ico"
+MAIN_IMAGE_PATH              = f"{IMAGES_PATH}/main.gif"
+DOOR_ICON_IMG_PATH           = f"{IMAGES_PATH}/door_icon.png"
+BUTTON_ENABLE_IMG_PATH       = f"{IMAGES_PATH}/button_enable.png"
+BUTTON_OPEN_REQUEST_IMG_PATH = f"{IMAGES_PATH}/button_open_request.png"
+BUTTON_DISABLE_IMG_PATH      = f"{IMAGES_PATH}/button_disable.png"
+QR_ICON_IMG_PATH             = f"{IMAGES_PATH}/qr_icon.png"
+QR_ENABLE_IMG_PATH           = f"{IMAGES_PATH}/qr_enable.png"
+QR_DISABLE_IMG_PATH          = f"{IMAGES_PATH}/qr_disable.png"
+NFC_ICON_IMG_PATH            = f"{IMAGES_PATH}/nfc_icon.png"
+NFC_ENABLE_IMG_PATH          = f"{IMAGES_PATH}/nfc_enable.png"
+NFC_DISABLE_IMG_PATH         = f"{IMAGES_PATH}/nfc_disable.png"
+
 ## sounds
-CLICK_SOUND_PATH = "./src/sounds/click.mp3"
-WRONG_SOUND_PATH = "./src/sounds/wrong.mp3"
-SUCCESS_SOUND_PATH = "./src/sounds/success.mp3"
-TEST_MUSIC = "./src/sounds/test_music.mp3"
-DOOR_OPEN_SOUND_PATH = "./src/sounds/door_open.mp3"
-DOOR_CLOSE_SOUND_PATH = "./src/sounds/door_close.mp3"
-MINECRAFT_DEATH = "./src/sounds/minecraft_death.mp3"
-WHY_YOU_LITTLE = "./src/sounds/why_you_little.mp3"
-DTMG = "./src/sounds/dtmg.mp3"
-JTMG = "./src/sounds/jtmg.mp3"
-ELEVATOR_MUSIC = "./src/sounds/elevator_music.mp3"
+SOUNDS_PATH = f"{SRC_PATH}/sounds"
+CLICK_SOUND_PATH      = f"{SOUNDS_PATH}/click.mp3"
+WRONG_SOUND_PATH      = f"{SOUNDS_PATH}/wrong.mp3"
+SUCCESS_SOUND_PATH    = f"{SOUNDS_PATH}/success.mp3"
+TEST_MUSIC            = f"{SOUNDS_PATH}/test_music.mp3"
+DOOR_OPEN_SOUND_PATH  = f"{SOUNDS_PATH}/door_open.mp3"
+DOOR_CLOSE_SOUND_PATH = f"{SOUNDS_PATH}/door_close.mp3"
+MINECRAFT_DEATH       = f"{SOUNDS_PATH}/minecraft_death.mp3"
+WHY_YOU_LITTLE        = f"{SOUNDS_PATH}/why_you_little.mp3"
+DTMG                  = f"{SOUNDS_PATH}/dtmg.mp3"
+JTMG                  = f"{SOUNDS_PATH}/jtmg.mp3"
+ELEVATOR_MUSIC        = f"{SOUNDS_PATH}/elevator_music.mp3"

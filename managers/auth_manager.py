@@ -60,7 +60,7 @@ class AuthManager:
                     self.open_request_enabled = result_data['open_request_enabled']
                     
                     if self.remote_open_enabled == setting.STATUS_ENABLE:
-                        threading.Thread(target=self.remote_open_callback, args=(self.remote_open_by,)).start()
+                        threading.Thread(target=self.remote_open_callback, args=(self.remote_open_by,), daemon=True).start()
                 else:
                     self.connection_success = False
             except Exception:

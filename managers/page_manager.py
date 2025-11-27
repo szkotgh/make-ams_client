@@ -24,6 +24,7 @@ class App(tk.Tk):
         self.attributes("-topmost", True)
         self.attributes("-fullscreen", True)
         self.config(cursor="none")
+        self.iconphoto(False, tk.PhotoImage(file=setting.ICON_PATH))
         def toggle_fullscreen():
             self.attributes("-fullscreen", False)
             self.after(100, lambda: self.attributes("-fullscreen", True))

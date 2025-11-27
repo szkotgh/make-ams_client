@@ -22,7 +22,7 @@ class PageAdminMain(tk.Frame):
         tk.Label(title_frame, text="관리자 메뉴", font=(setting.DEFAULT_FONT, 28, "bold"), fg="black").pack(pady=10)
         self.src_label = tk.Label(title_frame, text=f"PID: {utils.get_program_pid()} | DS:{utils.get_display_size()}", font=(setting.DEFAULT_FONT, 12), fg="black")
         self.wifi_label = tk.Label(title_frame, text=f"연결정보: ", font=(setting.DEFAULT_FONT, 12), fg="black")
-        self.system_label = tk.Label(title_frame, text=f"CPU:n% | RAM:n% | DISK:n%", font=(setting.DEFAULT_FONT, 12), fg="black")
+        self.system_label = tk.Label(title_frame, text=f"CPU:n%(n℃) | RAM:n% | DISK:n%", font=(setting.DEFAULT_FONT, 12), fg="black")
         self.uptime = utils.get_now_datetime() - setting.START_TIME
         self.uptime_label = tk.Label(title_frame, text=f"작동시간: | 마지막 하트비트: ", font=(setting.DEFAULT_FONT, 12), fg="black")
 
@@ -36,9 +36,10 @@ class PageAdminMain(tk.Frame):
         def update_system_info():
             hardware_info = utils.get_hardware_info()
             cpu_usage = round(sum(hardware_info["cpu_usages"]) / hardware_info["cpu_count"], 2)
+            cpu_temp = round(hardware_info['cpu_temp'], 1)
             memory_usage = f"{utils.format_bytes(hardware_info['used_memory'])}/{utils.format_bytes(hardware_info['total_memory'])}"
             disk_usage = f"{utils.format_bytes(hardware_info['used_disk'])}/{utils.format_bytes(hardware_info['total_disk'])}"
-            self.system_label.config(text=f"CPU:{cpu_usage}% | RAM:{memory_usage} | DISK:{disk_usage}")
+            self.system_label.config(text=f"CPU:{cpu_usage}%({cpu_temp}℃) | RAM:{memory_usage} | DISK:{disk_usage}")
             self.system_label.after(10000, update_system_info)
         update_system_info()
         self.system_label.pack()

@@ -1,6 +1,3 @@
-import threading
-from google.cloud import texttospeech
-
 class TTSManager:
     '''
         Require: enviroment variable GOOGLE_APPLICATION_CREDENTIALS\n
