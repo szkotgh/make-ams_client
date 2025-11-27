@@ -36,8 +36,8 @@ class PageAdminMain(tk.Frame):
         def update_system_info():
             hardware_info = utils.get_hardware_info()
             cpu_usage = round(sum(hardware_info["cpu_usages"]) / hardware_info["cpu_count"], 2)
-            memory_usage = f"{utils.format_bytes(hardware_info['total_memory'])}/{utils.format_bytes(hardware_info['used_memory'])}"
-            disk_usage = f"{utils.format_bytes(hardware_info['total_disk'])}/{utils.format_bytes(hardware_info['used_disk'])}"
+            memory_usage = f"{utils.format_bytes(hardware_info['used_memory'])}/{utils.format_bytes(hardware_info['total_memory'])}"
+            disk_usage = f"{utils.format_bytes(hardware_info['used_disk'])}/{utils.format_bytes(hardware_info['total_disk'])}"
             self.system_label.config(text=f"CPU:{cpu_usage}% | RAM:{memory_usage} | DISK:{disk_usage}")
             self.system_label.after(10000, update_system_info)
         update_system_info()
