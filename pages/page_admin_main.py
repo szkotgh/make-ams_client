@@ -1,6 +1,7 @@
 import os
 import tkinter as tk
 import subprocess
+import threading
 from managers import auth_manager
 import setting
 import utils
@@ -12,6 +13,8 @@ class PageAdminMain(tk.Frame):
         super().__init__(parent)
         self.controller = controller
         self.inactivity_timer = None
+        self.countdown_timer = None
+        self.remaining_seconds = 60
 
         self.admin_frame = tk.Frame(self)
         self.admin_frame.pack(expand=True)
@@ -34,13 +37,16 @@ class PageAdminMain(tk.Frame):
         self.src_label.pack()
 
         def update_system_info():
-            hardware_info = utils.get_hardware_info()
-            cpu_usage = round(sum(hardware_info["cpu_usages"]) / hardware_info["cpu_count"], 2)
-            cpu_temp = round(hardware_info['cpu_temp'], 1)
-            memory_usage = f"{utils.format_bytes(hardware_info['used_memory'])}/{utils.format_bytes(hardware_info['total_memory'])}"
-            disk_usage = f"{utils.format_bytes(hardware_info['used_disk'])}/{utils.format_bytes(hardware_info['total_disk'])}"
-            self.system_label.config(text=f"CPU:{cpu_usage}%({cpu_temp}℃) | RAM:{memory_usage} | DISK:{disk_usage}")
-            self.system_label.after(10000, update_system_info)
+            def fetch_and_update():
+                hardware_info = utils.get_hardware_info()
+                cpu_usage = round(sum(hardware_info["cpu_usages"]) / hardware_info["cpu_count"], 2)
+                cpu_temp = round(hardware_info['cpu_temp'], 1)
+                memory_usage = f"{utils.format_bytes(hardware_info['used_memory'])}/{utils.format_bytes(hardware_info['total_memory'])}"
+                disk_usage = f"{utils.format_bytes(hardware_info['used_disk'])}/{utils.format_bytes(hardware_info['total_disk'])}"
+                text = f"CPU:{cpu_usage}%({cpu_temp}℃) | RAM:{memory_usage} | DISK:{disk_usage}"
+                self.system_label.after(0, lambda: self.system_label.config(text=text))
+            threading.Thread(target=fetch_and_update, daemon=True).start()
+            self.after(10000, update_system_info)
         update_system_info()
         self.system_label.pack()
 
@@ -87,7 +93,7 @@ class PageAdminMain(tk.Frame):
         self.button_test_qr.pack(side="left", padx=2)
         self.button_test_nfc = tk.Button(button_frame_two, text="NFC테스트", font=(setting.DEFAULT_FONT, 16, 'bold'), height=2, command=lambda: self.on_user_action(self.test_nfc))
         self.button_test_nfc.pack(side="left", padx=2)
-        self.button_close_admin = tk.Button(self.admin_frame, text="관리자 종료", font=(setting.DEFAULT_FONT, 14), width=14, height=2, command=lambda: self.on_user_action(self.close_admin_page))
+        self.button_close_admin = tk.Button(self.admin_frame, text="관리자 종료 (60)", font=(setting.DEFAULT_FONT, 14), width=14, height=2, command=lambda: self.on_user_action(self.close_admin_page))
         self.button_close_admin.pack(pady=10)
 
         self.all_buttons = [self.button_reboot, self.button_exit, self.button_restart, self.button_open_door,
@@ -103,7 +109,26 @@ class PageAdminMain(tk.Frame):
     def reset_inactivity_timer(self):
         if self.inactivity_timer:
             self.after_cancel(self.inactivity_timer)
+        if self.countdown_timer:
+            self.after_cancel(self.countdown_timer)
+        self.remaining_seconds = 60
+        self.update_countdown_display()
         self.inactivity_timer = self.after(60000, self.auto_close_admin_page)  # 1 minute
+        self.start_countdown()
+    
+    def start_countdown(self):
+        if self.countdown_timer:
+            self.after_cancel(self.countdown_timer)
+        self.countdown_timer = self.after(1000, self.update_countdown)
+    
+    def update_countdown(self):
+        if self.remaining_seconds > 0:
+            self.remaining_seconds -= 1
+            self.update_countdown_display()
+            self.countdown_timer = self.after(1000, self.update_countdown)
+    
+    def update_countdown_display(self):
+        self.button_close_admin.config(text=f"관리자 종료 ({self.remaining_seconds})")
     
     def auto_close_admin_page(self):
         hardware_manager.speaker.play(setting.CLICK_SOUND_PATH)

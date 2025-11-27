@@ -29,25 +29,24 @@ class Door:
             self._door_close_thread = None
         self._cancel_close_flag.clear()
 
-    def close_door(self, close_duration=3, sound_enable=True, wait_duration=0):
+    def close_door(self, close_duration=1, sound_enable=True, wait_duration=0):
         self.cancel_close_door()
 
         def _close():
-            for _ in range(int(wait_duration * 10)):
+            for _ in range(wait_duration):
                 if self._cancel_close_flag.is_set():
                     return
-                time.sleep(0.1)
-            
+                time.sleep(1)
             if self._cancel_close_flag.is_set():
                 return
                 
             if sound_enable:
                 hardware_manager.speaker.play(setting.DOOR_CLOSE_SOUND_PATH)
             
-            for _ in range(int(close_duration * 10)):
+            for _ in range(close_duration):
                 if self._cancel_close_flag.is_set():
                     return
-                time.sleep(0.1)
+                time.sleep(1)
             
             if not self._cancel_close_flag.is_set():
                 self.set_door(False)
@@ -56,6 +55,5 @@ class Door:
         self._door_close_thread.start()
 
     def auto_open_door(self, wait_duration=3, sound_enable=True):
-        self.cancel_close_door()
         self.open_door(sound_enable=sound_enable)
         self.close_door(wait_duration=wait_duration, sound_enable=sound_enable)
